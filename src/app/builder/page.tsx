@@ -177,7 +177,7 @@ export default function BuilderPage() {
   const hasPackage = pkg !== null;
 
   return (
-    <div className="min-h-screen flex flex-col bg-canvas-parchment text-ink">
+    <div className="h-screen flex flex-col bg-canvas-parchment text-ink overflow-hidden">
       {/* Global nav — pure black, 44px */}
       <header className="relative z-40 h-11 bg-surface-black text-body-on-dark flex items-center px-5 flex-shrink-0">
         <Link href="/" className="text-nav-link font-medium hover:opacity-80">
@@ -463,12 +463,9 @@ export default function BuilderPage() {
             />
           </div>
           <QualityFooter
-            report={pkg?.qualityReport ?? null}
             onDownload={handleDownloadZip}
             isDownloading={isExporting}
             hasPackage={!!pkg}
-            onInspectQuality={() => setInspector({ type: "quality" })}
-            inspecting={inspector.type === "quality"}
           />
         </aside>
       </div>
