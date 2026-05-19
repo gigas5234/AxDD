@@ -219,32 +219,18 @@ export default function BuilderPage() {
       <div className="flex-1 grid grid-cols-[320px_minmax(0,1fr)_320px] min-h-0">
         {/* Left panel — settings-dominant */}
         <aside className="border-r border-hairline bg-canvas-parchment overflow-y-auto thin-scrollbar">
-          {/* Sticky Quick Bar (c) */}
-          <div className="sticky top-0 z-20 bg-canvas-parchment/95 backdrop-blur-md border-b border-hairline px-3 py-2 flex items-center gap-2">
-            <button
-              type="button"
-              onClick={handleGenerate}
-              disabled={isGenerating}
-              className="flex-1 inline-flex items-center justify-center rounded-pill bg-primary text-body-on-dark px-3 py-[7px] text-caption hover:opacity-95 disabled:opacity-50 transition"
-            >
-              {isGenerating
-                ? tr(UI.generating, locale)
-                : hasPackage
-                  ? tr(UI.qbRegenerate, locale)
-                  : tr(UI.qbGenerate, locale)}
-            </button>
-            <button
-              type="button"
-              onClick={handleResetToPreset}
-              className="inline-flex items-center justify-center rounded-md border border-hairline bg-surface-pearl px-3 py-[7px] text-caption text-ink-muted-80 hover:bg-divider-soft transition"
-              title={tr(UI.qbResetTitle, locale)}
-            >
-              {tr(UI.qbReset, locale)}
-            </button>
-          </div>
-
           <div className="p-4 space-y-3">
-            <PanelLabel>{tr(UI.panelDetailedSettings, locale)}</PanelLabel>
+            <div className="flex items-center justify-between">
+              <PanelLabel>{tr(UI.panelDetailedSettings, locale)}</PanelLabel>
+              <button
+                type="button"
+                onClick={handleResetToPreset}
+                title={tr(UI.qbResetTitle, locale)}
+                className="text-[12px] text-ink-muted-48 hover:text-ink underline-offset-2 hover:underline transition"
+              >
+                ↺ {tr(UI.qbReset, locale)}
+              </button>
+            </div>
             <SettingsForm
               config={config}
               onChange={setConfig}

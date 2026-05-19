@@ -6,14 +6,17 @@ const config: Config = {
     extend: {
       fontFamily: {
         sans: [
-          "ui-sans-serif",
-          "system-ui",
+          "Pretendard Variable",
+          "Pretendard",
           "-apple-system",
           "BlinkMacSystemFont",
-          "Segoe UI",
+          "system-ui",
           "Roboto",
-          "Helvetica",
-          "Arial",
+          "Helvetica Neue",
+          "Segoe UI",
+          "Apple SD Gothic Neo",
+          "Noto Sans KR",
+          "Malgun Gothic",
           "sans-serif",
         ],
         mono: [

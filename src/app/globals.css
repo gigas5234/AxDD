@@ -24,13 +24,14 @@ body {
 
 body {
   font-family:
-    ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
-    Roboto, Helvetica, Arial, sans-serif;
+    "Pretendard Variable", Pretendard, -apple-system, BlinkMacSystemFont,
+    system-ui, Roboto, "Helvetica Neue", "Segoe UI", "Apple SD Gothic Neo",
+    "Noto Sans KR", "Malgun Gothic", sans-serif;
   -webkit-font-smoothing: antialiased;
-  /* Apple's body convention: 17px not 16px */
+  /* Body convention: 17px (slight tightening for Pretendard) */
   font-size: 17px;
-  line-height: 1.47;
-  letter-spacing: -0.374px;
+  line-height: 1.5;
+  letter-spacing: -0.2px;
 }
 
 /* Single-accent focus ring */
@@ -50,7 +51,7 @@ button:not(:disabled):active {
   line-height: 1.65;
   color: var(--kt-ink);
   font-size: 17px;
-  letter-spacing: -0.374px;
+  letter-spacing: -0.2px;
 }
 .markdown-body h1 {
   font-size: 40px;
