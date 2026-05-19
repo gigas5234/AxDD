@@ -16,39 +16,52 @@ export const CATEGORY_REGISTRY: CategoryDescriptor[] = [
     status: "available",
   },
   {
+    id: "frontend",
+    label: "Frontend Implementation",
+    shortDescription:
+      "Translate specs and design tokens into shippable React + Tailwind code.",
+    status: "available",
+  },
+  {
+    id: "design-system",
+    label: "Design System Generator",
+    shortDescription:
+      "Generate tokens, primitives, and component rules from a brand direction.",
+    status: "available",
+  },
+  // Harness category is hidden until the harness output pipeline is complete.
+  // Re-add by uncommenting; type, buildConfig, and packs are preserved elsewhere.
+  // {
+  //   id: "harness",
+  //   label: "Harness Setup",
+  //   shortDescription: "...",
+  //   status: "available",
+  // },
+  {
     id: "product",
     label: "Product Planner",
     shortDescription: "Plan features, scope, and milestones with AI assistance.",
     status: "coming-soon",
   },
   {
-    id: "frontend",
-    label: "Frontend Implementation",
-    shortDescription: "Translate specs and design tokens into shippable frontend code.",
-    status: "coming-soon",
-  },
-  {
-    id: "design-system",
-    label: "Design System Generator",
-    shortDescription: "Generate tokens, primitives, and component rules from a brand direction.",
-    status: "coming-soon",
-  },
-  {
     id: "research",
     label: "Research Assistant",
-    shortDescription: "Survey topics, summarize sources, and produce structured research briefs.",
+    shortDescription:
+      "Survey topics, summarize sources, and produce structured research briefs.",
     status: "coming-soon",
   },
   {
     id: "content",
     label: "Content Planner",
-    shortDescription: "Plan content calendars, briefs, and copy with brand-aware structure.",
+    shortDescription:
+      "Plan content calendars, briefs, and copy with brand-aware structure.",
     status: "coming-soon",
   },
   {
     id: "data",
     label: "Data Analysis",
-    shortDescription: "Explore datasets, generate hypotheses, and produce analytical narratives.",
+    shortDescription:
+      "Explore datasets, generate hypotheses, and produce analytical narratives.",
     status: "coming-soon",
   },
 ];

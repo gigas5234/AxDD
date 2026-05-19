@@ -225,6 +225,95 @@ export const UI = {
   } as Bilingual,
   refInstalls: { en: "installs", ko: "설치" } as Bilingual,
   refSeeMore: { en: "Browse more on skills.sh →", ko: "skills.sh에서 더 보기 →" } as Bilingual,
+
+  // Intent input / AI recommendation
+  intentHeroTitle: {
+    en: "What do you want to build?",
+    ko: "무엇을 만들고 싶으세요?",
+  } as Bilingual,
+  intentHeroSubtitle: {
+    en: "Type freely — we match the closest skills from the catalog and recommend a starting configuration.",
+    ko: "자유롭게 입력하면 카탈로그에서 가장 가까운 스킬을 찾아 추천해드립니다.",
+  } as Bilingual,
+  intentPlaceholder: {
+    en: "e.g., design a fintech onboarding screen / implement a React component",
+    ko: "예: 핀테크 온보딩 화면 설계 / React 컴포넌트 구현",
+  } as Bilingual,
+  intentSubmit: { en: "Recommend", ko: "추천 받기" } as Bilingual,
+  intentExamplesLabel: { en: "Try", ko: "예시" } as Bilingual,
+  intentNote: {
+    en: "Keyword matching today. AI semantic matching coming in Phase 2.",
+    ko: "현재는 키워드 매칭입니다. AI 의미 검색은 Phase 2에서 제공 예정.",
+  } as Bilingual,
+  orPickRecipe: {
+    en: "Or pick a starting point",
+    ko: "또는 시작점에서 선택",
+  } as Bilingual,
+
+  recHeader: {
+    en: "Recommendations for",
+    ko: "이 입력에 대한 추천",
+  } as Bilingual,
+  recCategory: { en: "Category", ko: "카테고리" } as Bilingual,
+  recRecipe: { en: "Recipe", ko: "레시피" } as Bilingual,
+  recPacks: { en: "Capability Packs", ko: "능력 팩" } as Bilingual,
+  recWorkflows: { en: "Workflow Modules", ko: "워크플로 모듈" } as Bilingual,
+  recMatched: { en: "matched", ko: "일치" } as Bilingual,
+  recApplyAll: { en: "Apply all suggestions", ko: "모두 적용" } as Bilingual,
+  recDismiss: { en: "Dismiss", ko: "닫기" } as Bilingual,
+  recNoMatch: {
+    en: "No matches found. Try different keywords or pick a recipe below.",
+    ko: "일치 항목이 없습니다. 다른 키워드를 시도하거나 아래 레시피에서 선택해 주세요.",
+  } as Bilingual,
+
+  // Dependencies
+  depsUnmet: { en: "Has unmet dependency", ko: "의존성 미충족" } as Bilingual,
+  depsTitle: { en: "Dependencies", ko: "의존성" } as Bilingual,
+  depsRequires: { en: "Requires", ko: "필요" } as Bilingual,
+  depsEnable: { en: "Enable", ko: "활성화" } as Bilingual,
+  depsMet: { en: "Enabled ✓", ko: "활성화됨 ✓" } as Bilingual,
+
+  // Simulator
+  simTab: { en: "Simulate", ko: "시뮬레이션" } as Bilingual,
+  simTitle: { en: "Skill Simulator", ko: "스킬 시뮬레이터" } as Bilingual,
+  simSubtitle: {
+    en: "Type a fictional user input. See how this skill would route and what it would emit — before installing.",
+    ko: "가상의 사용자 입력을 적어주세요. 설치하기 전에 이 스킬이 어떻게 동작할지 미리 봅니다.",
+  } as Bilingual,
+  simPlaceholder: {
+    en: "e.g., Design an order status screen for a food delivery app.",
+    ko: "예: 음식 배달 앱의 주문 상태 화면을 설계해줘.",
+  } as Bilingual,
+  simRun: { en: "Run simulation", ko: "시뮬레이션 실행" } as Bilingual,
+  simRequiresPackage: {
+    en: "Generate a package first to enable simulation.",
+    ko: "시뮬레이션을 사용하려면 먼저 패키지를 생성하세요.",
+  } as Bilingual,
+  simTriage: { en: "Triage decision", ko: "트리아지 판단" } as Bilingual,
+  simPipeline: { en: "Pipeline", ko: "파이프라인" } as Bilingual,
+  simSkipped: {
+    en: "Triage suggested these but the config does not enable them",
+    ko: "트리아지가 추천했지만 현재 설정에 없음",
+  } as Bilingual,
+  simStepOutput: { en: "Required output shape", ko: "필수 출력 형태" } as Bilingual,
+  simStepReferences: { en: "References loaded", ko: "참조 파일" } as Bilingual,
+  simStepStop: { en: "STOP gates", ko: "STOP 게이트" } as Bilingual,
+  simStopWillTrigger: {
+    en: "Likely to trigger — agent will pause and ask",
+    ko: "발동 가능 — 에이전트가 멈추고 질문할 가능성",
+  } as Bilingual,
+  simAllPass: {
+    en: "All STOP gates pass with this input.",
+    ko: "이 입력에서 STOP 게이트가 모두 통과합니다.",
+  } as Bilingual,
+  simNoMatch: {
+    en: "No workflow matched. Defaulting to the category's standard pipeline.",
+    ko: "매칭된 워크플로 없음. 카테고리의 기본 파이프라인으로 진행.",
+  } as Bilingual,
+  simTokenCost: {
+    en: "Approx. SKILL.md context cost",
+    ko: "SKILL.md 컨텍스트 비용(추정)",
+  } as Bilingual,
 };
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -256,26 +345,58 @@ export const TRANSLATION_MODE_LABELS: Record<TranslationMode, Bilingual> = {
 // ─────────────────────────────────────────────────────────────────────────────
 
 export const WORKFLOW_LABELS: Record<WorkflowModule, Bilingual> = {
+  // UX/UI
   "problem-definition": { en: "Problem Definition", ko: "문제 정의" },
   "user-flow": { en: "User Flow", ko: "사용자 흐름" },
-  "information-architecture": {
-    en: "Information Architecture",
-    ko: "정보 구조",
-  },
+  "information-architecture": { en: "Information Architecture", ko: "정보 구조" },
   "screen-design": { en: "Screen Design", ko: "화면 설계" },
   "component-breakdown": { en: "Component Breakdown", ko: "컴포넌트 분해" },
   "design-system-draft": { en: "Design System Draft", ko: "디자인 시스템 초안" },
   "figma-to-code": { en: "Figma to Code", ko: "Figma to 코드" },
   "ux-review": { en: "UX Review", ko: "UX 리뷰" },
   "accessibility-check": { en: "Accessibility Check", ko: "접근성 점검" },
-  "implementation-prompt": {
-    en: "Implementation Prompt",
-    ko: "구현 프롬프트",
+  "implementation-prompt": { en: "Implementation Prompt", ko: "구현 프롬프트" },
+  // Frontend
+  "code-architecture": { en: "Code Architecture", ko: "코드 아키텍처" },
+  "component-implementation": {
+    en: "Component Implementation",
+    ko: "컴포넌트 구현",
   },
+  "state-management": { en: "State Management", ko: "상태 관리" },
+  "routing-strategy": { en: "Routing Strategy", ko: "라우팅 전략" },
+  "performance-budget": { en: "Performance Budget", ko: "성능 예산" },
+  "accessibility-implementation": {
+    en: "Accessibility Implementation",
+    ko: "접근성 구현",
+  },
+  // Design System
+  "token-system": { en: "Token System", ko: "토큰 시스템" },
+  "primitive-design": { en: "Primitive Design", ko: "프리미티브 설계" },
+  "variant-system": { en: "Variant System", ko: "베리언트 체계" },
+  "documentation-strategy": { en: "Documentation Strategy", ko: "문서화 전략" },
+  "migration-plan": { en: "Migration Plan", ko: "마이그레이션 계획" },
+  // Harness
+  "harness-target-selection": {
+    en: "Harness Target Selection",
+    ko: "하네스 타겟 선정",
+  },
+  "harness-permissions": { en: "Harness Permissions", ko: "하네스 권한" },
+  "harness-hooks": { en: "Harness Hooks", ko: "하네스 훅" },
+  "harness-install-flow": { en: "Harness Install Flow", ko: "하네스 설치 흐름" },
 };
 
 export const QUALITY_LABELS: Record<QualityRule, Bilingual> = {
+  // Universal
   "avoid-vague-language": { en: "Avoid vague language", ko: "모호한 표현 회피" },
+  "avoid-unnecessary-questions": {
+    en: "Avoid unnecessary questions",
+    ko: "불필요한 질문 회피",
+  },
+  "avoid-overlong-chat-response": {
+    en: "Avoid overlong chat responses",
+    ko: "장황한 응답 회피",
+  },
+  // UX/UI
   "define-primary-action": { en: "Define primary action", ko: "주요 액션 정의" },
   "include-information-hierarchy": {
     en: "Include information hierarchy",
@@ -288,13 +409,51 @@ export const QUALITY_LABELS: Record<QualityRule, Bilingual> = {
     ko: "반응형 노트 포함",
   },
   "include-accessibility": { en: "Include accessibility", ko: "접근성 포함" },
-  "avoid-unnecessary-questions": {
-    en: "Avoid unnecessary questions",
-    ko: "불필요한 질문 회피",
+  // Frontend
+  "fe-no-any": {
+    en: "No `any` — use `unknown` and narrow",
+    ko: "any 금지 — unknown 사용 후 좁히기",
   },
-  "avoid-overlong-chat-response": {
-    en: "Avoid overlong chat responses",
-    ko: "장황한 응답 회피",
+  "fe-compose-over-branch": {
+    en: "Compose over variant branching",
+    ko: "베리언트 분기 대신 합성",
+  },
+  "fe-test-users-not-impl": {
+    en: "Test users, not implementation",
+    ko: "구현이 아닌 사용자 테스트",
+  },
+  "fe-semantic-html-first": {
+    en: "Semantic HTML before ARIA",
+    ko: "ARIA 이전에 시맨틱 HTML",
+  },
+  "fe-perf-budget": {
+    en: "Enforce performance budget",
+    ko: "성능 예산 강제",
+  },
+  "fe-state-colocation": {
+    en: "Colocate state at common ancestor",
+    ko: "공통 조상에 상태 동거",
+  },
+  // Design System
+  "ds-semantic-tokens": {
+    en: "Tokens are semantic, not literal",
+    ko: "토큰은 시맨틱, 리터럴 금지",
+  },
+  "ds-no-business-in-primitive": {
+    en: "No business logic in primitives",
+    ko: "프리미티브에 비즈니스 로직 금지",
+  },
+  "ds-variants-cap-5": {
+    en: "Cap variants per primitive at 5",
+    ko: "프리미티브당 베리언트 5개 상한",
+  },
+  "ds-states-4tuple": {
+    en: "States are 4-tuple (default/hover/active/disabled)",
+    ko: "상태는 4튜플 (기본·호버·액티브·비활성)",
+  },
+  "ds-doc-canonical-usage": {
+    en: "Document one canonical usage per component",
+    ko: "컴포넌트당 공식 사용 예 1개",
   },
 };
 
@@ -349,6 +508,13 @@ export const CATEGORY_LABELS: Record<
     shortDescription: {
       en: "Explore datasets, generate hypotheses, and produce analytical narratives.",
       ko: "데이터셋을 탐색하고 가설을 세워 분석 결과를 정리합니다.",
+    },
+  },
+  harness: {
+    label: { en: "Harness Setup", ko: "하네스 세팅" },
+    shortDescription: {
+      en: "Configure the agent harness — install paths, permissions, hooks, and conversion notes for Claude Code / Cursor / Codex.",
+      ko: "Claude Code / Cursor / Codex 등 에이전트 하네스의 설치 경로, 권한, 훅, 변환 노트를 구성합니다.",
     },
   },
 };
@@ -413,6 +579,48 @@ export const PACK_LABELS: Record<
       ko: "게슈탈트 원리·광학적 정렬·그리드·시각적 리듬 등 순수 구성 규칙.",
     },
   },
+  "react-patterns": {
+    label: { en: "React Patterns", ko: "React 패턴" },
+    summary: {
+      en: "Modern React: composition, server/client boundary, hooks discipline.",
+      ko: "현대 React — 합성, 서버/클라이언트 경계, 훅 규율.",
+    },
+  },
+  "typescript-strict": {
+    label: { en: "TypeScript Strict", ko: "TypeScript 엄격" },
+    summary: {
+      en: "Discriminated unions, no any, types as documentation, narrow at boundaries.",
+      ko: "분별 유니언, any 금지, 타입을 문서로, 경계에서 좁히기.",
+    },
+  },
+  "testing-discipline": {
+    label: { en: "Testing Discipline", ko: "테스트 규율" },
+    summary: {
+      en: "Test users, not implementation. Behavior-first assertions.",
+      ko: "구현이 아닌 사용자 행위를 테스트 — 동작 우선 단언.",
+    },
+  },
+  "claude-code-target": {
+    label: { en: "Claude Code Target", ko: "Claude Code 타겟" },
+    summary: {
+      en: "Install paths, settings.json, and CLAUDE.md hook layout for Claude Code.",
+      ko: "Claude Code의 설치 경로, settings.json, CLAUDE.md 훅 구조.",
+    },
+  },
+  "cursor-target": {
+    label: { en: "Cursor Target", ko: "Cursor 타겟" },
+    summary: {
+      en: "Rules format, .mdc conversion, and cursor.json snippet for Cursor IDE.",
+      ko: "Cursor의 규칙 형식, .mdc 변환, cursor.json 스니펫.",
+    },
+  },
+  "codex-target": {
+    label: { en: "Codex CLI Target", ko: "Codex CLI 타겟" },
+    summary: {
+      en: "AGENTS.md layout and config.toml settings for Codex CLI.",
+      ko: "Codex CLI의 AGENTS.md 구조와 config.toml 설정.",
+    },
+  },
 };
 
 export const PRESET_LABELS: Record<
@@ -448,6 +656,64 @@ export const PRESET_LABELS: Record<
     bestFor: {
       en: "Reviewing existing screens and finding UX/UI issues.",
       ko: "기존 화면을 검토해 UX/UI 이슈를 찾아냅니다.",
+    },
+  },
+  "frontend-axdd-default": {
+    name: {
+      en: "Frontend Implementation — AxDD Default",
+      ko: "프론트엔드 구현 — AxDD 기본",
+    },
+    bestFor: {
+      en: "Translating specs and design tokens into React + Tailwind components with TypeScript discipline.",
+      ko: "명세·디자인 토큰을 TypeScript 규율을 갖춘 React + Tailwind 컴포넌트로 변환.",
+    },
+  },
+  "design-system-axdd-default": {
+    name: {
+      en: "Design System Generator — AxDD Default",
+      ko: "디자인 시스템 생성 — AxDD 기본",
+    },
+    bestFor: {
+      en: "Building a complete token + primitive + variant system from a brand direction.",
+      ko: "브랜드 방향성에서 토큰·프리미티브·베리언트 체계 전체를 설계.",
+    },
+  },
+  "harness-axdd-default": {
+    name: {
+      en: "Harness Setup — Claude Code",
+      ko: "하네스 세팅 — Claude Code",
+    },
+    bestFor: {
+      en: "Preparing a skill package for installation into Claude Code (paths, permissions, hooks).",
+      ko: "Claude Code 설치용 스킬 패키지 준비 (경로·권한·훅).",
+    },
+  },
+  "frontend-test-first": {
+    name: { en: "Test-First Frontend", ko: "테스트 우선 프론트엔드" },
+    bestFor: {
+      en: "Test-driven React development — tests describe behavior, components follow.",
+      ko: "테스트 우선 React 개발 — 테스트로 동작을 정의하고 컴포넌트가 따라옵니다.",
+    },
+  },
+  "frontend-server-components": {
+    name: { en: "Server Components First", ko: "Server Components 우선" },
+    bestFor: {
+      en: "Modern React with Server Components as default; client islands only when needed.",
+      ko: "Server Components 기본 + 필요할 때만 client island인 현대 React.",
+    },
+  },
+  "ds-token-only": {
+    name: { en: "Token-Only Starter", ko: "토큰 전용 스타터" },
+    bestFor: {
+      en: "Tokens only — color, type, spacing, radius. Skip primitives for now.",
+      ko: "토큰만 — 색·타이포·간격·라디우스. 프리미티브는 다음 단계.",
+    },
+  },
+  "ds-component-library": {
+    name: { en: "Component Library Builder", ko: "컴포넌트 라이브러리 빌더" },
+    bestFor: {
+      en: "Full component library — tokens + primitives + variants + docs.",
+      ko: "완전한 컴포넌트 라이브러리 — 토큰·프리미티브·베리언트·문서.",
     },
   },
 };

@@ -1,4 +1,4 @@
-import type { CapabilityPack } from "@/types/skill";
+import type { CapabilityPack, SkillCategory } from "@/types/skill";
 
 export type CapabilityPackEffect = {
   filesAdded: string[];
@@ -16,6 +16,10 @@ export type CapabilityPackDef = {
   skillMdSection?: { heading: string; body: string };
   extraRules?: string[];
   recommendedDefault?: boolean;
+  /** Packs that MUST also be enabled for this one to make sense. */
+  dependencies?: CapabilityPack[];
+  /** Packs that should not be enabled simultaneously. */
+  conflicts?: CapabilityPack[];
 };
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -318,6 +322,7 @@ const SHADCN_AFFINITY: CapabilityPackDef = {
   summary:
     "Prefer shadcn/ui primitives when designing components; map specs to existing shadcn parts.",
   sourceInspiration: "shadcn (shadcn/ui)",
+  dependencies: ["tailwind-first"],
   effect: {
     filesAdded: ["references/shadcn-primitives.md"],
     skillMdSections: ["shadcn primitive mapping"],
@@ -578,6 +583,332 @@ Composition rules that apply before color and typography.
   },
 };
 
+// ─────────────────────────────────────────────────────────────────────────────
+// 9. React Patterns (Frontend)
+// ─────────────────────────────────────────────────────────────────────────────
+const REACT_PATTERNS: CapabilityPackDef = {
+  id: "react-patterns",
+  label: "React Patterns",
+  summary:
+    "Modern React: composition over inheritance, server vs client components, hooks discipline.",
+  sourceInspiration: "frontend-design (anthropics/skills)",
+  effect: {
+    filesAdded: ["references/react-patterns.md"],
+    skillMdSections: ["React patterns"],
+    rulesAdded: [
+      "Prefer composition over conditional rendering inside components.",
+      "Server components by default; mark client components explicitly.",
+    ],
+  },
+  referenceFile: {
+    fileName: "react-patterns.md",
+    content: `# React Patterns
+
+## Composition over conditional branches
+- A component that switches behavior by a \`variant\` prop with 4+ branches is usually two components.
+- Compose: \`<Card><Card.Header /><Card.Body /></Card>\` over giant prop bags.
+
+## Server / Client component boundary
+- Default to server components in React 19 / Next App Router.
+- Client components only when you need state, effects, refs, or browser APIs.
+- Pass server data down; never re-fetch in client components.
+
+## Hooks discipline
+- Custom hooks return values + setters; never JSX.
+- Effects model side effects, not derived data — use \`useMemo\` for derived.
+- \`useEffect\` with empty deps is a yellow flag — verify you actually mean mount-only.
+
+## State colocation
+- State lives at the lowest common ancestor of its consumers.
+- Promote to context only when 3+ unrelated subtrees need it.
+
+## Refs and DOM
+- Refs are an escape hatch — use only for focus, scroll, integration with non-React libs.
+`,
+  },
+  skillMdSection: {
+    heading: "React patterns",
+    body: `Apply React patterns when producing component code:
+
+- **Composition over branching** — variants ≥ 4 → split the component.
+- **Server components by default**; client components only when state/effects/browser APIs needed.
+- **Custom hooks return data**, never JSX.
+- **State colocation** — keep state at the lowest common ancestor.
+- **Refs are an escape hatch**, not the first tool.`,
+  },
+};
+
+// ─────────────────────────────────────────────────────────────────────────────
+// 10. TypeScript Strict (Frontend)
+// ─────────────────────────────────────────────────────────────────────────────
+const TYPESCRIPT_STRICT: CapabilityPackDef = {
+  id: "typescript-strict",
+  label: "TypeScript Strict",
+  summary:
+    "Discriminated unions, no any, types as documentation, narrow at boundaries.",
+  sourceInspiration: "common TypeScript best practices",
+  effect: {
+    filesAdded: ["references/typescript-strict.md"],
+    skillMdSections: ["TypeScript discipline"],
+    rulesAdded: [
+      "No `any`. Use `unknown` and narrow.",
+      "Discriminated unions for variant data.",
+    ],
+  },
+  referenceFile: {
+    fileName: "typescript-strict.md",
+    content: `# TypeScript Strict
+
+## No \`any\`
+- \`any\` defeats the type system. Use \`unknown\` and narrow at the boundary.
+- Where a library types poorly, write the narrowed wrapper once.
+
+## Discriminated unions for variant data
+- Replace \`{ type: string; payload: unknown }\` with:
+\`\`\`ts
+type Event =
+  | { type: "click"; x: number; y: number }
+  | { type: "submit"; values: FormValues };
+\`\`\`
+- Then \`switch (event.type)\` narrows automatically.
+
+## Types as documentation
+- Prefer named types over inline. \`type ScreenName = string\` reads better than \`string\` in 30 places.
+
+## Narrow at boundaries
+- HTTP responses, env vars, user input — narrow on entry, never trust the cast.
+
+## Inferred return types
+- For functions used internally, let TS infer. For library exports, declare explicitly.
+`,
+  },
+  skillMdSection: {
+    heading: "TypeScript discipline",
+    body: `When producing TypeScript code:
+
+- **No \`any\`** — use \`unknown\` and narrow.
+- **Discriminated unions** for variant data; \`switch\` on the discriminator.
+- **Named types** for anything used in 3+ places.
+- **Narrow at boundaries** — HTTP, env, user input — never trust the cast.`,
+  },
+};
+
+// ─────────────────────────────────────────────────────────────────────────────
+// 11. Testing Discipline (Frontend)
+// ─────────────────────────────────────────────────────────────────────────────
+const TESTING_DISCIPLINE: CapabilityPackDef = {
+  id: "testing-discipline",
+  label: "Testing Discipline",
+  summary:
+    "Test what users do, not what code does. Behavior-first assertions, no implementation mirrors.",
+  sourceInspiration: "Kent C. Dodds testing-library philosophy",
+  effect: {
+    filesAdded: ["references/testing-discipline.md"],
+    skillMdSections: ["Testing discipline"],
+    rulesAdded: [
+      "Assert on what the user perceives, not on implementation details.",
+    ],
+  },
+  referenceFile: {
+    fileName: "testing-discipline.md",
+    content: `# Testing Discipline
+
+## Test users, not implementation
+- Query by role / label / text — the things a user perceives.
+- Avoid querying by class names, test IDs (escape hatch only), or component instance internals.
+
+## Behavior-first assertions
+- "Click submit → success message appears" — yes.
+- "Component re-renders 2 times" — no.
+
+## Async by default
+- UIs are async. Use \`findBy*\` over \`getBy*\` when waiting for state.
+
+## What to test
+- User-facing flows (login, checkout, search).
+- Critical business rules (price math, permission checks).
+- Bug regressions (write the test that *would* have caught the bug).
+
+## What not to test
+- Implementation details.
+- Third-party library internals.
+- Generated types.
+`,
+  },
+  skillMdSection: {
+    heading: "Testing discipline",
+    body: `When producing tests:
+
+- **Test users, not code** — query by role/label/text.
+- **Behavior assertions** — "submit clicked → success shown", not "renders 2 times".
+- **Async by default** — \`findBy*\` over \`getBy*\` for state-dependent assertions.
+- Cover user flows, business rules, and bug regressions.`,
+  },
+};
+
+// ─────────────────────────────────────────────────────────────────────────────
+// 12. Claude Code Target (Harness)
+// ─────────────────────────────────────────────────────────────────────────────
+const CLAUDE_CODE_TARGET: CapabilityPackDef = {
+  id: "claude-code-target",
+  label: "Claude Code Target",
+  summary:
+    "Install paths, settings.json snippet, and CLAUDE.md hook layout for Claude Code.",
+  sourceInspiration: "Claude Code documentation",
+  effect: {
+    filesAdded: [
+      "references/claude-code-install.md",
+      "install/claude-code-settings.json",
+    ],
+    skillMdSections: ["Claude Code installation"],
+    rulesAdded: [
+      "Skills live in `~/.claude/skills/` (user) or `.claude/skills/` (project).",
+    ],
+  },
+  referenceFile: {
+    fileName: "claude-code-install.md",
+    content: `# Claude Code Installation
+
+## Install path
+- User-scope: \`~/.claude/skills/<package-name>/\`
+- Project-scope: \`<repo>/.claude/skills/<package-name>/\`
+
+## Discovery
+- Claude Code auto-detects \`SKILL.md\` inside any folder under \`skills/\`.
+- The skill name is read from the frontmatter \`name:\` field.
+
+## Verification
+\`\`\`bash
+ls ~/.claude/skills/
+# expect: <package-name>/
+claude /skills list
+# expect: <skill-name> appears
+\`\`\`
+
+## settings.json shape
+\`\`\`json
+{
+  "permissions": {
+    "allow": ["Read", "Glob", "Grep"]
+  }
+}
+\`\`\`
+
+## Project CLAUDE.md hook
+If you want the skill to be auto-engaged on certain prompts, add to \`CLAUDE.md\`:
+\`\`\`
+When the user asks for UX/UI work, use the skill at \`.claude/skills/<package-name>\`.
+\`\`\`
+`,
+  },
+  skillMdSection: {
+    heading: "Claude Code installation",
+    body: `Install path: \`~/.claude/skills/<package-name>/\` (user) or \`.claude/skills/<package-name>/\` (project).
+
+Claude Code auto-detects \`SKILL.md\` and reads \`name:\` from frontmatter.
+
+Verify with \`claude /skills list\`. See \`references/claude-code-install.md\` for the full procedure and a \`settings.json\` example.`,
+  },
+};
+
+// ─────────────────────────────────────────────────────────────────────────────
+// 13. Cursor Target (Harness)
+// ─────────────────────────────────────────────────────────────────────────────
+const CURSOR_TARGET: CapabilityPackDef = {
+  id: "cursor-target",
+  label: "Cursor Target",
+  summary:
+    "Rules format, .mdc conversion, and cursor.json snippet for Cursor IDE.",
+  sourceInspiration: "Cursor documentation",
+  effect: {
+    filesAdded: ["references/cursor-install.md"],
+    skillMdSections: ["Cursor installation"],
+    rulesAdded: [
+      "Cursor rules live as `.cursor/rules/*.mdc` files in project root.",
+    ],
+  },
+  referenceFile: {
+    fileName: "cursor-install.md",
+    content: `# Cursor Installation
+
+## Install path
+Cursor rules are project-scoped:
+\`\`\`
+<repo>/.cursor/rules/<rule-name>.mdc
+\`\`\`
+
+## .mdc file shape
+A \`.mdc\` is markdown with YAML frontmatter:
+\`\`\`md
+---
+description: short rule purpose
+globs:
+  - "src/**/*.tsx"
+alwaysApply: false
+---
+
+[rule body in markdown]
+\`\`\`
+
+## Converting SKILL.md → .mdc
+- Take the SKILL.md content.
+- Replace the frontmatter with the .mdc frontmatter shape.
+- Pick globs to scope the rule to relevant files.
+
+## Verification
+- Open Cursor in the project. Settings → Rules. The rule appears with its description.
+`,
+  },
+  skillMdSection: {
+    heading: "Cursor installation",
+    body: `Cursor rules live at \`.cursor/rules/*.mdc\` in the project root. The SKILL.md can be converted to \`.mdc\` by replacing the frontmatter and scoping with \`globs\`. See \`references/cursor-install.md\`.`,
+  },
+};
+
+// ─────────────────────────────────────────────────────────────────────────────
+// 14. Codex Target (Harness)
+// ─────────────────────────────────────────────────────────────────────────────
+const CODEX_TARGET: CapabilityPackDef = {
+  id: "codex-target",
+  label: "Codex CLI Target",
+  summary:
+    "AGENTS.md layout and config.toml settings for Codex CLI.",
+  sourceInspiration: "Codex CLI documentation",
+  effect: {
+    filesAdded: ["references/codex-install.md"],
+    skillMdSections: ["Codex installation"],
+    rulesAdded: [
+      "Codex CLI reads instructions from `AGENTS.md` (project) and `~/.codex/AGENTS.md` (user).",
+    ],
+  },
+  referenceFile: {
+    fileName: "codex-install.md",
+    content: `# Codex CLI Installation
+
+## Install path
+- Global: \`~/.codex/AGENTS.md\`
+- Project: \`<repo>/AGENTS.md\`
+
+## Convert SKILL.md → AGENTS.md
+- Codex doesn't have a separate skills system. The SKILL.md content becomes part of \`AGENTS.md\`.
+- Either replace AGENTS.md or append, scoped by a clear section header.
+
+## Config
+\`~/.codex/config.toml\` controls model, tools, and approval mode. Not directly tied to the skill content.
+
+## Verification
+\`\`\`bash
+codex
+# Then ask a prompt that should engage your skill; observe behavior.
+\`\`\`
+`,
+  },
+  skillMdSection: {
+    heading: "Codex installation",
+    body: `Codex CLI reads instructions from \`AGENTS.md\` (project) or \`~/.codex/AGENTS.md\` (user). The SKILL.md content can be inlined or appended. See \`references/codex-install.md\`.`,
+  },
+};
+
 export const CAPABILITY_PACKS: CapabilityPackDef[] = [
   DESIGN_TASTE,
   WEB_BEST_PRACTICES,
@@ -587,7 +918,52 @@ export const CAPABILITY_PACKS: CapabilityPackDef[] = [
   MOBILE_PATTERNS,
   EXTRACT_DESIGN_SYSTEM,
   VISUAL_COMPOSITION,
+  REACT_PATTERNS,
+  TYPESCRIPT_STRICT,
+  TESTING_DISCIPLINE,
+  CLAUDE_CODE_TARGET,
+  CURSOR_TARGET,
+  CODEX_TARGET,
 ];
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Which packs are relevant to which category
+// ─────────────────────────────────────────────────────────────────────────────
+
+export const PACKS_BY_CATEGORY: Record<SkillCategory, CapabilityPack[]> = {
+  "ux-ui": [
+    "design-taste",
+    "web-best-practices",
+    "theme-factory",
+    "tailwind-first",
+    "shadcn-affinity",
+    "mobile-patterns",
+    "extract-design-system",
+    "visual-composition",
+  ],
+  frontend: [
+    "design-taste",
+    "tailwind-first",
+    "shadcn-affinity",
+    "react-patterns",
+    "typescript-strict",
+    "testing-discipline",
+    "web-best-practices",
+  ],
+  "design-system": [
+    "design-taste",
+    "theme-factory",
+    "visual-composition",
+    "extract-design-system",
+    "tailwind-first",
+    "shadcn-affinity",
+  ],
+  harness: ["claude-code-target", "cursor-target", "codex-target"],
+  product: [],
+  research: [],
+  content: [],
+  data: [],
+};
 
 export function getCapabilityPack(id: CapabilityPack): CapabilityPackDef | undefined {
   return CAPABILITY_PACKS.find((p) => p.id === id);

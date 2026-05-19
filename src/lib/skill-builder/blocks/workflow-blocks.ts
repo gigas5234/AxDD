@@ -1,4 +1,4 @@
-import type { SkillBlock, WorkflowModule } from "@/types/skill";
+import type { SkillBlock, SkillCategory, WorkflowModule } from "@/types/skill";
 
 export const WORKFLOW_BLOCKS: Record<WorkflowModule, SkillBlock> = {
   "problem-definition": {
@@ -188,6 +188,7 @@ export const WORKFLOW_BLOCKS: Record<WorkflowModule, SkillBlock> = {
       "2. Map each node to a component and its tokens.",
       "3. Output a Tailwind/React implementation outline.",
     ].join("\n"),
+    dependencies: ["component-breakdown"],
   },
   "ux-review": {
     id: "wf-ux-review",
@@ -292,6 +293,249 @@ export const WORKFLOW_BLOCKS: Record<WorkflowModule, SkillBlock> = {
       "3. Embed acceptance criteria and edge cases.",
     ].join("\n"),
   },
+
+  // ── Frontend Implementation ────────────────────────────────────────────────
+  "code-architecture": {
+    id: "wf-code-architecture",
+    category: "workflow",
+    title: "Code Architecture",
+    description: "Decide the file/folder layout, boundaries, and data flow.",
+    content: [
+      "### Code Architecture",
+      "1. Map components, hooks, and utils to folders by feature, not by type.",
+      "2. Identify the data-flow direction (props down, events up; or store).",
+      "3. Define module boundaries — no cross-feature imports without an interface.",
+    ].join("\n"),
+  },
+  "component-implementation": {
+    id: "wf-component-implementation",
+    category: "workflow",
+    title: "Component Implementation",
+    description: "Implement a single component from spec with full state coverage.",
+    content: [
+      "### Component Implementation",
+      "1. Translate the spec's props into a typed component signature.",
+      "2. Implement default, empty, loading, and error states explicitly.",
+      "3. Wire keyboard interaction and focus management before styling.",
+      "4. Add a Storybook entry or test file with all variants and states.",
+    ].join("\n"),
+  },
+  "state-management": {
+    id: "wf-state-management",
+    category: "workflow",
+    title: "State Management",
+    description: "Pick local vs shared vs server state, and the right tool.",
+    content: [
+      "### State Management",
+      "1. Classify each piece of state: local / shared / server / URL.",
+      "2. Default to local. Promote to shared only when ≥3 components need it.",
+      "3. Server state belongs in a query library (React Query / SWR), not Redux.",
+    ].join("\n"),
+  },
+  "routing-strategy": {
+    id: "wf-routing-strategy",
+    category: "workflow",
+    title: "Routing Strategy",
+    description: "Define URL structure, params, and code-splitting boundaries.",
+    content: [
+      "### Routing Strategy",
+      "1. URLs reflect content hierarchy and are sharable.",
+      "2. Query params for filters and sort; path params for entities.",
+      "3. Code-split per route; preload on hover for above-the-fold links.",
+    ].join("\n"),
+  },
+  "performance-budget": {
+    id: "wf-performance-budget",
+    category: "workflow",
+    title: "Performance Budget",
+    description: "Set and enforce performance targets at the component level.",
+    content: [
+      "### Performance Budget",
+      "1. Targets: LCP < 2.5s, CLS = 0 above the fold, JS < 250KB initial.",
+      "2. Lazy-load below-the-fold images and routes.",
+      "3. Memoize expensive renders only after profiling, not preemptively.",
+    ].join("\n"),
+  },
+  "accessibility-implementation": {
+    id: "wf-accessibility-implementation",
+    category: "workflow",
+    title: "Accessibility Implementation",
+    description: "Translate accessibility checks into code-level patterns.",
+    content: [
+      "### Accessibility Implementation",
+      "1. Every interactive element is reachable by Tab in logical order.",
+      "2. Use semantic HTML first; ARIA only when semantics fall short.",
+      "3. Visible focus ring at all times; never `outline: 0` without a replacement.",
+      "4. Honor `prefers-reduced-motion` for any non-essential animation.",
+    ].join("\n"),
+  },
+
+  // ── Design System Generator ────────────────────────────────────────────────
+  "token-system": {
+    id: "wf-token-system",
+    category: "workflow",
+    title: "Token System",
+    description: "Design semantic tokens and their reference chain.",
+    content: [
+      "### Token System",
+      "1. Define raw tokens (color values, type scale, spacing units).",
+      "2. Reference them as semantic tokens (surface, ink, accent, hairline).",
+      "3. Components consume *semantic* tokens only. Raw values never enter component code.",
+      "4. Emit tokens as JSON; map to Tailwind theme keys and CSS variables.",
+    ].join("\n"),
+  },
+  "primitive-design": {
+    id: "wf-primitive-design",
+    category: "workflow",
+    title: "Primitive Design",
+    description: "Specify the base components everything else composes from.",
+    content: [
+      "### Primitive Design",
+      "1. Identify the irreducible primitives (Button, Input, Card, Modal, Toast, etc.).",
+      "2. For each: define props, variants, states, and accessibility behavior.",
+      "3. Primitives have no business logic — only presentation and interaction.",
+    ].join("\n"),
+  },
+  "variant-system": {
+    id: "wf-variant-system",
+    category: "workflow",
+    title: "Variant System",
+    description: "Define the variant + state matrix per primitive.",
+    content: [
+      "### Variant System",
+      "1. Variants are intent-driven (primary / secondary / destructive), not visual.",
+      "2. States are always 4-tuple: default / hover / active / disabled.",
+      "3. Cap variants per primitive at 5 — more means a missing primitive.",
+    ].join("\n"),
+    dependencies: ["primitive-design"],
+  },
+  "documentation-strategy": {
+    id: "wf-documentation-strategy",
+    category: "workflow",
+    title: "Documentation Strategy",
+    description: "Decide how the system is taught to its users.",
+    content: [
+      "### Documentation Strategy",
+      "1. Each primitive has: purpose, props table, do/don't examples, accessibility notes.",
+      "2. Tokens are documented with both the raw value and the semantic name.",
+      "3. Show *one* canonical usage per component; avoid kitchen-sink demos.",
+    ].join("\n"),
+  },
+  "migration-plan": {
+    id: "wf-migration-plan",
+    category: "workflow",
+    title: "Migration Plan",
+    description: "Plan adoption from an existing UI to the new system.",
+    content: [
+      "### Migration Plan",
+      "1. Audit existing UI — map current patterns to new primitives.",
+      "2. Prioritize migration by traffic and visual prominence.",
+      "3. Allow legacy + new to coexist during transition; never block product work.",
+    ].join("\n"),
+    dependencies: ["token-system", "primitive-design"],
+  },
+
+  // ── Harness Setup ──────────────────────────────────────────────────────────
+  "harness-target-selection": {
+    id: "wf-harness-target-selection",
+    category: "workflow",
+    title: "Harness Target Selection",
+    description: "Pick which agent harness this skill is being installed into.",
+    content: [
+      "### Harness Target Selection",
+      "1. Identify the harness: Claude Code, Cursor, Codex, Windsurf, generic.",
+      "2. Note the harness's expected skill install path (e.g., `~/.claude/skills/`).",
+      "3. Note any harness-specific file formats (`.mdc` for Cursor, `AGENTS.md` for Codex).",
+    ].join("\n"),
+  },
+  "harness-permissions": {
+    id: "wf-harness-permissions",
+    category: "workflow",
+    title: "Harness Permissions",
+    description: "Declare what tools/files the skill needs access to.",
+    content: [
+      "### Harness Permissions",
+      "1. List required read paths, write paths, and shell commands.",
+      "2. Prefer least-privilege defaults; expand only as the skill needs.",
+      "3. Emit the matching `settings.json` permission block for the target harness.",
+    ].join("\n"),
+  },
+  "harness-hooks": {
+    id: "wf-harness-hooks",
+    category: "workflow",
+    title: "Harness Hooks",
+    description: "Wire pre/post hooks for tool calls or session events.",
+    content: [
+      "### Harness Hooks",
+      "1. Identify events that need automatic behavior (PreToolUse, PostToolUse, etc.).",
+      "2. For each, specify the matcher and the action (script path or inline command).",
+      "3. Hooks must be idempotent and fast — never block on network calls.",
+    ].join("\n"),
+  },
+  "harness-install-flow": {
+    id: "wf-harness-install-flow",
+    category: "workflow",
+    title: "Harness Install Flow",
+    description: "Produce a copy-pasteable install procedure.",
+    content: [
+      "### Harness Install Flow",
+      "1. State the exact directory the package goes into for the target harness.",
+      "2. Emit a one-line shell command (or two) that installs the package.",
+      "3. State how the user verifies installation (e.g., `claude /skills list`).",
+    ].join("\n"),
+  },
+};
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Which workflow modules apply to which category
+// ─────────────────────────────────────────────────────────────────────────────
+
+const UX_UI_WORKFLOWS: WorkflowModule[] = [
+  "problem-definition",
+  "user-flow",
+  "information-architecture",
+  "screen-design",
+  "component-breakdown",
+  "design-system-draft",
+  "figma-to-code",
+  "ux-review",
+  "accessibility-check",
+  "implementation-prompt",
+];
+
+const FRONTEND_WORKFLOWS: WorkflowModule[] = [
+  "code-architecture",
+  "component-implementation",
+  "state-management",
+  "routing-strategy",
+  "performance-budget",
+  "accessibility-implementation",
+];
+
+const DESIGN_SYSTEM_WORKFLOWS: WorkflowModule[] = [
+  "token-system",
+  "primitive-design",
+  "variant-system",
+  "documentation-strategy",
+  "migration-plan",
+];
+
+const HARNESS_WORKFLOWS: WorkflowModule[] = [
+  "harness-target-selection",
+  "harness-permissions",
+  "harness-hooks",
+  "harness-install-flow",
+];
+
+export const WORKFLOW_BY_CATEGORY: Record<SkillCategory, WorkflowModule[]> = {
+  "ux-ui": UX_UI_WORKFLOWS,
+  frontend: FRONTEND_WORKFLOWS,
+  "design-system": DESIGN_SYSTEM_WORKFLOWS,
+  harness: HARNESS_WORKFLOWS,
+  product: [],
+  research: [],
+  content: [],
+  data: [],
 };
 
 export function workflowBlocksFor(modules: WorkflowModule[]): SkillBlock[] {

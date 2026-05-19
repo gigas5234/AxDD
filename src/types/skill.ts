@@ -5,7 +5,8 @@ export type SkillCategory =
   | "design-system"
   | "research"
   | "content"
-  | "data";
+  | "data"
+  | "harness";
 
 export type TargetAgent =
   | "generic"
@@ -17,6 +18,7 @@ export type TargetAgent =
 export type RoleLevel = "junior" | "mid" | "senior" | "expert";
 
 export type WorkflowModule =
+  // UX/UI Designer
   | "problem-definition"
   | "user-flow"
   | "information-architecture"
@@ -26,9 +28,28 @@ export type WorkflowModule =
   | "figma-to-code"
   | "ux-review"
   | "accessibility-check"
-  | "implementation-prompt";
+  | "implementation-prompt"
+  // Frontend Implementation
+  | "code-architecture"
+  | "component-implementation"
+  | "state-management"
+  | "routing-strategy"
+  | "performance-budget"
+  | "accessibility-implementation"
+  // Design System Generator
+  | "token-system"
+  | "primitive-design"
+  | "variant-system"
+  | "documentation-strategy"
+  | "migration-plan"
+  // Harness Setup
+  | "harness-target-selection"
+  | "harness-permissions"
+  | "harness-hooks"
+  | "harness-install-flow";
 
 export type CapabilityPack =
+  // Cross-category (mostly UX/UI but reusable)
   | "design-taste"
   | "web-best-practices"
   | "theme-factory"
@@ -36,18 +57,41 @@ export type CapabilityPack =
   | "shadcn-affinity"
   | "mobile-patterns"
   | "extract-design-system"
-  | "visual-composition";
+  | "visual-composition"
+  // Frontend Implementation
+  | "react-patterns"
+  | "typescript-strict"
+  | "testing-discipline"
+  // Harness Setup
+  | "claude-code-target"
+  | "cursor-target"
+  | "codex-target";
 
 export type QualityRule =
+  // Universal (any category)
   | "avoid-vague-language"
+  | "avoid-unnecessary-questions"
+  | "avoid-overlong-chat-response"
+  // UX/UI Designer
   | "define-primary-action"
   | "include-information-hierarchy"
   | "include-screen-states"
   | "componentize-output"
   | "include-responsive-notes"
   | "include-accessibility"
-  | "avoid-unnecessary-questions"
-  | "avoid-overlong-chat-response";
+  // Frontend Implementation
+  | "fe-no-any"
+  | "fe-compose-over-branch"
+  | "fe-test-users-not-impl"
+  | "fe-semantic-html-first"
+  | "fe-perf-budget"
+  | "fe-state-colocation"
+  // Design System Generator
+  | "ds-semantic-tokens"
+  | "ds-no-business-in-primitive"
+  | "ds-variants-cap-5"
+  | "ds-states-4tuple"
+  | "ds-doc-canonical-usage";
 
 export type AnswerStyle = "concise" | "structured" | "detailed";
 export type TranslationMode = "none" | "on-demand" | "side-by-side" | "cached";

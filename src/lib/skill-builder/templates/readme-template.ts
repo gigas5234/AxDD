@@ -88,5 +88,7 @@ function labelForCategory(category: SkillConfig["category"]): string {
       return "content planning";
     case "data":
       return "data analysis";
+    case "harness":
+      return "harness setup";
   }
 }
