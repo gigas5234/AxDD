@@ -1,6 +1,8 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { useLocale, tr } from "@/lib/i18n/locale";
+import { UI } from "@/lib/i18n/strings";
 
 export type DropdownItem = {
   id: string;
@@ -22,6 +24,7 @@ export function Dropdown({
   onChange: (id: string) => void;
   minWidth?: number;
 }) {
+  const { locale } = useLocale();
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
 
@@ -95,7 +98,7 @@ export function Dropdown({
                       </span>
                       {item.disabled && (
                         <span className="text-[10px] uppercase tracking-[0.16em] text-ink-muted-48">
-                          Soon
+                          {tr(UI.comingSoon, locale)}
                         </span>
                       )}
                       {!item.disabled && selected && (

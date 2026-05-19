@@ -1,6 +1,8 @@
 "use client";
 
 import type { QualityReport } from "@/types/skill";
+import { useLocale, tr } from "@/lib/i18n/locale";
+import { UI } from "@/lib/i18n/strings";
 
 function statusDot(status: "pass" | "warning" | "fail"): string {
   // Single-accent system: pass = ink, warning = muted ink, fail = KT Real Red
@@ -16,10 +18,11 @@ function scoreColor(score: number): string {
 }
 
 export function QualityPanel({ report }: { report: QualityReport | null }) {
+  const { locale } = useLocale();
   if (!report) {
     return (
       <div className="text-caption text-ink-muted-48 px-4 py-5">
-        Generate a package to see its quality report.
+        {tr(UI.qpEmpty, locale)}
       </div>
     );
   }
@@ -27,7 +30,7 @@ export function QualityPanel({ report }: { report: QualityReport | null }) {
     <div className="px-4 py-4 space-y-5">
       <div>
         <div className="text-fine-print uppercase tracking-[0.16em] text-ink-muted-48">
-          Quality score
+          {tr(UI.qpScore, locale)}
         </div>
         <div
           className={`font-semibold ${scoreColor(report.totalScore)}`}
@@ -39,7 +42,7 @@ export function QualityPanel({ report }: { report: QualityReport | null }) {
 
       <div>
         <div className="text-fine-print uppercase tracking-[0.16em] text-ink-muted-48 mb-2">
-          Checks
+          {tr(UI.qpChecks, locale)}
         </div>
         <ul className="space-y-2">
           {report.checks.map((c) => (
@@ -63,7 +66,7 @@ export function QualityPanel({ report }: { report: QualityReport | null }) {
       {report.warnings.length > 0 && (
         <div>
           <div className="text-fine-print uppercase tracking-[0.16em] text-ink-muted-48 mb-2">
-            Warnings
+            {tr(UI.qpWarningsLabel, locale)}
           </div>
           <ul className="space-y-1">
             {report.warnings.map((w, i) => (
@@ -79,7 +82,7 @@ export function QualityPanel({ report }: { report: QualityReport | null }) {
       {report.suggestions.length > 0 && (
         <div>
           <div className="text-fine-print uppercase tracking-[0.16em] text-ink-muted-48 mb-2">
-            Suggestions
+            {tr(UI.qpSuggestions, locale)}
           </div>
           <ul className="space-y-1">
             {report.suggestions.map((s, i) => (

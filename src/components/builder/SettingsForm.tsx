@@ -13,6 +13,16 @@ import type {
 } from "@/types/skill";
 import { CAPABILITY_PACKS } from "@/lib/skill-builder/blocks/capability-packs";
 import type { InspectorTarget } from "./InspectorPanel";
+import { useLocale, tr } from "@/lib/i18n/locale";
+import {
+  UI,
+  WORKFLOW_LABELS as WORKFLOW_I18N,
+  QUALITY_LABELS as QUALITY_I18N,
+  PACK_LABELS,
+  ROLE_LEVEL_LABELS,
+  ANSWER_STYLE_LABELS,
+  TRANSLATION_MODE_LABELS,
+} from "@/lib/i18n/strings";
 
 const ROLE_LEVELS: RoleLevel[] = ["junior", "mid", "senior", "expert"];
 const TARGET_AGENTS: TargetAgent[] = [
@@ -30,33 +40,8 @@ const TRANSLATION_MODES: TranslationMode[] = [
   "cached",
 ];
 
-const WORKFLOW_LABELS: Record<WorkflowModule, string> = {
-  "problem-definition": "Problem Definition",
-  "user-flow": "User Flow",
-  "information-architecture": "Information Architecture",
-  "screen-design": "Screen Design",
-  "component-breakdown": "Component Breakdown",
-  "design-system-draft": "Design System Draft",
-  "figma-to-code": "Figma to Code",
-  "ux-review": "UX Review",
-  "accessibility-check": "Accessibility Check",
-  "implementation-prompt": "Implementation Prompt",
-};
-
-const QUALITY_LABELS: Record<QualityRule, string> = {
-  "avoid-vague-language": "Avoid vague language",
-  "define-primary-action": "Define primary action",
-  "include-information-hierarchy": "Include information hierarchy",
-  "include-screen-states": "Include screen states",
-  "componentize-output": "Componentize output",
-  "include-responsive-notes": "Include responsive notes",
-  "include-accessibility": "Include accessibility",
-  "avoid-unnecessary-questions": "Avoid unnecessary questions",
-  "avoid-overlong-chat-response": "Avoid overlong chat responses",
-};
-
-const ALL_WORKFLOWS = Object.keys(WORKFLOW_LABELS) as WorkflowModule[];
-const ALL_RULES = Object.keys(QUALITY_LABELS) as QualityRule[];
+const ALL_WORKFLOWS = Object.keys(WORKFLOW_I18N) as WorkflowModule[];
+const ALL_RULES = Object.keys(QUALITY_I18N) as QualityRule[];
 
 function Section({
   id,
@@ -159,15 +144,22 @@ export function SettingsForm({
   inspector,
   onInspect,
 }: SettingsFormProps) {
+  const { locale } = useLocale();
   const [openSection, setOpenSection] = useState<string | null>("basic");
 
   // Compute hints shown next to closed section headers
-  const hintRole = `${config.roleProfile.roleLevel}, ${config.roleProfile.domainFocus.length} focus`;
+  const focusWord = locale === "ko" ? "개 도메인" : "focus";
+  const includedWord = locale === "ko" ? "포함" : "included";
+  const hintRole = `${tr(ROLE_LEVEL_LABELS[config.roleProfile.roleLevel], locale)}, ${config.roleProfile.domainFocus.length} ${focusWord}`;
   const hintWorkflow = `${config.workflowModules.length}/${ALL_WORKFLOWS.length}`;
   const hintPacks = `${config.capabilityPacks.length}/${CAPABILITY_PACKS.length}`;
-  const hintOutput = config.outputFormat.answerStyle;
+  const hintOutput = tr(ANSWER_STYLE_LABELS[config.outputFormat.answerStyle], locale);
   const hintRules = `${config.qualityRules.length}/${ALL_RULES.length}`;
-  const hintLang = `${config.language.primaryLanguage} · ${config.language.translationMode}`;
+  const langLabel =
+    config.language.primaryLanguage === "ko"
+      ? tr(UI.langKorean, locale)
+      : tr(UI.langEnglish, locale);
+  const hintLang = `${langLabel} · ${tr(TRANSLATION_MODE_LABELS[config.language.translationMode], locale)}`;
   const hintPkg = (() => {
     const o = config.packageOptions;
     const count = [
@@ -177,7 +169,7 @@ export function SettingsForm({
       o.includeTemplates,
       o.includeExamples,
     ].filter(Boolean).length;
-    return `${count}/5 included`;
+    return `${count}/5 ${includedWord}`;
   })();
   function update<K extends keyof SkillConfig>(key: K, value: SkillConfig[K]) {
     onChange({ ...config, [key]: value, updatedAt: new Date().toISOString() });
@@ -246,25 +238,25 @@ export function SettingsForm({
     <div className="space-y-3">
       <Section
         id="basic"
-        title="1. Basic Info"
+        title={tr(UI.secBasic, locale)}
         openSection={openSection}
         onToggleSection={setOpenSection}
       >
-        <Field label="Skill name">
+        <Field label={tr(UI.fldSkillName, locale)}>
           <input
             className={inputCls}
             value={config.skillName}
             onChange={(e) => update("skillName", e.target.value)}
           />
         </Field>
-        <Field label="Package name">
+        <Field label={tr(UI.fldPackageName, locale)}>
           <input
             className={inputCls}
             value={config.packageName}
             onChange={(e) => update("packageName", e.target.value)}
           />
         </Field>
-        <Field label="Description">
+        <Field label={tr(UI.fldDescription, locale)}>
           <textarea
             className={inputCls}
             rows={3}
@@ -272,7 +264,7 @@ export function SettingsForm({
             onChange={(e) => update("description", e.target.value)}
           />
         </Field>
-        <Field label="Target agent">
+        <Field label={tr(UI.fldTargetAgent, locale)}>
           <select
             className={inputCls}
             value={config.targetAgent}
@@ -289,12 +281,12 @@ export function SettingsForm({
 
       <Section
         id="role"
-        title="2. Role Profile"
+        title={tr(UI.secRole, locale)}
         hint={hintRole}
         openSection={openSection}
         onToggleSection={setOpenSection}
       >
-        <Field label="Role level">
+        <Field label={tr(UI.fldRoleLevel, locale)}>
           <select
             className={inputCls}
             value={config.roleProfile.roleLevel}
@@ -302,12 +294,12 @@ export function SettingsForm({
           >
             {ROLE_LEVELS.map((r) => (
               <option key={r} value={r}>
-                {r}
+                {tr(ROLE_LEVEL_LABELS[r], locale)}
               </option>
             ))}
           </select>
         </Field>
-        <Field label="Domain focus (comma separated)">
+        <Field label={tr(UI.fldDomainFocus, locale)}>
           <input
             className={inputCls}
             value={config.roleProfile.domainFocus.join(", ")}
@@ -323,17 +315,17 @@ export function SettingsForm({
           />
         </Field>
         <Check
-          label="Implementation awareness"
+          label={tr(UI.fldImplAware, locale)}
           checked={config.roleProfile.implementationAwareness}
           onChange={(v) => updateRole("implementationAwareness", v)}
         />
         <Check
-          label="Design system awareness"
+          label={tr(UI.fldDsAware, locale)}
           checked={config.roleProfile.designSystemAwareness}
           onChange={(v) => updateRole("designSystemAwareness", v)}
         />
         <Check
-          label="Business awareness"
+          label={tr(UI.fldBizAware, locale)}
           checked={config.roleProfile.businessAwareness}
           onChange={(v) => updateRole("businessAwareness", v)}
         />
@@ -341,7 +333,7 @@ export function SettingsForm({
 
       <Section
         id="workflow"
-        title="3. Workflow Modules"
+        title={tr(UI.secWorkflow, locale)}
         hint={hintWorkflow}
         openSection={openSection}
         onToggleSection={setOpenSection}
@@ -350,7 +342,7 @@ export function SettingsForm({
           {ALL_WORKFLOWS.map((m) => (
             <Check
               key={m}
-              label={WORKFLOW_LABELS[m]}
+              label={tr(WORKFLOW_I18N[m], locale)}
               checked={config.workflowModules.includes(m)}
               onChange={() => toggleWorkflow(m)}
             />
@@ -360,14 +352,13 @@ export function SettingsForm({
 
       <Section
         id="packs"
-        title="4. Capability Packs"
+        title={tr(UI.secPacks, locale)}
         hint={hintPacks}
         openSection={openSection}
         onToggleSection={setOpenSection}
       >
         <p className="text-fine-print text-ink-muted-48 leading-snug -mt-1">
-          Optional skill flavors. Click a card to see its full effect on the
-          right.
+          {tr(UI.packsIntro, locale)}
         </p>
         <div className="space-y-1.5">
           {CAPABILITY_PACKS.map((pack) => {
@@ -391,7 +382,7 @@ export function SettingsForm({
                     checked={checked}
                     onChange={() => togglePack(pack.id)}
                     className="rounded-sm accent-primary"
-                    aria-label={`Enable ${pack.label}`}
+                    aria-label={tr(PACK_LABELS[pack.id].label, locale)}
                   />
                 </label>
                 <button
@@ -400,14 +391,14 @@ export function SettingsForm({
                     onInspect({ type: "capability-pack", id: pack.id })
                   }
                   className="flex-1 text-left py-2.5 pr-3 flex items-center gap-2 min-w-0"
-                  title="Show details on the right"
+                  title={tr(UI.inspShowDetails, locale)}
                 >
                   <div className="flex-1 min-w-0">
                     <div className="text-[14px] font-semibold text-ink truncate">
-                      {pack.label}
+                      {tr(PACK_LABELS[pack.id].label, locale)}
                     </div>
                     <div className="text-[12px] text-ink-muted-80 leading-snug truncate mt-0.5">
-                      {pack.summary}
+                      {tr(PACK_LABELS[pack.id].summary, locale)}
                     </div>
                   </div>
                   <span
@@ -424,12 +415,12 @@ export function SettingsForm({
 
       <Section
         id="output"
-        title="5. Output Format"
+        title={tr(UI.secOutput, locale)}
         hint={hintOutput}
         openSection={openSection}
         onToggleSection={setOpenSection}
       >
-        <Field label="Answer style">
+        <Field label={tr(UI.fldAnswerStyle, locale)}>
           <select
             className={inputCls}
             value={config.outputFormat.answerStyle}
@@ -439,38 +430,38 @@ export function SettingsForm({
           >
             {ANSWER_STYLES.map((a) => (
               <option key={a} value={a}>
-                {a}
+                {tr(ANSWER_STYLE_LABELS[a], locale)}
               </option>
             ))}
           </select>
         </Field>
         <Check
-          label="Include Markdown"
+          label={tr(UI.fldIncludeMd, locale)}
           checked={config.outputFormat.includeMarkdown}
           onChange={(v) => updateOutput("includeMarkdown", v)}
         />
         <Check
-          label="Include JSON"
+          label={tr(UI.fldIncludeJson, locale)}
           checked={config.outputFormat.includeJson}
           onChange={(v) => updateOutput("includeJson", v)}
         />
         <Check
-          label="Include tables"
+          label={tr(UI.fldIncludeTables, locale)}
           checked={config.outputFormat.includeTables}
           onChange={(v) => updateOutput("includeTables", v)}
         />
         <Check
-          label="Include Cursor prompt"
+          label={tr(UI.fldIncludeCursor, locale)}
           checked={config.outputFormat.includeCursorPrompt}
           onChange={(v) => updateOutput("includeCursorPrompt", v)}
         />
         <Check
-          label="Include checklists"
+          label={tr(UI.fldIncludeChecks, locale)}
           checked={config.outputFormat.includeChecklists}
           onChange={(v) => updateOutput("includeChecklists", v)}
         />
         <Check
-          label="Include examples"
+          label={tr(UI.fldIncludeExamples, locale)}
           checked={config.outputFormat.includeExamples}
           onChange={(v) => updateOutput("includeExamples", v)}
         />
@@ -478,7 +469,7 @@ export function SettingsForm({
 
       <Section
         id="rules"
-        title="6. Quality Rules"
+        title={tr(UI.secRules, locale)}
         hint={hintRules}
         openSection={openSection}
         onToggleSection={setOpenSection}
@@ -487,7 +478,7 @@ export function SettingsForm({
           {ALL_RULES.map((r) => (
             <Check
               key={r}
-              label={QUALITY_LABELS[r]}
+              label={tr(QUALITY_I18N[r], locale)}
               checked={config.qualityRules.includes(r)}
               onChange={() => toggleRule(r)}
             />
@@ -497,12 +488,12 @@ export function SettingsForm({
 
       <Section
         id="lang"
-        title="7. Language"
+        title={tr(UI.secLanguage, locale)}
         hint={hintLang}
         openSection={openSection}
         onToggleSection={setOpenSection}
       >
-        <Field label="Primary language">
+        <Field label={tr(UI.fldPrimaryLang, locale)}>
           <select
             className={inputCls}
             value={config.language.primaryLanguage}
@@ -510,13 +501,13 @@ export function SettingsForm({
               updateLang("primaryLanguage", e.target.value as "en" | "ko")
             }
           >
-            <option value="en">English</option>
-            <option value="ko">Korean</option>
+            <option value="en">{tr(UI.langEnglish, locale)}</option>
+            <option value="ko">{tr(UI.langKorean, locale)}</option>
           </select>
         </Field>
         <Field
-          label="Translation mode"
-          hint="Korean translation is mocked in the MVP — see Korean tab in the preview."
+          label={tr(UI.fldTranslationMode, locale)}
+          hint={tr(UI.fldTranslationHint, locale)}
         >
           <select
             className={inputCls}
@@ -527,13 +518,13 @@ export function SettingsForm({
           >
             {TRANSLATION_MODES.map((m) => (
               <option key={m} value={m}>
-                {m}
+                {tr(TRANSLATION_MODE_LABELS[m], locale)}
               </option>
             ))}
           </select>
         </Field>
         <Check
-          label="Generate Korean by default"
+          label={tr(UI.fldGenKoDefault, locale)}
           checked={config.language.generateKoreanByDefault}
           onChange={(v) => updateLang("generateKoreanByDefault", v)}
         />
@@ -541,33 +532,33 @@ export function SettingsForm({
 
       <Section
         id="pkg"
-        title="8. Package Options"
+        title={tr(UI.secPackage, locale)}
         hint={hintPkg}
         openSection={openSection}
         onToggleSection={setOpenSection}
       >
         <Check
-          label="Include SKILL.md"
+          label={tr(UI.fldIncSkillMd, locale)}
           checked={config.packageOptions.includeSkillMd}
           onChange={(v) => updatePkg("includeSkillMd", v)}
         />
         <Check
-          label="Include README.md"
+          label={tr(UI.fldIncReadme, locale)}
           checked={config.packageOptions.includeReadme}
           onChange={(v) => updatePkg("includeReadme", v)}
         />
         <Check
-          label="Include references/"
+          label={tr(UI.fldIncReferences, locale)}
           checked={config.packageOptions.includeReferences}
           onChange={(v) => updatePkg("includeReferences", v)}
         />
         <Check
-          label="Include templates/"
+          label={tr(UI.fldIncTemplates, locale)}
           checked={config.packageOptions.includeTemplates}
           onChange={(v) => updatePkg("includeTemplates", v)}
         />
         <Check
-          label="Include examples/"
+          label={tr(UI.fldIncExamples, locale)}
           checked={config.packageOptions.includeExamples}
           onChange={(v) => updatePkg("includeExamples", v)}
         />

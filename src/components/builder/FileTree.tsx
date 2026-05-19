@@ -1,6 +1,8 @@
 "use client";
 
 import type { GeneratedFile } from "@/types/skill";
+import { useLocale, tr } from "@/lib/i18n/locale";
+import { UI } from "@/lib/i18n/strings";
 
 type Node = {
   name: string;
@@ -103,6 +105,7 @@ function NodeRow({
         <span
           className="ml-auto mr-3 inline-block w-1.5 h-1.5 rounded-full bg-primary"
           title="Edited"
+          aria-label="Edited"
         />
       )}
     </button>
@@ -118,10 +121,11 @@ export function FileTree({
   selectedFileId: string | null;
   onSelect: (fileId: string) => void;
 }) {
+  const { locale } = useLocale();
   if (files.length === 0) {
     return (
       <div className="text-caption text-ink-muted-48 px-4 py-5">
-        Generate a package to see the file tree.
+        {tr(UI.fileTreeEmpty, locale)}
       </div>
     );
   }

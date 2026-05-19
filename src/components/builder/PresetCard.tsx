@@ -1,6 +1,8 @@
 "use client";
 
 import type { PresetDescriptor } from "@/lib/skill-builder/default-preset";
+import { useLocale, tr } from "@/lib/i18n/locale";
+import { UI, PRESET_LABELS } from "@/lib/i18n/strings";
 
 export function PresetCard({
   preset,
@@ -11,6 +13,8 @@ export function PresetCard({
   selected: boolean;
   onSelect: () => void;
 }) {
+  const { locale } = useLocale();
+  const i18n = PRESET_LABELS[preset.id];
   const isComingSoon = preset.status === "coming-soon";
   return (
     <button
@@ -24,14 +28,18 @@ export function PresetCard({
       } ${isComingSoon ? "opacity-50 cursor-not-allowed" : ""}`}
     >
       <div className="flex items-center justify-between gap-2">
-        <div className="text-body-strong text-ink">{preset.name}</div>
+        <div className="text-body-strong text-ink">
+          {i18n ? tr(i18n.name, locale) : preset.name}
+        </div>
         {isComingSoon && (
           <span className="text-[10px] uppercase tracking-[0.16em] text-ink-muted-48">
-            Soon
+            {tr(UI.comingSoon, locale)}
           </span>
         )}
       </div>
-      <div className="mt-1 text-caption text-ink-muted-48">{preset.bestFor}</div>
+      <div className="mt-1 text-caption text-ink-muted-48">
+        {i18n ? tr(i18n.bestFor, locale) : preset.bestFor}
+      </div>
     </button>
   );
 }

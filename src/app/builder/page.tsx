@@ -29,10 +29,18 @@ import {
 } from "@/components/builder/InspectorPanel";
 import { QualityFooter } from "@/components/builder/QualityFooter";
 import { Dropdown, type DropdownItem } from "@/components/builder/Dropdown";
+import { LangToggle } from "@/components/builder/LangToggle";
+import { useLocale, tr } from "@/lib/i18n/locale";
+import {
+  UI,
+  CATEGORY_LABELS,
+  PRESET_LABELS,
+} from "@/lib/i18n/strings";
 
 type PreviewTab = "preview" | "raw" | "korean";
 
 export default function BuilderPage() {
+  const { locale } = useLocale();
   const [config, setConfig] = useState<SkillConfig>(() => buildUxUiDefaultConfig());
   const [pkg, setPkg] = useState<GeneratedPackage | null>(null);
   const [selectedFileId, setSelectedFileId] = useState<string | null>(null);
@@ -139,17 +147,20 @@ export default function BuilderPage() {
 
   const categoryItems: DropdownItem[] = CATEGORY_REGISTRY.map((c) => ({
     id: c.id,
-    label: c.label,
-    description: c.shortDescription,
+    label: tr(CATEGORY_LABELS[c.id].label, locale),
+    description: tr(CATEGORY_LABELS[c.id].shortDescription, locale),
     disabled: c.status === "coming-soon",
   }));
 
-  const presetItems: DropdownItem[] = PRESETS.map((p) => ({
-    id: p.id,
-    label: p.name,
-    description: p.bestFor,
-    disabled: p.status === "coming-soon",
-  }));
+  const presetItems: DropdownItem[] = PRESETS.map((p) => {
+    const i18n = PRESET_LABELS[p.id];
+    return {
+      id: p.id,
+      label: i18n ? tr(i18n.name, locale) : p.name,
+      description: i18n ? tr(i18n.bestFor, locale) : p.bestFor,
+      disabled: p.status === "coming-soon",
+    };
+  });
 
   const hasPackage = pkg !== null;
 
@@ -158,16 +169,16 @@ export default function BuilderPage() {
       {/* Global nav — pure black, 44px */}
       <header className="relative z-40 h-11 bg-surface-black text-body-on-dark flex items-center px-5 flex-shrink-0">
         <Link href="/" className="text-nav-link font-medium hover:opacity-80">
-          AxDD Skill Builder
+          {tr(UI.brand, locale)}
         </Link>
         <nav className="ml-8 flex items-center gap-5 text-nav-link">
-          <span className="text-body-on-dark">UX/UI</span>
-          <span className="text-body-on-dark/50">Product</span>
-          <span className="text-body-on-dark/50">Frontend</span>
-          <span className="text-body-on-dark/50">Design System</span>
+          <span className="text-body-on-dark">{tr(UI.navUxUi, locale)}</span>
+          <span className="text-body-on-dark/50">{tr(UI.navProduct, locale)}</span>
+          <span className="text-body-on-dark/50">{tr(UI.navFrontend, locale)}</span>
+          <span className="text-body-on-dark/50">{tr(UI.navDesignSystem, locale)}</span>
         </nav>
-        <div className="ml-auto text-nav-link text-body-on-dark/70">
-          Static MVP
+        <div className="ml-auto">
+          <LangToggle variant="dark" />
         </div>
       </header>
 
@@ -177,7 +188,7 @@ export default function BuilderPage() {
         style={{ height: 52 }}
       >
         <Dropdown
-          label="Category"
+          label={tr(UI.category, locale)}
           value="ux-ui"
           items={categoryItems}
           onChange={() => {
@@ -186,7 +197,7 @@ export default function BuilderPage() {
           minWidth={240}
         />
         <Dropdown
-          label="Preset"
+          label={tr(UI.preset, locale)}
           value={selectedPresetId}
           items={presetItems}
           onChange={handleSelectPreset}
@@ -199,7 +210,7 @@ export default function BuilderPage() {
             disabled={isGenerating}
             className="inline-flex items-center justify-center rounded-pill bg-primary text-body-on-dark px-[22px] py-[8px] text-[15px] font-normal hover:opacity-95 disabled:opacity-50 transition"
           >
-            {isGenerating ? "Generating…" : "Generate Skill Package"}
+            {isGenerating ? tr(UI.generating, locale) : tr(UI.generate, locale)}
           </button>
         </div>
       </div>
@@ -216,20 +227,24 @@ export default function BuilderPage() {
               disabled={isGenerating}
               className="flex-1 inline-flex items-center justify-center rounded-pill bg-primary text-body-on-dark px-3 py-[7px] text-caption hover:opacity-95 disabled:opacity-50 transition"
             >
-              {isGenerating ? "Generating…" : hasPackage ? "Re-generate" : "Generate"}
+              {isGenerating
+                ? tr(UI.generating, locale)
+                : hasPackage
+                  ? tr(UI.qbRegenerate, locale)
+                  : tr(UI.qbGenerate, locale)}
             </button>
             <button
               type="button"
               onClick={handleResetToPreset}
               className="inline-flex items-center justify-center rounded-md border border-hairline bg-surface-pearl px-3 py-[7px] text-caption text-ink-muted-80 hover:bg-divider-soft transition"
-              title="Restore settings from the current preset's defaults"
+              title={tr(UI.qbResetTitle, locale)}
             >
-              Reset
+              {tr(UI.qbReset, locale)}
             </button>
           </div>
 
           <div className="p-4 space-y-3">
-            <PanelLabel>Detailed settings</PanelLabel>
+            <PanelLabel>{tr(UI.panelDetailedSettings, locale)}</PanelLabel>
             <SettingsForm
               config={config}
               onChange={setConfig}
@@ -243,7 +258,7 @@ export default function BuilderPage() {
         <main className="flex min-h-0 bg-canvas">
           <div className="w-64 border-r border-hairline overflow-y-auto thin-scrollbar bg-canvas">
             <div className="px-4 py-3 border-b border-hairline">
-              <PanelLabel>Files</PanelLabel>
+              <PanelLabel>{tr(UI.panelFiles, locale)}</PanelLabel>
             </div>
             <FileTree
               files={pkg?.files ?? []}
@@ -264,28 +279,30 @@ export default function BuilderPage() {
                       {selectedFile.path}
                     </span>
                     {selectedFile.isEdited && (
-                      <span className="text-[11px] text-primary">edited</span>
+                      <span className="text-[11px] text-primary">
+                        {tr(UI.edited, locale)}
+                      </span>
                     )}
                   </>
                 ) : (
                   <span className="text-caption text-ink-muted-48">
-                    Generate a package and select a file.
+                    {tr(UI.previewEmptyHint, locale)}
                   </span>
                 )}
               </div>
               <div className="flex items-center gap-1">
                 <TabButton
-                  label="Preview"
+                  label={tr(UI.previewTabPreview, locale)}
                   active={activeTab === "preview"}
                   onClick={() => setActiveTab("preview")}
                 />
                 <TabButton
-                  label="Raw"
+                  label={tr(UI.previewTabRaw, locale)}
                   active={activeTab === "raw"}
                   onClick={() => setActiveTab("raw")}
                 />
                 <TabButton
-                  label="Korean"
+                  label={tr(UI.previewTabKorean, locale)}
                   active={activeTab === "korean"}
                   onClick={() => setActiveTab("korean")}
                 />
@@ -304,11 +321,10 @@ export default function BuilderPage() {
                         letterSpacing: "-0.28px",
                       }}
                     >
-                      Choose a preset and generate your first skill package.
+                      {tr(UI.emptyHeroTitle, locale)}
                     </div>
                     <div className="text-ink-muted-48 mt-3" style={{ fontSize: 17 }}>
-                      The file tree, preview, and quality score appear here once
-                      the package is generated.
+                      {tr(UI.emptyHeroBody, locale)}
                     </div>
                   </div>
                 </div>
@@ -326,15 +342,13 @@ export default function BuilderPage() {
                 <div className="px-6 py-6">
                   <div className="rounded-lg border border-hairline bg-canvas-parchment p-5">
                     <div className="text-caption uppercase tracking-[0.16em] text-ink-muted-48">
-                      Korean Preview
+                      {tr(UI.btnKoreanPreview, locale)}
                     </div>
                     <p className="mt-2 text-ink" style={{ fontSize: 17 }}>
-                      한글 미리보기는 AI 번역 단계가 연결된 이후에 제공됩니다.
-                      MVP에서는 토큰 사용량을 줄이기 위해 비활성화되어 있습니다.
+                      {tr(UI.koPreviewLine1, locale)}
                     </p>
                     <p className="mt-2 text-ink-muted-48" style={{ fontSize: 14 }}>
-                      Korean preview is generated on demand to reduce token
-                      usage. Available in Phase 2 (AI Assist).
+                      {tr(UI.koPreviewLine2, locale)}
                     </p>
                   </div>
                 </div>
@@ -344,26 +358,26 @@ export default function BuilderPage() {
             <div className="h-12 border-t border-hairline px-4 flex items-center justify-between flex-shrink-0">
               <div className="text-fine-print text-ink-muted-48">
                 {selectedFile?.lastGeneratedAt
-                  ? `Last generated ${new Date(selectedFile.lastGeneratedAt).toLocaleTimeString()}`
+                  ? `${tr(UI.lastGenerated, locale)} ${new Date(selectedFile.lastGeneratedAt).toLocaleTimeString()}`
                   : ""}
               </div>
               <div className="flex items-center gap-2">
                 <button
                   type="button"
                   disabled
-                  title="Korean preview is available after AI integration (Phase 2)."
+                  title={tr(UI.btnKoreanPreviewTitle, locale)}
                   className="text-caption px-3 py-1.5 rounded-md border border-hairline bg-surface-pearl text-ink-muted-48 cursor-not-allowed"
                 >
-                  Korean Preview
+                  {tr(UI.btnKoreanPreview, locale)}
                 </button>
                 <button
                   type="button"
                   onClick={handleRegenerateFile}
                   disabled={!selectedFile}
-                  title="Regenerate this file deterministically from the current config."
+                  title={tr(UI.btnRegenerateFileTitle, locale)}
                   className="text-caption px-3 py-1.5 rounded-md border border-hairline bg-surface-pearl text-ink-muted-80 hover:bg-divider-soft disabled:opacity-50"
                 >
-                  Regenerate File
+                  {tr(UI.btnRegenerateFile, locale)}
                 </button>
               </div>
             </div>

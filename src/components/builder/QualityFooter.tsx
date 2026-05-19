@@ -1,6 +1,8 @@
 "use client";
 
 import type { QualityReport } from "@/types/skill";
+import { useLocale, tr } from "@/lib/i18n/locale";
+import { UI } from "@/lib/i18n/strings";
 
 function scoreColor(score: number): string {
   if (score >= 85) return "text-ink";
@@ -23,6 +25,7 @@ export function QualityFooter({
   onInspectQuality: () => void;
   inspecting: boolean;
 }) {
+  const { locale } = useLocale();
   const warnCount = report?.warnings.length ?? 0;
   const score = report?.totalScore;
   return (
@@ -30,13 +33,13 @@ export function QualityFooter({
       <button
         type="button"
         onClick={onInspectQuality}
-        title="Open quality details"
+        title={tr(UI.qfOpenDetails, locale)}
         className={`w-full flex items-center gap-3 rounded-md px-2 py-2 transition mb-2.5 ${
           inspecting ? "bg-divider-soft" : "hover:bg-divider-soft"
         }`}
       >
         <div className="text-[11px] uppercase tracking-[0.14em] text-ink-muted-80 font-medium">
-          Quality
+          {tr(UI.panelQuality, locale)}
         </div>
         <div
           className={`font-semibold ${scoreColor(score ?? 0)}`}
@@ -46,11 +49,13 @@ export function QualityFooter({
         </div>
         {warnCount > 0 && (
           <span className="text-[12px] text-primary font-medium">
-            {warnCount} warning{warnCount > 1 ? "s" : ""}
+            {locale === "ko"
+              ? `${tr(UI.qfWarning, locale)} ${warnCount}개`
+              : `${warnCount} ${warnCount > 1 ? tr(UI.qfWarnings, locale) : tr(UI.qfWarning, locale)}`}
           </span>
         )}
         <span className="ml-auto text-ink-muted-48 text-[12.5px]">
-          {inspecting ? "shown" : "details ▸"}
+          {inspecting ? tr(UI.qfShown, locale) : `${tr(UI.qfDetails, locale)} ▸`}
         </span>
       </button>
       <button
@@ -59,7 +64,7 @@ export function QualityFooter({
         disabled={!hasPackage || isDownloading}
         className="w-full inline-flex items-center justify-center rounded-pill bg-primary text-body-on-dark px-[22px] py-[10px] text-[15px] font-normal hover:opacity-95 disabled:opacity-50 transition"
       >
-        {isDownloading ? "Preparing ZIP…" : "Download ZIP"}
+        {isDownloading ? tr(UI.qfDownloading, locale) : tr(UI.qfDownload, locale)}
       </button>
     </div>
   );
