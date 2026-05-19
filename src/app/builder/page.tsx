@@ -4,7 +4,9 @@ import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { CATEGORY_REGISTRY } from "@/lib/skill-builder/categories";
 import {
+  buildDefaultConfigForCategory,
   buildUxUiDefaultConfig,
+  DEFAULT_PRESET_BY_CATEGORY,
   PRESETS,
 } from "@/lib/skill-builder/default-preset";
 import {
@@ -17,6 +19,7 @@ import type {
   CapabilityPack,
   GeneratedFile,
   GeneratedPackage,
+  SkillCategory,
   SkillConfig,
 } from "@/types/skill";
 import { SettingsForm } from "@/components/builder/SettingsForm";
@@ -46,8 +49,16 @@ import {
   REFERENCE_SKILLS,
   SKILLS_SH_URL,
 } from "@/lib/skill-builder/reference-skills";
+import {
+  recommend,
+  applyRecommendationToConfig,
+  type Recommendation,
+} from "@/lib/skill-builder/recommender";
+import { IntentInput } from "@/components/builder/IntentInput";
+import { RecommendationPanel } from "@/components/builder/RecommendationPanel";
+import { SimulatorPanel } from "@/components/builder/SimulatorPanel";
 
-type PreviewTab = "preview" | "raw" | "korean";
+type PreviewTab = "preview" | "raw" | "korean" | "simulate";
 
 export default function BuilderPage() {
   const { locale } = useLocale();
@@ -63,6 +74,19 @@ export default function BuilderPage() {
   const [inspector, setInspector] = useState<InspectorTarget>({
     type: "quality",
   });
+  const [recommendation, setRecommendation] = useState<Recommendation | null>(
+    null,
+  );
+
+  function handleIntentSubmit(query: string) {
+    setRecommendation(recommend(query));
+  }
+
+  function handleApplyRecommendation() {
+    if (!recommendation) return;
+    setConfig((c) => applyRecommendationToConfig(recommendation, c));
+    setRecommendation(null);
+  }
 
   // Esc → close inspector (back to Quality view)
   useEffect(() => {
@@ -110,6 +134,17 @@ export default function BuilderPage() {
     if (!preset || preset.status !== "available" || !preset.buildConfig) return;
     setSelectedPresetId(preset.id);
     setConfig(preset.buildConfig());
+  }
+
+  function handleSelectCategory(categoryId: string) {
+    const cat = categoryId as SkillCategory;
+    const nextConfig = buildDefaultConfigForCategory(cat);
+    setConfig(nextConfig);
+    const defaultPresetId = DEFAULT_PRESET_BY_CATEGORY[cat];
+    if (defaultPresetId) setSelectedPresetId(defaultPresetId);
+    // Clear any existing package so the user re-generates for the new category
+    setPkg(null);
+    setSelectedFileId(null);
   }
 
   function handleResetToPreset() {
@@ -164,7 +199,9 @@ export default function BuilderPage() {
     disabled: c.status === "coming-soon",
   }));
 
-  const presetItems: DropdownItem[] = PRESETS.map((p) => {
+  const presetItems: DropdownItem[] = PRESETS.filter(
+    (p) => p.category === config.category,
+  ).map((p) => {
     const i18n = PRESET_LABELS[p.id];
     return {
       id: p.id,
@@ -183,12 +220,6 @@ export default function BuilderPage() {
         <Link href="/" className="text-nav-link font-medium hover:opacity-80">
           {tr(UI.brand, locale)}
         </Link>
-        <nav className="ml-8 flex items-center gap-5 text-nav-link">
-          <span className="text-body-on-dark">{tr(UI.navUxUi, locale)}</span>
-          <span className="text-body-on-dark/50">{tr(UI.navProduct, locale)}</span>
-          <span className="text-body-on-dark/50">{tr(UI.navFrontend, locale)}</span>
-          <span className="text-body-on-dark/50">{tr(UI.navDesignSystem, locale)}</span>
-        </nav>
         <div className="ml-auto">
           <LangToggle variant="dark" />
         </div>
@@ -201,11 +232,9 @@ export default function BuilderPage() {
       >
         <Dropdown
           label={tr(UI.category, locale)}
-          value="ux-ui"
+          value={config.category}
           items={categoryItems}
-          onChange={() => {
-            /* Only ux-ui is selectable in MVP; other items are disabled. */
-          }}
+          onChange={handleSelectCategory}
           minWidth={240}
         />
         <Dropdown
@@ -304,30 +333,43 @@ export default function BuilderPage() {
                   active={activeTab === "korean"}
                   onClick={() => setActiveTab("korean")}
                 />
+                <TabButton
+                  label={tr(UI.simTab, locale)}
+                  active={activeTab === "simulate"}
+                  onClick={() => setActiveTab("simulate")}
+                />
               </div>
             </div>
 
             <div className="flex-1 overflow-auto min-h-0 thin-scrollbar">
-              {!selectedFile && (
+              {activeTab === "simulate" && (
+                <SimulatorPanel config={config} pkg={pkg} />
+              )}
+              {activeTab !== "simulate" && !selectedFile && (
                 <div className="px-8 py-10 max-w-4xl mx-auto">
-                  {/* Hero */}
-                  <div className="mb-8">
-                    <h2
-                      className="text-ink font-semibold"
-                      style={{
-                        fontSize: 32,
-                        lineHeight: 1.15,
-                        letterSpacing: "-0.2px",
-                      }}
-                    >
-                      {tr(UI.emptyHeroTitle, locale)}
-                    </h2>
-                    <p
-                      className="text-ink-muted-80 mt-2"
-                      style={{ fontSize: 16, lineHeight: 1.5 }}
-                    >
-                      {tr(UI.emptyHeroBody, locale)}
-                    </p>
+                  {/* Intent input — primary hero */}
+                  <div className="mb-6">
+                    <IntentInput onSubmit={handleIntentSubmit} />
+                  </div>
+
+                  {/* Recommendation result (only when present) */}
+                  {recommendation && (
+                    <div className="mb-8">
+                      <RecommendationPanel
+                        rec={recommendation}
+                        onApply={handleApplyRecommendation}
+                        onDismiss={() => setRecommendation(null)}
+                      />
+                    </div>
+                  )}
+
+                  {/* "Or pick a starting point" divider */}
+                  <div className="flex items-center gap-4 my-8">
+                    <div className="flex-1 h-px bg-hairline" />
+                    <div className="text-[12px] uppercase tracking-[0.16em] text-ink-muted-48">
+                      {tr(UI.orPickRecipe, locale)}
+                    </div>
+                    <div className="flex-1 h-px bg-hairline" />
                   </div>
 
                   {/* Recommended recipes */}

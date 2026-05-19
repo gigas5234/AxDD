@@ -11,7 +11,17 @@ import type {
   TranslationMode,
   WorkflowModule,
 } from "@/types/skill";
-import { CAPABILITY_PACKS } from "@/lib/skill-builder/blocks/capability-packs";
+import {
+  CAPABILITY_PACKS,
+  PACKS_BY_CATEGORY,
+} from "@/lib/skill-builder/blocks/capability-packs";
+import { WORKFLOW_BY_CATEGORY } from "@/lib/skill-builder/blocks/workflow-blocks";
+import { RULES_BY_CATEGORY } from "@/lib/skill-builder/blocks/rule-blocks";
+import {
+  checkDependencies,
+  packHasUnmetDeps,
+  workflowHasUnmetDeps,
+} from "@/lib/skill-builder/dependencies";
 import type { InspectorTarget } from "./InspectorPanel";
 import { useLocale, tr } from "@/lib/i18n/locale";
 import {
@@ -147,14 +157,25 @@ export function SettingsForm({
   const { locale } = useLocale();
   const [openSection, setOpenSection] = useState<string | null>("basic");
 
+  // Category-scoped workflow modules, capability packs, and quality rules
+  const categoryWorkflows = WORKFLOW_BY_CATEGORY[config.category] ?? [];
+  const categoryPackIds = PACKS_BY_CATEGORY[config.category] ?? [];
+  const categoryPacks = CAPABILITY_PACKS.filter((p) =>
+    categoryPackIds.includes(p.id),
+  );
+  const categoryRules = RULES_BY_CATEGORY[config.category] ?? [];
+
+  // Live dependency violations across the current config
+  const violations = checkDependencies(config);
+
   // Compute hints shown next to closed section headers
   const focusWord = locale === "ko" ? "개 도메인" : "focus";
   const includedWord = locale === "ko" ? "포함" : "included";
   const hintRole = `${tr(ROLE_LEVEL_LABELS[config.roleProfile.roleLevel], locale)}, ${config.roleProfile.domainFocus.length} ${focusWord}`;
-  const hintWorkflow = `${config.workflowModules.length}/${ALL_WORKFLOWS.length}`;
-  const hintPacks = `${config.capabilityPacks.length}/${CAPABILITY_PACKS.length}`;
+  const hintWorkflow = `${config.workflowModules.length}/${categoryWorkflows.length || ALL_WORKFLOWS.length}`;
+  const hintPacks = `${config.capabilityPacks.length}/${categoryPacks.length || CAPABILITY_PACKS.length}`;
   const hintOutput = tr(ANSWER_STYLE_LABELS[config.outputFormat.answerStyle], locale);
-  const hintRules = `${config.qualityRules.length}/${ALL_RULES.length}`;
+  const hintRules = `${config.qualityRules.length}/${categoryRules.length || ALL_RULES.length}`;
   const langLabel =
     config.language.primaryLanguage === "ko"
       ? tr(UI.langKorean, locale)
@@ -339,14 +360,28 @@ export function SettingsForm({
         onToggleSection={setOpenSection}
       >
         <div className="grid grid-cols-1 gap-1.5">
-          {ALL_WORKFLOWS.map((m) => (
-            <Check
-              key={m}
-              label={tr(WORKFLOW_I18N[m], locale)}
-              checked={config.workflowModules.includes(m)}
-              onChange={() => toggleWorkflow(m)}
-            />
-          ))}
+          {(categoryWorkflows.length > 0 ? categoryWorkflows : ALL_WORKFLOWS).map(
+            (m) => {
+              const hasViolation = workflowHasUnmetDeps(violations, m);
+              return (
+                <div key={m} className="flex items-center gap-2">
+                  <Check
+                    label={tr(WORKFLOW_I18N[m], locale)}
+                    checked={config.workflowModules.includes(m)}
+                    onChange={() => toggleWorkflow(m)}
+                  />
+                  {hasViolation && (
+                    <span
+                      className="text-[11px] text-primary font-medium"
+                      title={tr(UI.depsUnmet, locale)}
+                    >
+                      ⚠
+                    </span>
+                  )}
+                </div>
+              );
+            },
+          )}
         </div>
       </Section>
 
@@ -361,10 +396,11 @@ export function SettingsForm({
           {tr(UI.packsIntro, locale)}
         </p>
         <div className="space-y-1.5">
-          {CAPABILITY_PACKS.map((pack) => {
+          {(categoryPacks.length > 0 ? categoryPacks : CAPABILITY_PACKS).map((pack) => {
             const checked = config.capabilityPacks.includes(pack.id);
             const inspecting =
               inspector.type === "capability-pack" && inspector.id === pack.id;
+            const hasViolation = packHasUnmetDeps(violations, pack.id);
             return (
               <div
                 key={pack.id}
@@ -394,8 +430,16 @@ export function SettingsForm({
                   title={tr(UI.inspShowDetails, locale)}
                 >
                   <div className="flex-1 min-w-0">
-                    <div className="text-[14px] font-semibold text-ink truncate">
+                    <div className="text-[14px] font-semibold text-ink truncate flex items-center gap-1.5">
                       {tr(PACK_LABELS[pack.id].label, locale)}
+                      {hasViolation && (
+                        <span
+                          className="text-[11px] text-primary"
+                          title={tr(UI.depsUnmet, locale)}
+                        >
+                          ⚠
+                        </span>
+                      )}
                     </div>
                     <div className="text-[12px] text-ink-muted-80 leading-snug truncate mt-0.5">
                       {tr(PACK_LABELS[pack.id].summary, locale)}
@@ -475,7 +519,7 @@ export function SettingsForm({
         onToggleSection={setOpenSection}
       >
         <div className="grid grid-cols-1 gap-1.5">
-          {ALL_RULES.map((r) => (
+          {(categoryRules.length > 0 ? categoryRules : ALL_RULES).map((r) => (
             <Check
               key={r}
               label={tr(QUALITY_I18N[r], locale)}

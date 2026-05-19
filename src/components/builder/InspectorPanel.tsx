@@ -134,6 +134,51 @@ export function InspectorPanel({
           </ul>
         </div>
 
+        {pack.dependencies && pack.dependencies.length > 0 && (
+          <div className="pt-1">
+            <div className="text-fine-print uppercase tracking-[0.16em] text-ink-muted-48 mb-2">
+              {tr(UI.depsTitle, locale)}
+            </div>
+            <ul className="space-y-1.5">
+              {pack.dependencies.map((depId) => {
+                const depPack = getCapabilityPack(depId);
+                if (!depPack) return null;
+                const depEnabled = isEnabled(depId);
+                const depI18n = PACK_LABELS[depId];
+                return (
+                  <li
+                    key={depId}
+                    className="flex items-center gap-2 text-[13px]"
+                  >
+                    <span
+                      className={`inline-block w-1.5 h-1.5 rounded-full ${depEnabled ? "bg-ink" : "bg-primary"}`}
+                    />
+                    <span className="text-ink truncate flex-1">
+                      {tr(UI.depsRequires, locale)}:{" "}
+                      <span className="font-semibold">
+                        {depI18n ? tr(depI18n.label, locale) : depPack.label}
+                      </span>
+                    </span>
+                    {depEnabled ? (
+                      <span className="text-[11px] text-ink-muted-48">
+                        {tr(UI.depsMet, locale)}
+                      </span>
+                    ) : (
+                      <button
+                        type="button"
+                        onClick={() => onToggle(depId)}
+                        className="text-[11px] text-primary hover:underline"
+                      >
+                        {tr(UI.depsEnable, locale)}
+                      </button>
+                    )}
+                  </li>
+                );
+              })}
+            </ul>
+          </div>
+        )}
+
         <div className="text-[12px] text-ink-muted-48 italic leading-relaxed pt-1 border-t border-divider-soft">
           {tr(UI.inspInspiredBy, locale)} {pack.sourceInspiration}
         </div>
