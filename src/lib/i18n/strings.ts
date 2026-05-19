@@ -203,6 +203,28 @@ export const UI = {
   // Language value labels
   langEnglish: { en: "English", ko: "영어" } as Bilingual,
   langKorean: { en: "Korean", ko: "한국어" } as Bilingual,
+
+  // Recommendations on empty state
+  recipesTitle: {
+    en: "Recommended starting points",
+    ko: "추천 시작점",
+  } as Bilingual,
+  recipesIntro: {
+    en: "Click a recipe to apply its Capability Packs and workflow modules to your current settings. Fine-tune from the left panel, then press Generate.",
+    ko: "레시피를 클릭하면 현재 설정에 해당 Capability Pack과 워크플로가 적용됩니다. 좌측에서 세부 조정 후 생성을 눌러주세요.",
+  } as Bilingual,
+  recipeApply: { en: "Apply this recipe", ko: "이 레시피 적용" } as Bilingual,
+  recipeApplied: { en: "Applied ✓", ko: "적용됨 ✓" } as Bilingual,
+  recipePacksLabel: { en: "Packs", ko: "팩" } as Bilingual,
+  recipeWorkflowsLabel: { en: "Workflow", ko: "워크플로" } as Bilingual,
+  recipeStyleLabel: { en: "Style", ko: "스타일" } as Bilingual,
+  refSkillsTitle: { en: "Reference skills", ko: "참고 스킬" } as Bilingual,
+  refSkillsIntro: {
+    en: "Top installed skills on skills.sh that informed AxDD's Capability Packs.",
+    ko: "AxDD의 Capability Pack에 영감을 준 skills.sh의 인기 스킬들.",
+  } as Bilingual,
+  refInstalls: { en: "installs", ko: "설치" } as Bilingual,
+  refSeeMore: { en: "Browse more on skills.sh →", ko: "skills.sh에서 더 보기 →" } as Bilingual,
 };
 
 // ─────────────────────────────────────────────────────────────────────────────

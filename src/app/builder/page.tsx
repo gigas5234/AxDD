@@ -30,12 +30,22 @@ import {
 import { QualityFooter } from "@/components/builder/QualityFooter";
 import { Dropdown, type DropdownItem } from "@/components/builder/Dropdown";
 import { LangToggle } from "@/components/builder/LangToggle";
+import { RecipeCard } from "@/components/builder/RecipeCard";
 import { useLocale, tr } from "@/lib/i18n/locale";
 import {
   UI,
   CATEGORY_LABELS,
   PRESET_LABELS,
 } from "@/lib/i18n/strings";
+import {
+  RECIPES,
+  applyRecipeToConfig,
+  findMatchingRecipeId,
+} from "@/lib/skill-builder/recipes";
+import {
+  REFERENCE_SKILLS,
+  SKILLS_SH_URL,
+} from "@/lib/skill-builder/reference-skills";
 
 type PreviewTab = "preview" | "raw" | "korean";
 
@@ -80,6 +90,8 @@ export default function BuilderPage() {
     if (!pkg || !selectedFileId) return null;
     return pkg.files.find((f) => f.id === selectedFileId) ?? null;
   }, [pkg, selectedFileId]);
+
+  const matchingRecipeId = useMemo(() => findMatchingRecipeId(config), [config]);
 
   function handleGenerate() {
     setIsGenerating(true);
@@ -297,22 +309,91 @@ export default function BuilderPage() {
 
             <div className="flex-1 overflow-auto min-h-0 thin-scrollbar">
               {!selectedFile && (
-                <div className="h-full flex items-center justify-center">
-                  <div className="text-center max-w-md px-6">
-                    <div
+                <div className="px-8 py-10 max-w-4xl mx-auto">
+                  {/* Hero */}
+                  <div className="mb-8">
+                    <h2
                       className="text-ink font-semibold"
                       style={{
-                        fontSize: 40,
-                        lineHeight: 1.1,
-                        letterSpacing: "-0.28px",
+                        fontSize: 32,
+                        lineHeight: 1.15,
+                        letterSpacing: "-0.2px",
                       }}
                     >
                       {tr(UI.emptyHeroTitle, locale)}
-                    </div>
-                    <div className="text-ink-muted-48 mt-3" style={{ fontSize: 17 }}>
+                    </h2>
+                    <p
+                      className="text-ink-muted-80 mt-2"
+                      style={{ fontSize: 16, lineHeight: 1.5 }}
+                    >
                       {tr(UI.emptyHeroBody, locale)}
-                    </div>
+                    </p>
                   </div>
+
+                  {/* Recommended recipes */}
+                  <section className="mb-10">
+                    <div className="flex items-baseline justify-between mb-1">
+                      <h3 className="text-[18px] font-semibold text-ink">
+                        {tr(UI.recipesTitle, locale)}
+                      </h3>
+                    </div>
+                    <p className="text-[13px] text-ink-muted-80 leading-snug mb-4">
+                      {tr(UI.recipesIntro, locale)}
+                    </p>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+                      {RECIPES.map((recipe) => (
+                        <RecipeCard
+                          key={recipe.id}
+                          recipe={recipe}
+                          active={matchingRecipeId === recipe.id}
+                          onApply={() =>
+                            setConfig((c) => applyRecipeToConfig(recipe, c))
+                          }
+                        />
+                      ))}
+                    </div>
+                  </section>
+
+                  {/* Reference skills */}
+                  <section>
+                    <div className="flex items-baseline justify-between mb-1">
+                      <h3 className="text-[18px] font-semibold text-ink">
+                        {tr(UI.refSkillsTitle, locale)}
+                      </h3>
+                      <a
+                        href={SKILLS_SH_URL}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-[12px] text-primary hover:underline"
+                      >
+                        {tr(UI.refSeeMore, locale)}
+                      </a>
+                    </div>
+                    <p className="text-[13px] text-ink-muted-80 leading-snug mb-4">
+                      {tr(UI.refSkillsIntro, locale)}
+                    </p>
+                    <ul className="divide-y divide-divider-soft border border-hairline rounded-lg bg-canvas overflow-hidden">
+                      {REFERENCE_SKILLS.map((rs) => (
+                        <li
+                          key={rs.name}
+                          className="flex items-baseline gap-3 px-4 py-2.5"
+                        >
+                          <span className="font-mono text-[13px] text-ink font-semibold truncate min-w-[180px]">
+                            {rs.name}
+                          </span>
+                          <span className="text-[12px] text-ink-muted-48 truncate hidden sm:inline">
+                            {rs.publisher}
+                          </span>
+                          <span className="flex-1 text-[12.5px] text-ink-muted-80 leading-snug truncate">
+                            {tr(rs.description, locale)}
+                          </span>
+                          <span className="text-[11px] text-ink-muted-48 whitespace-nowrap">
+                            {rs.installs} {tr(UI.refInstalls, locale)}
+                          </span>
+                        </li>
+                      ))}
+                    </ul>
+                  </section>
                 </div>
               )}
               {selectedFile && activeTab === "preview" && (
