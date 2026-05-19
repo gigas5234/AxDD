@@ -24,7 +24,7 @@ const FEAT_TITLE_1: Bilingual = {
 };
 const FEAT_BODY_1: Bilingual = {
   en: "No AI calls. Templates compose SKILL.md, README, references, templates, and examples directly from your settings.",
-  ko: "AI 호출 없이 템플릿이 설정값을 기반으로 SKILL.md·README·references·templates·examples를 곧바로 조합합니다.",
+  ko: "AI 호출 없이, 설정값에서 SKILL.md, README, references, templates, examples 파일을 곧바로 조합합니다.",
 };
 
 const FEAT_TITLE_2: Bilingual = {
@@ -58,12 +58,6 @@ export default function HomePage() {
       {/* Global nav — pure black, 44px */}
       <header className="h-11 bg-surface-black text-body-on-dark flex items-center px-5">
         <div className="text-nav-link font-medium">{tr(UI.brand, locale)}</div>
-        <nav className="ml-8 flex items-center gap-5 text-nav-link text-body-on-dark/85">
-          <span>{tr(UI.navUxUi, locale)}</span>
-          <span className="opacity-50">{tr(UI.navProduct, locale)}</span>
-          <span className="opacity-50">{tr(UI.navFrontend, locale)}</span>
-          <span className="opacity-50">{tr(UI.navDesignSystem, locale)}</span>
-        </nav>
         <div className="ml-auto">
           <LangToggle variant="dark" />
         </div>
@@ -145,9 +139,17 @@ export default function HomePage() {
 
 function FeatureCell({ title, body }: { title: string; body: string }) {
   return (
-    <div>
+    <div className="min-w-0">
       <div className="text-tagline text-ink">{title}</div>
-      <p className="mt-2 text-ink-muted-80" style={{ fontSize: 17, lineHeight: 1.47 }}>
+      <p
+        className="mt-2 text-ink-muted-80"
+        style={{
+          fontSize: 17,
+          lineHeight: 1.55,
+          wordBreak: "keep-all",
+          overflowWrap: "anywhere",
+        }}
+      >
         {body}
       </p>
     </div>
