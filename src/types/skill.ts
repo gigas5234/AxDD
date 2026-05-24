@@ -167,6 +167,7 @@ export type SkillConfig = {
   description: string;
   category: SkillCategory;
   packageType: SkillPackageType;
+  includedSkillTypes: SkillPackageType[];
   targetAgent: TargetAgent;
   roleProfile: RoleProfileSettings;
   workflowModules: WorkflowModule[];

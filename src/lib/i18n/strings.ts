@@ -164,12 +164,24 @@ export const UI = {
   } as Bilingual,
   secPacks: { en: "4. Design Capability Add-ons", ko: "4. 디자인 능력 추가 모듈" } as Bilingual,
   secSkillPackageType: {
-    en: "Skill Package Type",
-    ko: "스킬 패키지 타입",
+    en: "Primary Kit Structure",
+    ko: "기본 키트 구조",
   } as Bilingual,
   skillPackageTypeIntro: {
-    en: "Package type controls the required file structure, quality checks, and workflow model.",
-    ko: "패키지 타입은 필수 파일 구조·품질 검사·워크플로 모델을 결정합니다.",
+    en: "This controls the exported file structure and quality checks. It is auto-selected by the preset.",
+    ko: "내보낼 파일 구조와 품질 검사를 결정합니다. 프리셋에 의해 자동 선택됩니다.",
+  } as Bilingual,
+  secIncludedSkillTypes: {
+    en: "Included Skill Types",
+    ko: "포함된 스킬 타입",
+  } as Bilingual,
+  includedSkillTypesIntro: {
+    en: "Capabilities the preset bundles into this kit. Auto-selected; read-only in v0.1.2.",
+    ko: "프리셋이 이 키트에 묶어주는 능력입니다. 자동 선택 · v0.1.2에서는 읽기 전용입니다.",
+  } as Bilingual,
+  includedSkillTypesPrimaryBadge: {
+    en: "primary",
+    ko: "기본",
   } as Bilingual,
   skillPackageTypeComingSoon: {
     en: "Coming soon",
@@ -195,6 +207,10 @@ export const UI = {
     en: "This kit is a test-skill because it ships SKILL.md, README.md, CATALOG.md, checklists/, and tests/ — focused on validation and release gates rather than generation.",
     ko: "이 키트는 SKILL.md, README.md, CATALOG.md, checklists/, tests/ 중심의 test-skill입니다 — 생성보다 검증·릴리스 게이트에 초점.",
   } as Bilingual,
+  templateWhyThisKit: {
+    en: "This kit is a template-skill because the output shape is the contract — it ships SKILL.md, README.md, CATALOG.md, templates/, and examples/.",
+    ko: "이 키트는 출력 형식 자체가 계약인 template-skill입니다 — SKILL.md, README.md, CATALOG.md, templates/, examples/ 포함.",
+  } as Bilingual,
   secReferenceSkillFiles: {
     en: "Reference Skill Files",
     ko: "Reference Skill 파일",
@@ -204,8 +220,8 @@ export const UI = {
     ko: "검증 Skill 파일",
   } as Bilingual,
   addonsHelper: {
-    en: "Capability add-ons enrich the UX/UI content of the kit. They do not change the package type.",
-    ko: "능력 추가 모듈은 키트의 UX/UI 콘텐츠를 보강합니다. 패키지 타입을 바꾸지 않습니다.",
+    en: "Capability add-ons enrich the UX/UI content of the kit. They do not change the primary kit structure.",
+    ko: "능력 추가 모듈은 키트의 UX/UI 콘텐츠를 보강합니다. 기본 키트 구조를 바꾸지 않습니다.",
   } as Bilingual,
   secStandardKitFiles: {
     en: "Standard Kit Files",
@@ -826,21 +842,21 @@ export const PRESET_LABELS: Record<
       ko: "스크린샷·Figma 설명·UI 레퍼런스를 React/Tailwind 구현 계획으로 변환합니다.",
     },
   },
-  "axdd-ux-ui-reference-skill": {
-    name: { en: "UX/UI Reference Skill", ko: "UX/UI Reference Skill" },
+  "axdd-ux-ui-reference-review": {
+    name: {
+      en: "Reference-Based UX/UI Review",
+      ko: "참조 기반 UX/UI 리뷰",
+    },
     bestFor: {
-      en: "Lightweight UX/UI skill — guide AI outputs from references (principles, patterns, design-system rules, accessibility, implementation mapping).",
-      ko: "참조 문서(원칙·패턴·디자인 시스템·접근성·구현 매핑)로 AI 출력을 안내하는 경량 UX/UI 스킬입니다.",
+      en: "Reference-led review of UX/UI work, with light validation assets. Primary structure: reference-skill.",
+      ko: "참조 문서 기반의 UX/UI 리뷰, 가벼운 검증 자산 포함. 기본 구조: reference-skill.",
     },
   },
-  "axdd-ux-ui-review-validation-skill": {
-    name: {
-      en: "UX/UI Review & Validation Skill",
-      ko: "UX/UI 리뷰·검증 Skill",
-    },
+  "axdd-cursor-handoff-kit": {
+    name: { en: "Cursor Handoff Kit", ko: "Cursor 핸드오프 키트" },
     bestFor: {
-      en: "Validation-focused UX/UI skill — audit screens, prompts, Figma instructions, and handoff deliverables.",
-      ko: "화면·프롬프트·Figma 지침·핸드오프 산출물을 검증하는 UX/UI 스킬입니다.",
+      en: "Hand off UX/UI specs to Cursor or another code agent. Template-led, with references and validation. Primary structure: template-skill.",
+      ko: "Cursor 등 코드 에이전트에 UX/UI 명세를 전달. 템플릿 중심에 references·validation 포함. 기본 구조: template-skill.",
     },
   },
   "design-system-starter": {

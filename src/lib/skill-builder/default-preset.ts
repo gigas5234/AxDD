@@ -36,6 +36,12 @@ export function buildUxUiDefaultConfig(): SkillConfig {
       "AXDD Standard Kit for AI-assisted UX/UI design — from requirement intake through handoff — with references, templates, checklists, and validation tests.",
     category: "ux-ui",
     packageType: "full-step-skill",
+    includedSkillTypes: [
+      "full-step-skill",
+      "reference-skill",
+      "template-skill",
+      "test-skill",
+    ],
     targetAgent: "generic",
     roleProfile: {
       roleLevel: "senior",
@@ -101,18 +107,19 @@ export function buildUxUiDefaultConfig(): SkillConfig {
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// UX/UI Reference Skill (lightweight references-focused)
+// Reference-Based UX/UI Review (reference-skill primary, includes test-skill)
 // ─────────────────────────────────────────────────────────────────────────────
 export function buildUxUiReferenceSkillConfig(): SkillConfig {
   const ts = nowIso();
   return {
-    id: "axdd-ux-ui-reference-skill",
-    skillName: "UX/UI Reference Skill",
-    packageName: "axdd-ux-ui-reference-skill",
+    id: "axdd-ux-ui-reference-review",
+    skillName: "Reference-Based UX/UI Review",
+    packageName: "axdd-ux-ui-reference-review",
     description:
-      "Lightweight UX/UI skill that guides AI outputs using design principles, design system rules, accessibility rules, and implementation mapping references.",
+      "Review UX/UI work against design principles, design-system rules, accessibility, and implementation mappings. Reference-led, with light validation assets.",
     category: "ux-ui",
     packageType: "reference-skill",
+    includedSkillTypes: ["reference-skill", "test-skill"],
     targetAgent: "generic",
     roleProfile: {
       roleLevel: "senior",
@@ -155,8 +162,8 @@ export function buildUxUiReferenceSkillConfig(): SkillConfig {
       includeCatalogMd: true,
       includeWorkUnitJson: false,
       includeHooksJson: false,
-      includeChecklists: false,
-      includeTests: false,
+      includeChecklists: true,
+      includeTests: true,
       exportFormat: "zip",
     },
     createdAt: ts,
@@ -165,42 +172,42 @@ export function buildUxUiReferenceSkillConfig(): SkillConfig {
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// UX/UI Review & Validation Skill (test-skill — validation-focused)
+// Cursor Handoff Kit (template-skill primary, includes reference + test)
 // ─────────────────────────────────────────────────────────────────────────────
 export function buildUxUiTestSkillConfig(): SkillConfig {
   const ts = nowIso();
   return {
-    id: "axdd-ux-ui-review-validation-skill",
-    skillName: "UX/UI Review & Validation Skill",
-    packageName: "axdd-ux-ui-review-validation-skill",
+    id: "axdd-cursor-handoff-kit",
+    skillName: "Cursor Handoff Kit",
+    packageName: "axdd-cursor-handoff-kit",
     description:
-      "Validation-focused UX/UI skill — audits screens, prompts, Figma instructions, and handoff deliverables against UX/UI quality and accessibility checklists.",
+      "Hand off UX/UI specs to Cursor (or another code agent) with implementation-ready prompts. Template-led, with supporting references and lightweight validation.",
     category: "ux-ui",
-    packageType: "test-skill",
-    targetAgent: "generic",
+    packageType: "template-skill",
+    includedSkillTypes: ["template-skill", "reference-skill", "test-skill"],
+    targetAgent: "cursor",
     roleProfile: {
       roleLevel: "senior",
-      domainFocus: ["UX Review", "Accessibility", "Handoff Validation"],
+      domainFocus: ["UI Implementation", "Tokens", "Cursor Prompting"],
       implementationAwareness: true,
       designSystemAwareness: true,
       businessAwareness: false,
     },
     workflowModules: [],
     workflowStages: [],
-    capabilityPacks: ["web-best-practices"],
+    capabilityPacks: ["tailwind-first", "web-best-practices"],
     outputFormat: {
       answerStyle: "structured",
       includeMarkdown: true,
-      includeJson: true,
-      includeTables: true,
-      includeCursorPrompt: false,
+      includeJson: false,
+      includeTables: false,
+      includeCursorPrompt: true,
       includeChecklists: true,
       includeExamples: true,
     },
     qualityRules: [
       "avoid-vague-language",
       "define-primary-action",
-      "include-information-hierarchy",
       "include-screen-states",
       "include-responsive-notes",
       "include-accessibility",
@@ -215,8 +222,8 @@ export function buildUxUiTestSkillConfig(): SkillConfig {
     packageOptions: {
       includeSkillMd: true,
       includeReadme: true,
-      includeReferences: false,
-      includeTemplates: false,
+      includeReferences: true,
+      includeTemplates: true,
       includeExamples: true,
       includeCatalogMd: true,
       includeWorkUnitJson: false,
@@ -243,6 +250,7 @@ export function buildFrontendDefaultConfig(): SkillConfig {
       "Frontend implementation skill — turn specs and tokens into shippable React + Tailwind code.",
     category: "frontend",
     packageType: "full-step-skill",
+    includedSkillTypes: ["full-step-skill"],
     targetAgent: "cursor",
     roleProfile: {
       roleLevel: "senior",
@@ -306,6 +314,7 @@ export function buildDesignSystemDefaultConfig(): SkillConfig {
       "Design system generation skill — build tokens, primitives, and component rules from brand direction.",
     category: "design-system",
     packageType: "full-step-skill",
+    includedSkillTypes: ["full-step-skill"],
     targetAgent: "generic",
     roleProfile: {
       roleLevel: "expert",
@@ -369,6 +378,7 @@ export function buildHarnessDefaultConfig(): SkillConfig {
       "Harness setup helper — install paths, permissions, hooks, and conversion notes for Claude Code / Cursor / Codex.",
     category: "harness",
     packageType: "full-step-skill",
+    includedSkillTypes: ["full-step-skill"],
     targetAgent: "claude-code",
     roleProfile: {
       roleLevel: "senior",
@@ -475,30 +485,29 @@ export const PRESETS: PresetDescriptor[] = [
   //   ...
   // },
   {
-    id: "axdd-ux-ui-reference-skill",
-    name: "UX/UI Reference Skill",
+    id: "axdd-ux-ui-reference-review",
+    name: "Reference-Based UX/UI Review",
     category: "ux-ui",
     bestFor:
-      "Lightweight UX/UI skill — guide AI outputs from references (principles, patterns, design-system rules, accessibility, implementation mapping).",
+      "Review UX/UI work against principles, design-system rules, accessibility, and implementation mappings. Reference-led, with light validation assets.",
     expectedOutput: [
-      "SKILL.md, README.md, CATALOG.md",
-      "references/ (principles + patterns + design system + accessibility + tailwind mapping)",
-      "examples/",
+      "Primary kit structure: reference-skill",
+      "Included skill types: reference-skill, test-skill",
+      "references/, checklists/, tests/, examples/",
     ],
     status: "available",
     buildConfig: buildUxUiReferenceSkillConfig,
   },
   {
-    id: "axdd-ux-ui-review-validation-skill",
-    name: "UX/UI Review & Validation Skill",
+    id: "axdd-cursor-handoff-kit",
+    name: "Cursor Handoff Kit",
     category: "ux-ui",
     bestFor:
-      "Validation-focused UX/UI skill — audit screens, prompts, Figma instructions, and handoff deliverables.",
+      "Hand off UX/UI specs to Cursor (or another code agent) with implementation-ready prompts. Template-led, with supporting references and validation.",
     expectedOutput: [
-      "SKILL.md, README.md, CATALOG.md",
-      "checklists/ (ux-foundation, ui-design, handoff, release)",
-      "tests/ (sandbox-test-scenario, validation-log-template)",
-      "examples/",
+      "Primary kit structure: template-skill",
+      "Included skill types: template-skill, reference-skill, test-skill",
+      "templates/ (incl. cursor-prompt-template, figma-instruction-template), references/, checklists/, tests/, examples/",
     ],
     status: "available",
     buildConfig: buildUxUiTestSkillConfig,

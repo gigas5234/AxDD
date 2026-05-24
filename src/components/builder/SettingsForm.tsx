@@ -318,9 +318,14 @@ export function SettingsForm({
           {tr(UI.skillPackageTypeIntro, locale)}
         </p>
         {(() => {
+          // v0.1.2: Primary Kit Structure is auto-selected by the preset.
+          // The four "available" types reflect what current presets can drive;
+          // the rest stay tagged as roadmap. All cards are read-only here —
+          // the user changes Primary Kit Structure by choosing a preset.
           const availableTypes: SkillPackageType[] = [
             "full-step-skill",
             "reference-skill",
+            "template-skill",
             "test-skill",
           ];
           const comingSoonTypes: SkillPackageType[] = allPackageTypes.filter(
@@ -331,17 +336,17 @@ export function SettingsForm({
             const meta = SKILL_PACKAGE_TYPE_LABELS[pt];
             const selected = config.packageType === pt;
             return (
-              <label
+              <div
                 key={pt}
                 role="radio"
                 aria-checked={selected}
-                aria-disabled={!isEnabled}
-                className={`rounded-md border p-3 transition flex items-start gap-2.5 ${
+                aria-disabled
+                className={`rounded-md border p-3 transition flex items-start gap-2.5 cursor-default ${
                   selected
                     ? "border-primary bg-primary/5"
                     : isEnabled
-                      ? "border-hairline bg-canvas hover:bg-divider-soft cursor-pointer"
-                      : "border-hairline border-dashed bg-canvas-parchment cursor-not-allowed"
+                      ? "border-hairline bg-canvas"
+                      : "border-hairline border-dashed bg-canvas-parchment"
                 }`}
                 title={
                   isEnabled
@@ -354,8 +359,8 @@ export function SettingsForm({
                   name="skill-package-type"
                   className="mt-1 accent-primary"
                   checked={selected}
-                  disabled={!isEnabled}
-                  onChange={() => isEnabled && update("packageType", pt)}
+                  disabled
+                  readOnly
                 />
                 <div className="min-w-0 flex-1">
                   <div className="flex items-center gap-2 flex-wrap">
@@ -384,15 +389,17 @@ export function SettingsForm({
                           ? UI.fullStepWhyThisKit
                           : pt === "reference-skill"
                             ? UI.referenceWhyThisKit
-                            : pt === "test-skill"
-                              ? UI.testWhyThisKit
-                              : UI.skillPackageTypeIntro,
+                            : pt === "template-skill"
+                              ? UI.templateWhyThisKit
+                              : pt === "test-skill"
+                                ? UI.testWhyThisKit
+                                : UI.skillPackageTypeIntro,
                         locale,
                       )}
                     </div>
                   )}
                 </div>
-              </label>
+              </div>
             );
           };
 
@@ -423,6 +430,45 @@ export function SettingsForm({
             </div>
           );
         })()}
+      </Section>
+
+      <Section
+        id="included-types"
+        title={tr(UI.secIncludedSkillTypes, locale)}
+        hint={`${config.includedSkillTypes.length} / 8`}
+        openSection={openSection}
+        onToggleSection={setOpenSection}
+      >
+        <p className="text-fine-print text-ink-muted-80 leading-snug -mt-1">
+          {tr(UI.includedSkillTypesIntro, locale)}
+        </p>
+        <div className="flex flex-wrap gap-1.5">
+          {config.includedSkillTypes.map((pt) => {
+            const meta = SKILL_PACKAGE_TYPE_LABELS[pt];
+            const isPrimary = pt === config.packageType;
+            return (
+              <span
+                key={pt}
+                title={tr(meta.tagline, locale)}
+                className={`inline-flex items-center gap-1.5 rounded-pill border px-2.5 py-[3px] text-[12px] ${
+                  isPrimary
+                    ? "border-primary bg-primary/10 text-ink"
+                    : "border-hairline bg-canvas text-ink"
+                }`}
+              >
+                <span className="font-medium">{tr(meta.name, locale)}</span>
+                <span className="font-mono text-[10.5px] text-ink-muted-80">
+                  {pt}
+                </span>
+                {isPrimary && (
+                  <span className="text-[9.5px] uppercase tracking-wide text-primary border border-primary/40 rounded-sm px-1 leading-none py-[1px]">
+                    {tr(UI.includedSkillTypesPrimaryBadge, locale)}
+                  </span>
+                )}
+              </span>
+            );
+          })}
+        </div>
       </Section>
 
       <Section
