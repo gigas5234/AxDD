@@ -17,6 +17,7 @@ import {
   diffPresets,
   getPresetBundle,
 } from "@/lib/skill-builder/preset-bundles";
+import { getInstalledKits } from "@/lib/axdd-runtime/registry";
 
 export type InspectorTarget =
   | { type: "quality" }
@@ -29,7 +30,8 @@ export type InspectorTarget =
   | { type: "files-grouped" }
   | { type: "governance" }
   | { type: "advanced" }
-  | { type: "validation-lab" };
+  | { type: "validation-lab" }
+  | { type: "registry" };
 
 export function InspectorPanel({
   target,
@@ -52,7 +54,7 @@ export function InspectorPanel({
   onClose: () => void;
   config?: SkillConfig;
   onConfigChange?: (next: SkillConfig) => void;
-  files?: { path: string; fileName: string }[];
+  files?: { path: string; fileName: string; content: string }[];
   onInspect?: (target: InspectorTarget) => void;
   selectedPresetId?: string;
   lastPresetChange?: { fromId: string; toId: string } | null;
@@ -522,6 +524,98 @@ export function InspectorPanel({
     );
   }
 
+  // ── Registry ─────────────────────────────────────────────────────────────
+  if (target.type === "registry") {
+    const isKo = locale === "ko";
+    const kits = getInstalledKits();
+    return (
+      <div className="flex flex-col h-full min-h-0">
+        <div className="px-4 py-3 border-b border-hairline flex-shrink-0">
+          <div className="text-fine-print uppercase tracking-[0.16em] text-ink-muted-48">
+            {tr(UI.detailKicker, locale)}
+          </div>
+          <div className="text-body-strong text-ink mt-0.5">
+            {isKo ? "키트 레지스트리" : "Kit Registry"}
+          </div>
+          <div className="text-[12.5px] text-ink-muted-80 mt-1 leading-snug">
+            {isKo
+              ? "이 빌더가 발행할 수 있는 모든 AXDD 키트. 클릭해 install 하면 헤더 프리셋이 해당 키트로 전환됩니다."
+              : "Every AXDD kit this builder can publish. Click Install to switch the header preset to that kit."}
+          </div>
+        </div>
+        <div className="flex-1 overflow-y-auto thin-scrollbar px-4 py-3 space-y-2">
+          {kits.map((k) => {
+            const installed = config?.id === k.id;
+            return (
+              <div
+                key={k.id}
+                className={`rounded-md border p-3 ${
+                  installed
+                    ? "border-primary bg-primary/5"
+                    : "border-hairline bg-canvas"
+                }`}
+              >
+                <div className="flex items-start gap-2">
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <span className="text-[13.5px] font-semibold text-ink">
+                        {k.name}
+                      </span>
+                      <span className="text-[10.5px] font-mono text-ink-muted-80">
+                        {k.id}
+                      </span>
+                      <span className="text-[10.5px] uppercase tracking-wide border border-hairline rounded-sm px-1 py-[1px] text-ink-muted-80">
+                        v{k.schemaVersion}
+                      </span>
+                    </div>
+                    <div className="text-[12.5px] text-ink mt-1">{k.focus}</div>
+                    <div className="text-[11.5px] text-ink-muted-80 mt-1">
+                      <span className="font-mono">{k.primaryKitStructure}</span>{" "}
+                      ·{" "}
+                      <span>
+                        {k.includedSkillTypes.length} skill type
+                        {k.includedSkillTypes.length === 1 ? "" : "s"}
+                      </span>{" "}
+                      ·{" "}
+                      <span>≈ {k.estimatedFileCount} files</span>
+                    </div>
+                    <div className="text-[11px] text-ink-muted-48 mt-1 font-mono leading-snug break-words">
+                      headline: {k.emphasizedFiles.slice(0, 3).join(", ")}
+                      {k.emphasizedFiles.length > 3 ? "…" : ""}
+                    </div>
+                  </div>
+                  <button
+                    type="button"
+                    disabled={installed || !onConfigChange}
+                    onClick={() => onConfigChange?.(k.buildConfig())}
+                    className={`text-[11.5px] rounded-pill px-3 py-1 transition flex-shrink-0 ${
+                      installed
+                        ? "border border-primary/40 text-primary cursor-default"
+                        : "bg-primary text-body-on-dark hover:opacity-90"
+                    }`}
+                  >
+                    {installed
+                      ? isKo
+                        ? "활성"
+                        : "Installed"
+                      : isKo
+                        ? "설치"
+                        : "Install"}
+                  </button>
+                </div>
+              </div>
+            );
+          })}
+          <div className="text-[11.5px] text-ink-muted-48 leading-snug pt-2">
+            {isKo
+              ? "현재 in-memory 레지스트리. 향후 HTTP 기반 외부 레지스트리로 교체 예정."
+              : "In-memory registry today. Future: pluggable HTTP backend."}
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   // ── Validation Lab ───────────────────────────────────────────────────────
   if (target.type === "validation-lab" && config) {
     const isKo = locale === "ko";
@@ -543,7 +637,12 @@ export function InspectorPanel({
           </div>
         </div>
         <div className="flex-1 overflow-y-auto thin-scrollbar px-4 py-3">
-          <ValidationLab config={config} />
+          <ValidationLab
+            config={config}
+            hooksJsonContent={
+              files?.find((f) => f.fileName === "HOOKS.json")?.content
+            }
+          />
         </div>
       </div>
     );

@@ -67,8 +67,14 @@ export function SettingsNav({
     {
       id: "validation-lab",
       label: "Validation Lab",
-      description: "Run scenarios, paste output, score against rubric",
+      description: "Router auto-match · rule-based judge · scenario log",
       target: { type: "validation-lab" },
+    },
+    {
+      id: "registry",
+      label: "Kit Registry",
+      description: "Browse and install other AXDD kits",
+      target: { type: "registry" },
     },
     {
       id: "advanced",
