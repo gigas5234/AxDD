@@ -215,10 +215,11 @@ export function generatePackage(config: SkillConfig): GeneratedPackage {
 
   if (want.tests) {
     for (const t of buildTestFiles()) {
+      const sub = t.subPath ? `${t.subPath}/` : "";
       files.push(
         mdFile(
           pkg,
-          `${pkg}/tests/${t.fileName}`,
+          `${pkg}/tests/${sub}${t.fileName}`,
           t.fileName,
           t.content,
           t.generatedFrom,

@@ -65,6 +65,12 @@ export function SettingsNav({
       target: { type: "governance" },
     },
     {
+      id: "validation-lab",
+      label: "Validation Lab",
+      description: "Run scenarios, paste output, score against rubric",
+      target: { type: "validation-lab" },
+    },
+    {
       id: "advanced",
       label: "Advanced Settings",
       description: "Role, output, add-ons, rules, language, raw options",

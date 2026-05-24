@@ -9,6 +9,7 @@ import { getCapabilityPack } from "@/lib/skill-builder/blocks/capability-packs";
 import { QualityPanel } from "./QualityPanel";
 import { MarkdownPreview } from "./MarkdownPreview";
 import { SettingsForm, type SettingsTarget } from "./SettingsForm";
+import { ValidationLab } from "./ValidationLab";
 import { useLocale, tr } from "@/lib/i18n/locale";
 import { UI, PACK_LABELS, PRESET_LABELS } from "@/lib/i18n/strings";
 import {
@@ -27,7 +28,8 @@ export type InspectorTarget =
   | { type: "composition" }
   | { type: "files-grouped" }
   | { type: "governance" }
-  | { type: "advanced" };
+  | { type: "advanced" }
+  | { type: "validation-lab" };
 
 export function InspectorPanel({
   target,
@@ -515,6 +517,33 @@ export function InspectorPanel({
               </ul>
             </section>
           )}
+        </div>
+      </div>
+    );
+  }
+
+  // ── Validation Lab ───────────────────────────────────────────────────────
+  if (target.type === "validation-lab" && config) {
+    const isKo = locale === "ko";
+    return (
+      <div className="flex flex-col h-full min-h-0">
+        <div className="px-4 py-3 border-b border-hairline flex items-start gap-2 flex-shrink-0">
+          <div className="flex-1 min-w-0">
+            <div className="text-fine-print uppercase tracking-[0.16em] text-ink-muted-48">
+              {tr(UI.detailKicker, locale)}
+            </div>
+            <div className="text-body-strong text-ink mt-0.5">
+              {isKo ? "검증 랩" : "Validation Lab"}
+            </div>
+            <div className="text-[12.5px] text-ink-muted-80 mt-1 leading-snug">
+              {isKo
+                ? "시나리오 선택 → 예상 출력 확인 → 실제 출력 붙여넣기 → 채점 → validation-log.md 내보내기."
+                : "Pick a scenario, review the expected output, paste the agent's response, score against the rubric, export the log."}
+            </div>
+          </div>
+        </div>
+        <div className="flex-1 overflow-y-auto thin-scrollbar px-4 py-3">
+          <ValidationLab config={config} />
         </div>
       </div>
     );
