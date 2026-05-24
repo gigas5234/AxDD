@@ -7,6 +7,7 @@ import type {
   QualityRule,
   RoleLevel,
   SkillConfig,
+  SkillPackageType,
   TargetAgent,
   TranslationMode,
   WorkflowModule,
@@ -33,6 +34,7 @@ import {
   ROLE_LEVEL_LABELS,
   ANSWER_STYLE_LABELS,
   TRANSLATION_MODE_LABELS,
+  SKILL_PACKAGE_TYPE_LABELS,
 } from "@/lib/i18n/strings";
 import {
   REQUIRED_FILES_BY_TYPE,
@@ -288,8 +290,87 @@ export function SettingsForm({
   const inputCls =
     "w-full rounded-sm border border-hairline px-2.5 py-1.5 text-caption bg-canvas text-ink focus:outline-none focus:border-primary-focus focus:ring-1 focus:ring-primary-focus";
 
+  const allPackageTypes: SkillPackageType[] = [
+    "simple-skill",
+    "reference-skill",
+    "template-skill",
+    "script-skill",
+    "asset-skill",
+    "full-step-skill",
+    "metadata-skill",
+    "test-skill",
+  ];
+  const hintPkgType = tr(
+    SKILL_PACKAGE_TYPE_LABELS[config.packageType].name,
+    locale,
+  );
+
   return (
     <div className="space-y-3">
+      <Section
+        id="pkgtype"
+        title={tr(UI.secSkillPackageType, locale)}
+        hint={hintPkgType}
+        openSection={openSection}
+        onToggleSection={setOpenSection}
+      >
+        <p className="text-fine-print text-ink-muted-48 leading-snug -mt-1">
+          {tr(UI.skillPackageTypeIntro, locale)}
+        </p>
+        <div role="radiogroup" className="grid grid-cols-1 gap-2">
+          {allPackageTypes.map((pt) => {
+            const meta = SKILL_PACKAGE_TYPE_LABELS[pt];
+            const selected = config.packageType === pt;
+            const isFullStep = pt === "full-step-skill";
+            return (
+              <label
+                key={pt}
+                role="radio"
+                aria-checked={selected}
+                className={`rounded-md border p-3 cursor-pointer transition flex items-start gap-2.5 ${
+                  selected
+                    ? "border-primary bg-primary/5"
+                    : "border-hairline bg-canvas hover:bg-divider-soft"
+                }`}
+              >
+                <input
+                  type="radio"
+                  name="skill-package-type"
+                  className="mt-1 accent-primary"
+                  checked={selected}
+                  onChange={() => update("packageType", pt)}
+                />
+                <div className="min-w-0 flex-1">
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <span className="text-[13.5px] font-semibold text-ink">
+                      {tr(meta.name, locale)}
+                    </span>
+                    <span className="text-[10.5px] font-mono text-ink-muted-48">
+                      {pt}
+                    </span>
+                    {!isFullStep && (
+                      <span className="text-[10.5px] uppercase tracking-wide text-ink-muted-48 border border-hairline rounded-sm px-1.5 py-[1px]">
+                        {tr(UI.skillPackageTypePreview, locale)}
+                      </span>
+                    )}
+                  </div>
+                  <div className="text-[12.5px] text-ink-muted-80 mt-0.5">
+                    {tr(meta.tagline, locale)}
+                  </div>
+                  <div className="text-[11.5px] text-ink-muted-48 mt-1 leading-snug">
+                    <span className="font-medium">When to use:</span>{" "}
+                    {tr(meta.whenToUse, locale)}
+                  </div>
+                  <div className="text-[11px] text-ink-muted-48 mt-0.5 font-mono leading-snug break-words">
+                    <span className="not-italic">Required:</span> {meta.required}
+                  </div>
+                </div>
+              </label>
+            );
+          })}
+        </div>
+      </Section>
+
       <Section
         id="basic"
         title={tr(UI.secBasic, locale)}
@@ -465,6 +546,9 @@ export function SettingsForm({
       >
         <p className="text-fine-print text-ink-muted-48 leading-snug -mt-1">
           {tr(UI.packsIntro, locale)}
+        </p>
+        <p className="text-fine-print text-ink-muted-80 leading-snug -mt-1.5 italic">
+          {tr(UI.addonsHelper, locale)}
         </p>
         <div className="space-y-1.5">
           {(categoryPacks.length > 0 ? categoryPacks : CAPABILITY_PACKS).map((pack) => {
@@ -650,7 +734,7 @@ export function SettingsForm({
 
       <Section
         id="pkg"
-        title={tr(UI.secPackage, locale)}
+        title={tr(isFullStep ? UI.secStandardKitFiles : UI.secPackage, locale)}
         hint={hintPkg}
         openSection={openSection}
         onToggleSection={setOpenSection}

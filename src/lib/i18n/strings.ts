@@ -5,6 +5,7 @@ import type {
   QualityRule,
   RoleLevel,
   SkillCategory,
+  SkillPackageType,
   TranslationMode,
   WorkflowModule,
   WorkflowStageId,
@@ -161,7 +162,27 @@ export const UI = {
     en: "Full-step kits use the canonical AXDD 6-stage workflow defined in WORK_UNIT.json. Stages are locked for v0.1.",
     ko: "Full-step 키트는 WORK_UNIT.json에 정의된 표준 6단계 워크플로를 사용합니다. v0.1에서는 고정값입니다.",
   } as Bilingual,
-  secPacks: { en: "4. Capability Packs", ko: "4. 능력 팩" } as Bilingual,
+  secPacks: { en: "4. Design Capability Add-ons", ko: "4. 디자인 능력 추가 모듈" } as Bilingual,
+  secSkillPackageType: {
+    en: "0. Skill Package Type",
+    ko: "0. 스킬 패키지 타입",
+  } as Bilingual,
+  skillPackageTypeIntro: {
+    en: "Pick the AXDD package type for this kit. Required files come from the matrix; the UI below configures the content.",
+    ko: "이 키트의 AXDD 패키지 타입을 선택하세요. 필수 파일은 매트릭스에서 자동 결정되며, 아래에서 내용을 구성합니다.",
+  } as Bilingual,
+  skillPackageTypePreview: {
+    en: "preview — full-step-skill is the v0.1.2 default",
+    ko: "프리뷰 — v0.1.2 기본은 full-step-skill",
+  } as Bilingual,
+  addonsHelper: {
+    en: "Capability add-ons modify the UX/UI content of the kit. They do not change the package type.",
+    ko: "능력 추가 모듈은 키트의 UX/UI 콘텐츠를 보강합니다. 패키지 타입을 바꾸지 않습니다.",
+  } as Bilingual,
+  secStandardKitFiles: {
+    en: "8. Standard Kit Files",
+    ko: "8. 표준 키트 파일",
+  } as Bilingual,
   secOutput: { en: "5. Output Format", ko: "5. 출력 형식" } as Bilingual,
   secRules: { en: "6. Quality Rules", ko: "6. 품질 규칙" } as Bilingual,
   secLanguage: { en: "7. Language", ko: "7. 언어" } as Bilingual,
@@ -364,6 +385,109 @@ export const TRANSLATION_MODE_LABELS: Record<TranslationMode, Bilingual> = {
 // ─────────────────────────────────────────────────────────────────────────────
 // Workflow / Rule / Category / Pack / Preset label maps
 // ─────────────────────────────────────────────────────────────────────────────
+
+export const SKILL_PACKAGE_TYPE_LABELS: Record<
+  SkillPackageType,
+  { name: Bilingual; tagline: Bilingual; whenToUse: Bilingual; required: string }
+> = {
+  "simple-skill": {
+    name: { en: "Simple Skill", ko: "Simple Skill" },
+    tagline: {
+      en: "Just SKILL.md. Nothing else.",
+      ko: "SKILL.md만 포함합니다.",
+    },
+    whenToUse: {
+      en: "Tasks that need no references, templates, scripts, or validation.",
+      ko: "참조·템플릿·스크립트·검증이 불필요한 단순 작업.",
+    },
+    required: "SKILL.md",
+  },
+  "reference-skill": {
+    name: { en: "Reference Skill", ko: "Reference Skill" },
+    tagline: {
+      en: "Agent follows existing docs / standards / style guides.",
+      ko: "기존 문서·표준·스타일 가이드를 따르는 작업.",
+    },
+    whenToUse: {
+      en: "When existing knowledge must be cited or applied.",
+      ko: "기존 지식을 참조하거나 적용해야 할 때.",
+    },
+    required: "SKILL.md, references/",
+  },
+  "template-skill": {
+    name: { en: "Template Skill", ko: "Template Skill" },
+    tagline: {
+      en: "Output follows a fixed document or artifact shape.",
+      ko: "출력이 고정된 문서·아티팩트 구조를 따라야 할 때.",
+    },
+    whenToUse: {
+      en: "When the shape of the output is the contract.",
+      ko: "출력 형식 자체가 계약일 때.",
+    },
+    required: "SKILL.md, templates/",
+  },
+  "script-skill": {
+    name: { en: "Script Skill", ko: "Script Skill" },
+    tagline: {
+      en: "Calls scripts, CLIs, or configs for repeatable execution.",
+      ko: "스크립트·CLI·설정으로 반복 실행하는 작업.",
+    },
+    whenToUse: {
+      en: "When a repeatable execution step replaces ad-hoc reasoning.",
+      ko: "임의 추론 대신 반복 실행 단계가 필요할 때.",
+    },
+    required: "SKILL.md, scripts/, config/",
+  },
+  "asset-skill": {
+    name: { en: "Asset Skill", ko: "Asset Skill" },
+    tagline: {
+      en: "Bundles references + templates + checklists + examples.",
+      ko: "참조·템플릿·체크리스트·예시를 묶은 자산 패키지.",
+    },
+    whenToUse: {
+      en: "When the kit is a reusable process bundle (no per-stage workflow).",
+      ko: "재사용 가능한 프로세스 자산 패키지 (스테이지 워크플로 없음).",
+    },
+    required: "SKILL.md, references/, templates/, checklists/, examples/",
+  },
+  "full-step-skill": {
+    name: { en: "Full-Step Skill", ko: "Full-Step Skill" },
+    tagline: {
+      en: "End-to-end workflow kit with stages, routing, validation, handoff.",
+      ko: "스테이지·라우팅·검증·핸드오프를 포함한 전체 워크플로 키트.",
+    },
+    whenToUse: {
+      en: "When the task has multiple stages and needs routing + release gates.",
+      ko: "여러 스테이지와 라우팅·릴리스 게이트가 필요할 때.",
+    },
+    required:
+      "SKILL.md, CATALOG.md, README.md, WORK_UNIT.json, HOOKS.json, references/, templates/, checklists/, tests/, examples/",
+  },
+  "metadata-skill": {
+    name: { en: "Metadata Skill", ko: "Metadata Skill" },
+    tagline: {
+      en: "Helps the agent classify and select among many assets.",
+      ko: "여러 자산 중 적합한 것을 분류·선택하도록 돕습니다.",
+    },
+    whenToUse: {
+      en: "When the agent must pick the right kit / template by metadata.",
+      ko: "메타데이터로 적합한 키트·템플릿을 선택해야 할 때.",
+    },
+    required: "SKILL.md, CATALOG.md, KIT_MANIFEST.json",
+  },
+  "test-skill": {
+    name: { en: "Test Skill", ko: "Test Skill" },
+    tagline: {
+      en: "Validation, QA, sandbox scenarios, release checks.",
+      ko: "검증·QA·샌드박스 시나리오·릴리스 체크.",
+    },
+    whenToUse: {
+      en: "When the goal is verification, not generation.",
+      ko: "생성이 아닌 검증이 목적일 때.",
+    },
+    required: "SKILL.md, tests/, checklists/, validation-log-template.md",
+  },
+};
 
 export const WORKFLOW_STAGE_LABELS: Record<WorkflowStageId, Bilingual> = {
   "requirement-intake": { en: "Requirement Intake", ko: "요구사항 인테이크" },
