@@ -29,12 +29,13 @@ function nowIso(): string {
 export function buildUxUiDefaultConfig(): SkillConfig {
   const ts = nowIso();
   return {
-    id: "axdd-ux-ui-default",
-    skillName: "axdd-ux-ui-designer",
-    packageName: "axdd-ux-ui-designer",
+    id: "axdd-ux-ui-standard-kit",
+    skillName: "AXDD UX/UI Standard Kit",
+    packageName: "axdd-ux-ui-standard-kit",
     description:
-      "AI-assisted UX/UI design workflow skill for product designers and makers.",
+      "AXDD Standard Kit for AI-assisted UX/UI design — from requirement intake through handoff — with references, templates, checklists, and validation tests.",
     category: "ux-ui",
+    packageType: "full-step-skill",
     targetAgent: "generic",
     roleProfile: {
       roleLevel: "senior",
@@ -46,6 +47,14 @@ export function buildUxUiDefaultConfig(): SkillConfig {
     workflowModules: [...WORKFLOW_BY_CATEGORY["ux-ui"]].filter(
       (m) => m !== "accessibility-check",
     ),
+    workflowStages: [
+      "requirement-intake",
+      "ux-foundation",
+      "ui-design-foundation",
+      "prototype-planning",
+      "review-validation",
+      "handoff",
+    ],
     capabilityPacks: ["design-taste", "web-best-practices", "tailwind-first"],
     outputFormat: {
       answerStyle: "structured",
@@ -79,6 +88,11 @@ export function buildUxUiDefaultConfig(): SkillConfig {
       includeReferences: true,
       includeTemplates: true,
       includeExamples: true,
+      includeCatalogMd: true,
+      includeWorkUnitJson: true,
+      includeHooksJson: true,
+      includeChecklists: true,
+      includeTests: true,
       exportFormat: "zip",
     },
     createdAt: ts,
@@ -98,6 +112,7 @@ export function buildFrontendDefaultConfig(): SkillConfig {
     description:
       "Frontend implementation skill — turn specs and tokens into shippable React + Tailwind code.",
     category: "frontend",
+    packageType: "full-step-skill",
     targetAgent: "cursor",
     roleProfile: {
       roleLevel: "senior",
@@ -107,6 +122,7 @@ export function buildFrontendDefaultConfig(): SkillConfig {
       businessAwareness: false,
     },
     workflowModules: [...WORKFLOW_BY_CATEGORY.frontend],
+    workflowStages: [],
     capabilityPacks: [
       "react-patterns",
       "typescript-strict",
@@ -135,6 +151,11 @@ export function buildFrontendDefaultConfig(): SkillConfig {
       includeReferences: true,
       includeTemplates: true,
       includeExamples: true,
+      includeCatalogMd: true,
+      includeWorkUnitJson: true,
+      includeHooksJson: true,
+      includeChecklists: true,
+      includeTests: true,
       exportFormat: "zip",
     },
     createdAt: ts,
@@ -154,6 +175,7 @@ export function buildDesignSystemDefaultConfig(): SkillConfig {
     description:
       "Design system generation skill — build tokens, primitives, and component rules from brand direction.",
     category: "design-system",
+    packageType: "full-step-skill",
     targetAgent: "generic",
     roleProfile: {
       roleLevel: "expert",
@@ -163,6 +185,7 @@ export function buildDesignSystemDefaultConfig(): SkillConfig {
       businessAwareness: true,
     },
     workflowModules: [...WORKFLOW_BY_CATEGORY["design-system"]],
+    workflowStages: [],
     capabilityPacks: [
       "design-taste",
       "theme-factory",
@@ -191,6 +214,11 @@ export function buildDesignSystemDefaultConfig(): SkillConfig {
       includeReferences: true,
       includeTemplates: true,
       includeExamples: true,
+      includeCatalogMd: true,
+      includeWorkUnitJson: true,
+      includeHooksJson: true,
+      includeChecklists: true,
+      includeTests: true,
       exportFormat: "zip",
     },
     createdAt: ts,
@@ -210,6 +238,7 @@ export function buildHarnessDefaultConfig(): SkillConfig {
     description:
       "Harness setup helper — install paths, permissions, hooks, and conversion notes for Claude Code / Cursor / Codex.",
     category: "harness",
+    packageType: "full-step-skill",
     targetAgent: "claude-code",
     roleProfile: {
       roleLevel: "senior",
@@ -219,6 +248,7 @@ export function buildHarnessDefaultConfig(): SkillConfig {
       businessAwareness: false,
     },
     workflowModules: [...WORKFLOW_BY_CATEGORY.harness],
+    workflowStages: [],
     capabilityPacks: ["claude-code-target"],
     outputFormat: {
       answerStyle: "concise",
@@ -246,6 +276,11 @@ export function buildHarnessDefaultConfig(): SkillConfig {
       includeReferences: true,
       includeTemplates: false,
       includeExamples: true,
+      includeCatalogMd: false,
+      includeWorkUnitJson: false,
+      includeHooksJson: false,
+      includeChecklists: false,
+      includeTests: false,
       exportFormat: "zip",
     },
     createdAt: ts,
@@ -259,16 +294,16 @@ export function buildHarnessDefaultConfig(): SkillConfig {
 export const PRESETS: PresetDescriptor[] = [
   {
     id: "ux-ui-axdd-default",
-    name: "UX/UI Designer — AxDD Default",
+    name: "AXDD UX/UI Standard Kit",
     category: "ux-ui",
     bestFor:
-      "Turning rough service ideas into UX structures, screens, and implementation prompts.",
+      "Compose the full UX/UI Standard Kit (SKILL + CATALOG + WORK_UNIT + HOOKS + references / templates / checklists / tests / examples).",
     expectedOutput: [
-      "SKILL.md for UX/UI design",
-      "UX strategy workflow",
-      "Screen specification templates",
-      "Design review checklist",
-      "Cursor-ready prompt template",
+      "SKILL.md, CATALOG.md, README.md",
+      "WORK_UNIT.json (6 stages)",
+      "HOOKS.json (keyword + intent routing)",
+      "references / templates / checklists / tests / examples",
+      "Figma manual fallback template",
     ],
     status: "available",
     buildConfig: buildUxUiDefaultConfig,

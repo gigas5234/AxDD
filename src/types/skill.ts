@@ -8,6 +8,24 @@ export type SkillCategory =
   | "data"
   | "harness";
 
+export type SkillPackageType =
+  | "simple-skill"
+  | "reference-skill"
+  | "template-skill"
+  | "script-skill"
+  | "asset-skill"
+  | "full-step-skill"
+  | "metadata-skill"
+  | "test-skill";
+
+export type WorkflowStageId =
+  | "requirement-intake"
+  | "ux-foundation"
+  | "ui-design-foundation"
+  | "prototype-planning"
+  | "review-validation"
+  | "handoff";
+
 export type TargetAgent =
   | "generic"
   | "claude-code"
@@ -128,6 +146,11 @@ export type PackageOptions = {
   includeReferences: boolean;
   includeTemplates: boolean;
   includeExamples: boolean;
+  includeCatalogMd: boolean;
+  includeWorkUnitJson: boolean;
+  includeHooksJson: boolean;
+  includeChecklists: boolean;
+  includeTests: boolean;
   exportFormat: ExportFormat;
 };
 
@@ -143,9 +166,11 @@ export type SkillConfig = {
   packageName: string;
   description: string;
   category: SkillCategory;
+  packageType: SkillPackageType;
   targetAgent: TargetAgent;
   roleProfile: RoleProfileSettings;
   workflowModules: WorkflowModule[];
+  workflowStages: WorkflowStageId[];
   capabilityPacks: CapabilityPack[];
   outputFormat: OutputFormatSettings;
   qualityRules: QualityRule[];
@@ -194,7 +219,17 @@ export type GeneratedPackage = {
 
 export type SkillBlock = {
   id: string;
-  category: "role" | "workflow" | "output" | "rule" | "reference" | "template";
+  category:
+    | "role"
+    | "workflow"
+    | "output"
+    | "rule"
+    | "reference"
+    | "template"
+    | "checklist"
+    | "test"
+    | "catalog"
+    | "hook";
   title: string;
   description: string;
   content: string;

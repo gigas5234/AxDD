@@ -123,17 +123,24 @@ function Check({
   label,
   checked,
   onChange,
+  disabled,
 }: {
   label: string;
   checked: boolean;
   onChange: (v: boolean) => void;
+  disabled?: boolean;
 }) {
   return (
-    <label className="flex items-center gap-2.5 text-[14px] leading-relaxed text-ink cursor-pointer py-0.5">
+    <label
+      className={`flex items-center gap-2.5 text-[14px] leading-relaxed text-ink py-0.5 ${
+        disabled ? "opacity-50 cursor-not-allowed" : "cursor-pointer"
+      }`}
+    >
       <input
         type="checkbox"
         checked={checked}
         onChange={(e) => onChange(e.target.checked)}
+        disabled={disabled}
         className="rounded-sm border-hairline accent-primary"
       />
       <span>{label}</span>
@@ -550,7 +557,7 @@ export function SettingsForm({
           </select>
         </Field>
         <Field
-          label={tr(UI.fldTranslationMode, locale)}
+          label={`${tr(UI.fldTranslationMode, locale)} — Phase 2 (coming soon)`}
           hint={tr(UI.fldTranslationHint, locale)}
         >
           <select
@@ -559,6 +566,8 @@ export function SettingsForm({
             onChange={(e) =>
               updateLang("translationMode", e.target.value as TranslationMode)
             }
+            disabled
+            title="AI translation is a Phase 2 feature. The MVP is fully static and deterministic."
           >
             {TRANSLATION_MODES.map((m) => (
               <option key={m} value={m}>
@@ -568,9 +577,10 @@ export function SettingsForm({
           </select>
         </Field>
         <Check
-          label={tr(UI.fldGenKoDefault, locale)}
+          label={`${tr(UI.fldGenKoDefault, locale)} — Phase 2 (coming soon)`}
           checked={config.language.generateKoreanByDefault}
           onChange={(v) => updateLang("generateKoreanByDefault", v)}
+          disabled
         />
       </Section>
 

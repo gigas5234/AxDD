@@ -60,6 +60,36 @@ import { SimulatorPanel } from "@/components/builder/SimulatorPanel";
 
 type PreviewTab = "preview" | "raw" | "korean" | "simulate";
 
+function DemoSummary({ pkg }: { pkg: GeneratedPackage }) {
+  const workUnit = pkg.files.find((f) => f.fileName === "WORK_UNIT.json");
+  const hooks = pkg.files.find((f) => f.fileName === "HOOKS.json");
+  const jsonOk = (() => {
+    try {
+      if (workUnit) JSON.parse(workUnit.content);
+      if (hooks) JSON.parse(hooks.content);
+      return true;
+    } catch {
+      return false;
+    }
+  })();
+  const fails = pkg.qualityReport.checks.filter((c) => c.status === "fail").length;
+  const chip =
+    "inline-flex items-center gap-1 px-2 py-[3px] rounded-sm text-[11px] tracking-wide bg-ink/5 text-ink-muted-80 border border-hairline";
+  return (
+    <div
+      className="flex items-center gap-1.5"
+      title="Demo summary for AXDD Standard Kit Composer v0.1"
+    >
+      <span className={chip}>type: {pkg.config.packageType}</span>
+      <span className={chip}>files: {pkg.files.length}</span>
+      <span className={chip}>JSON: {jsonOk ? "passed" : "failed"}</span>
+      <span className={chip}>
+        quality: {pkg.qualityReport.totalScore} / 100 · {fails} fails
+      </span>
+    </div>
+  );
+}
+
 export default function BuilderPage() {
   const { locale } = useLocale();
   const [config, setConfig] = useState<SkillConfig>(() => buildUxUiDefaultConfig());
@@ -216,10 +246,16 @@ export default function BuilderPage() {
   return (
     <div className="h-screen flex flex-col bg-canvas-parchment text-ink overflow-hidden">
       {/* Global nav — pure black, 44px */}
-      <header className="relative z-40 h-11 bg-surface-black text-body-on-dark flex items-center px-5 flex-shrink-0">
+      <header className="relative z-40 h-11 bg-surface-black text-body-on-dark flex items-center px-5 flex-shrink-0 gap-3">
         <Link href="/" className="text-nav-link font-medium hover:opacity-80">
           {tr(UI.brand, locale)}
         </Link>
+        <span
+          className="text-[11px] tracking-wide uppercase px-2 py-[2px] rounded-sm bg-body-on-dark/10 text-body-on-dark/80"
+          title="AXDD Standard Kit Composer — demo build"
+        >
+          AXDD Standard Kit Composer · v0.1
+        </span>
         <div className="ml-auto">
           <LangToggle variant="dark" />
         </div>
@@ -245,6 +281,7 @@ export default function BuilderPage() {
           minWidth={260}
         />
         <div className="ml-auto flex items-center gap-2">
+          {pkg ? <DemoSummary pkg={pkg} /> : null}
           <button
             type="button"
             onClick={handleGenerate}
@@ -328,11 +365,7 @@ export default function BuilderPage() {
                   active={activeTab === "raw"}
                   onClick={() => setActiveTab("raw")}
                 />
-                <TabButton
-                  label={tr(UI.previewTabKorean, locale)}
-                  active={activeTab === "korean"}
-                  onClick={() => setActiveTab("korean")}
-                />
+                {/* Korean Preview tab — Phase 2 roadmap; hidden in v0.1. */}
                 <TabButton
                   label={tr(UI.simTab, locale)}
                   active={activeTab === "simulate"}
@@ -439,7 +472,10 @@ export default function BuilderPage() {
                 </div>
               )}
               {selectedFile && activeTab === "preview" && (
-                <MarkdownPreview content={selectedFile.content} />
+                <MarkdownPreview
+                  content={selectedFile.content}
+                  language={selectedFile.language}
+                />
               )}
               {selectedFile && activeTab === "raw" && (
                 <RawEditor

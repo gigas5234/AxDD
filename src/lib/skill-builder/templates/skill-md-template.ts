@@ -4,6 +4,7 @@ import { workflowBlocksFor } from "../blocks/workflow-blocks";
 import { outputFormatBlock } from "../blocks/output-blocks";
 import { ruleLines } from "../blocks/rule-blocks";
 import { CAPABILITY_PACKS } from "../blocks/capability-packs";
+import { STAGE_METADATA, ALL_STAGES } from "../package-matrix";
 
 function frontmatter(config: SkillConfig): string {
   return [
@@ -57,9 +58,66 @@ function corePrincipleBlock(): string {
 }
 
 function workflowSection(config: SkillConfig): string {
+  if (config.packageType === "full-step-skill") {
+    return stageWorkflowSection(config);
+  }
   const blocks = workflowBlocksFor(config.workflowModules);
   if (blocks.length === 0) return "";
   return ["## Workflow modes", ...blocks.map((b) => b.content)].join("\n\n");
+}
+
+function stageWorkflowSection(config: SkillConfig): string {
+  const stageIds =
+    config.workflowStages.length > 0 ? config.workflowStages : ALL_STAGES;
+  const orderTitles = stageIds.map((id) => STAGE_METADATA[id].title).join(" → ");
+
+  const sections: string[] = [
+    "## Workflow modes",
+    "",
+    `This kit composes a 6-stage workflow defined in \`WORK_UNIT.json\`: ${orderTitles}.`,
+    "",
+  ];
+
+  for (const id of stageIds) {
+    const stage = STAGE_METADATA[id];
+    const related = [
+      ...stage.usesTemplates,
+      ...stage.usesReferences,
+      ...stage.usesChecklists,
+    ];
+    sections.push(`### ${stage.order}. ${stage.title} (\`${stage.id}\`)`);
+    sections.push("");
+    sections.push(`**Purpose** — ${stage.purpose}`);
+    sections.push("");
+    sections.push(`**When to use** — enter this stage once the prior stage's exit criteria are met, or when a hook in \`HOOKS.json\` routes a request to \`${stage.id}\`.`);
+    sections.push("");
+    sections.push("**Expected inputs**");
+    for (const input of stage.inputs.length ? stage.inputs : ["—"]) {
+      sections.push(`- ${input}`);
+    }
+    sections.push("");
+    sections.push("**Expected outputs**");
+    for (const output of stage.outputs.length ? stage.outputs : ["—"]) {
+      sections.push(`- ${output}`);
+    }
+    sections.push("");
+    if (related.length > 0) {
+      sections.push("**Related files**");
+      for (const r of related) {
+        sections.push(`- \`${r}\``);
+      }
+      sections.push("");
+    }
+    if (stage.exitCriteria.length > 0) {
+      sections.push("**Exit criteria**");
+      for (const c of stage.exitCriteria) {
+        sections.push(`- ${c}`);
+      }
+      sections.push("");
+    }
+  }
+
+  return sections.join("\n").trimEnd();
 }
 
 function outputSection(config: SkillConfig): string {

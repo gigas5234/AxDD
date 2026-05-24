@@ -4,6 +4,7 @@ import type {
   QualityReport,
   SkillConfig,
 } from "@/types/skill";
+import { REQUIRED_FILES_BY_TYPE, ALL_STAGES } from "./package-matrix";
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Score model
@@ -36,7 +37,7 @@ function fileContent(files: GeneratedFile[], suffix: string): string {
 }
 
 const DEFAULT_DESCRIPTION_BOILERPLATE =
-  "AI-assisted UX/UI design workflow skill for product designers and makers.";
+  "AXDD Standard Kit for AI-assisted UX/UI design — from requirement intake through handoff — with references, templates, checklists, and validation tests.";
 
 export function runQualityChecks(
   config: SkillConfig,
@@ -339,6 +340,230 @@ export function runQualityChecks(
           "structural-whentouse",
           "SKILL.md structure",
           "Missing When-to-use section.",
+        ),
+      );
+    }
+  }
+
+  // ── AXDD Standard Kit checks ─────────────────────────────────────────────
+  const required = REQUIRED_FILES_BY_TYPE[config.packageType];
+  const fileMissing = (folder: string) =>
+    !files.some((f) => f.path.includes(`/${folder}/`));
+
+  // 14. Matrix: SKILL.md
+  if (required.skillMd && !hasFile(files, "/SKILL.md")) {
+    checks.push(fail("matrix-skill-md", "SKILL.md required", "Missing SKILL.md."));
+  } else {
+    checks.push(pass("matrix-skill-md", "SKILL.md present"));
+  }
+
+  // 15. Matrix: CATALOG.md
+  if (required.catalogMd) {
+    if (!hasFile(files, "/CATALOG.md")) {
+      checks.push(
+        fail(
+          "matrix-catalog",
+          "CATALOG.md required",
+          `Package type '${config.packageType}' requires CATALOG.md.`,
+        ),
+      );
+    } else {
+      checks.push(pass("matrix-catalog", "CATALOG.md present"));
+      // 15b. CATALOG entries cross-reference real files
+      const catalog = fileContent(files, "/CATALOG.md");
+      const referenced = Array.from(catalog.matchAll(/`([a-z0-9_\-/.]+\.(?:md|json))`/gi))
+        .map((m) => m[1])
+        .filter((p) => p.includes("/"));
+      const missing = referenced.filter(
+        (p) => !files.some((f) => f.path.endsWith(`/${p}`)),
+      );
+      if (missing.length === 0) {
+        checks.push(pass("catalog-refs", "CATALOG references resolve"));
+      } else {
+        checks.push(
+          warn(
+            "catalog-refs",
+            "CATALOG references missing files",
+            `Missing: ${missing.slice(0, 4).join(", ")}${missing.length > 4 ? "…" : ""}`,
+          ),
+        );
+      }
+    }
+  }
+
+  // 16. Matrix: WORK_UNIT.json (valid JSON, 6 stages)
+  if (required.workUnitJson) {
+    const wuRaw = fileContent(files, "/WORK_UNIT.json");
+    if (!wuRaw) {
+      checks.push(
+        fail(
+          "matrix-work-unit",
+          "WORK_UNIT.json required",
+          `Package type '${config.packageType}' requires WORK_UNIT.json.`,
+        ),
+      );
+    } else {
+      try {
+        const parsed = JSON.parse(wuRaw);
+        const n = Array.isArray(parsed.stages) ? parsed.stages.length : 0;
+        if (n === 6) {
+          checks.push(pass("work-unit-stages", "WORK_UNIT.json has 6 stages"));
+        } else {
+          checks.push(
+            warn(
+              "work-unit-stages",
+              "WORK_UNIT.json stage count",
+              `Expected 6 stages, found ${n}.`,
+            ),
+          );
+        }
+      } catch {
+        checks.push(
+          fail(
+            "work-unit-json",
+            "WORK_UNIT.json invalid JSON",
+            "WORK_UNIT.json could not be parsed.",
+          ),
+        );
+      }
+    }
+  }
+
+  // 17. Matrix: HOOKS.json (valid JSON, routes + collisions)
+  if (required.hooksJson) {
+    const hkRaw = fileContent(files, "/HOOKS.json");
+    if (!hkRaw) {
+      checks.push(
+        fail(
+          "matrix-hooks",
+          "HOOKS.json required",
+          `Package type '${config.packageType}' requires HOOKS.json.`,
+        ),
+      );
+    } else {
+      try {
+        const parsed = JSON.parse(hkRaw);
+        const hooks = Array.isArray(parsed.hooks) ? parsed.hooks : [];
+        // Stage references valid
+        const knownStages = new Set<string>(ALL_STAGES);
+        const badStage = hooks
+          .map((h: { id: string; routeTo?: { stage?: string } }) => h)
+          .filter(
+            (h: { id: string; routeTo?: { stage?: string } }) =>
+              h.routeTo?.stage && !knownStages.has(h.routeTo.stage),
+          );
+        if (badStage.length === 0) {
+          checks.push(pass("hooks-stage-routes", "HOOKS routes to known stages"));
+        } else {
+          checks.push(
+            fail(
+              "hooks-stage-routes",
+              "HOOKS routes to unknown stage(s)",
+              `Bad: ${badStage.map((h: { id: string }) => h.id).join(", ")}`,
+            ),
+          );
+        }
+        // Trigger collisions
+        const triggerToHooks = new Map<string, string[]>();
+        for (const h of hooks as Array<{ id: string; triggers: string[] }>) {
+          for (const t of h.triggers ?? []) {
+            const key = t.toLowerCase();
+            if (!triggerToHooks.has(key)) triggerToHooks.set(key, []);
+            triggerToHooks.get(key)!.push(h.id);
+          }
+        }
+        const collisions = Array.from(triggerToHooks.entries()).filter(
+          ([, ids]) => ids.length > 1,
+        );
+        if (collisions.length === 0) {
+          checks.push(pass("hooks-collisions", "No trigger collisions"));
+        } else {
+          checks.push(
+            warn(
+              "hooks-collisions",
+              "Hook trigger collisions",
+              collisions
+                .slice(0, 3)
+                .map(([t, ids]) => `"${t}" → ${ids.join("/")}`)
+                .join("; "),
+            ),
+          );
+        }
+      } catch {
+        checks.push(
+          fail(
+            "hooks-json",
+            "HOOKS.json invalid JSON",
+            "HOOKS.json could not be parsed.",
+          ),
+        );
+      }
+    }
+  }
+
+  // 18. Matrix: folder presence
+  const folderRules: Array<[keyof typeof required, string]> = [
+    ["references", "references"],
+    ["templates", "templates"],
+    ["checklists", "checklists"],
+    ["tests", "tests"],
+    ["examples", "examples"],
+  ];
+  for (const [key, folder] of folderRules) {
+    if (required[key] && fileMissing(folder)) {
+      checks.push(
+        fail(
+          `matrix-${folder}`,
+          `${folder}/ required`,
+          `Package type '${config.packageType}' requires ${folder}/ to be non-empty.`,
+        ),
+      );
+    }
+  }
+
+  // 19. Figma manual fallback (ux-ui kits)
+  if (config.category === "ux-ui" && required.templates) {
+    if (hasFile(files, "/templates/figma-instruction-template.md")) {
+      checks.push(pass("figma-fallback", "Figma manual fallback present"));
+    } else {
+      checks.push(
+        warn(
+          "figma-fallback",
+          "Figma manual fallback missing",
+          "UX/UI kits should ship templates/figma-instruction-template.md for enterprise environments where Figma MCP is blocked.",
+        ),
+      );
+    }
+  }
+
+  // 20. Governance files (when tests/checklists required)
+  if (required.tests) {
+    if (!hasFile(files, "/tests/sandbox-test-scenario.md")) {
+      checks.push(
+        fail(
+          "gov-sandbox",
+          "Sandbox scenarios missing",
+          "tests/sandbox-test-scenario.md is required.",
+        ),
+      );
+    }
+    if (!hasFile(files, "/tests/validation-log-template.md")) {
+      checks.push(
+        fail(
+          "gov-validation-log",
+          "Validation log missing",
+          "tests/validation-log-template.md is required.",
+        ),
+      );
+    }
+  }
+  if (required.checklists) {
+    if (!hasFile(files, "/checklists/release-checklist.md")) {
+      checks.push(
+        fail(
+          "gov-release",
+          "Release checklist missing",
+          "checklists/release-checklist.md is required.",
         ),
       );
     }
