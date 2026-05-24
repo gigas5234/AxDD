@@ -28,10 +28,17 @@ const config: Config = {
         ],
       },
       colors: {
-        // Brand & accent
-        primary: "#E60012", // KT Real Red
-        "primary-focus": "#FF1A2C",
-        "primary-on-dark": "#FF5A6A",
+        // Brand & accent — gray-toned. Used only for true points
+        // (primary CTA, currently-selected item highlight, focus ring).
+        // The strong red palette was retired in v0.1.3.
+        primary: "#1B1B1B", // ink-black, doubles as the highlight color
+        "primary-focus": "#2E2E2E", // slightly lifted for focus rings
+        "primary-on-dark": "#D4D4D8", // neutral on dark surfaces
+
+        // Accent reserved for the rare "real" highlight — e.g. selection
+        // ring on the actively chosen preset card. Subtle warm gray.
+        accent: "#4B4B52",
+        "accent-soft": "#6B6B72",
 
         // Surface
         canvas: "#ffffff",

@@ -4,8 +4,10 @@
 
 :root {
   color-scheme: light;
-  --kt-primary: #e60012;
-  --kt-primary-focus: #ff1a2c;
+  /* v0.1.3: gray-toned palette. Primary now equals ink; reserved for
+     true points (Generate CTA, selected highlight, focus ring). */
+  --kt-primary: #1b1b1b;
+  --kt-primary-focus: #2e2e2e;
   --kt-ink: #1b1b1b;
   --kt-canvas: #ffffff;
   --kt-parchment: #f4f4f6;
