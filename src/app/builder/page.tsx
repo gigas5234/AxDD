@@ -81,6 +81,10 @@ export default function BuilderPage() {
   const [selectedPresetId, setSelectedPresetId] = useState<string>(
     "ux-ui-axdd-default",
   );
+  const [lastPresetChange, setLastPresetChange] = useState<{
+    fromId: string;
+    toId: string;
+  } | null>(null);
   const [isGenerating, setIsGenerating] = useState(false);
   const [isExporting, setIsExporting] = useState(false);
   const [inspector, setInspector] = useState<InspectorTarget>({
@@ -137,8 +141,12 @@ export default function BuilderPage() {
   function handleSelectPreset(presetId: string) {
     const preset = PRESETS.find((p) => p.id === presetId);
     if (!preset || preset.status !== "available" || !preset.buildConfig) return;
+    if (preset.id !== selectedPresetId) {
+      setLastPresetChange({ fromId: selectedPresetId, toId: preset.id });
+    }
     setSelectedPresetId(preset.id);
     setConfig(preset.buildConfig());
+    setInspector({ type: "overview" });
   }
 
   function handleSelectCategory(categoryId: string) {
@@ -317,6 +325,9 @@ export default function BuilderPage() {
             config={config}
             onConfigChange={setConfig}
             files={pkg?.files}
+            selectedPresetId={selectedPresetId}
+            lastPresetChange={lastPresetChange}
+            onDismissPresetChange={() => setLastPresetChange(null)}
           />
         </aside>
 

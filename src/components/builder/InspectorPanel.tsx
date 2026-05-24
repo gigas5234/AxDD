@@ -10,7 +10,12 @@ import { QualityPanel } from "./QualityPanel";
 import { MarkdownPreview } from "./MarkdownPreview";
 import { SettingsForm, type SettingsTarget } from "./SettingsForm";
 import { useLocale, tr } from "@/lib/i18n/locale";
-import { UI, PACK_LABELS } from "@/lib/i18n/strings";
+import { UI, PACK_LABELS, PRESET_LABELS } from "@/lib/i18n/strings";
+import {
+  PRESET_BUNDLES,
+  diffPresets,
+  getPresetBundle,
+} from "@/lib/skill-builder/preset-bundles";
 
 export type InspectorTarget =
   | { type: "quality" }
@@ -34,6 +39,9 @@ export function InspectorPanel({
   onConfigChange,
   files,
   onInspect,
+  selectedPresetId,
+  lastPresetChange,
+  onDismissPresetChange,
 }: {
   target: InspectorTarget;
   report: QualityReport | null;
@@ -44,6 +52,9 @@ export function InspectorPanel({
   onConfigChange?: (next: SkillConfig) => void;
   files?: { path: string; fileName: string }[];
   onInspect?: (target: InspectorTarget) => void;
+  selectedPresetId?: string;
+  lastPresetChange?: { fromId: string; toId: string } | null;
+  onDismissPresetChange?: () => void;
 }) {
   const { locale } = useLocale();
 
@@ -106,6 +117,21 @@ export function InspectorPanel({
 
           <section className="space-y-2">
             <div className="text-[10.5px] uppercase tracking-[0.16em] text-ink-muted-48 font-medium">
+              {isKo ? "초점" : "Focus"}
+            </div>
+            <div className="rounded-md border border-hairline bg-canvas px-3 py-2 text-[12.5px] text-ink leading-snug">
+              {selectedPresetId && getPresetBundle(selectedPresetId)
+                ? isKo
+                  ? getPresetBundle(selectedPresetId)!.focus.ko
+                  : getPresetBundle(selectedPresetId)!.focus.en
+                : isKo
+                  ? "프리셋 미지정"
+                  : "No preset"}
+            </div>
+          </section>
+
+          <section className="space-y-2">
+            <div className="text-[10.5px] uppercase tracking-[0.16em] text-ink-muted-48 font-medium">
               {tr(UI.detailExpectedOutput, locale)}
             </div>
             <div className="rounded-md border border-hairline bg-canvas px-3 py-2 text-[12.5px] text-ink-muted-80 leading-snug">
@@ -126,6 +152,119 @@ export function InspectorPanel({
                   : "Press Generate Kit in the header to compose the AXDD Standard Kit."}
             </div>
           </section>
+
+          {/* Preset Impact — appears after the user changes the preset */}
+          {lastPresetChange && (() => {
+            const diff = diffPresets(
+              lastPresetChange.fromId,
+              lastPresetChange.toId,
+            );
+            if (!diff) return null;
+            const fromLabel =
+              PRESET_LABELS[lastPresetChange.fromId]?.name[locale] ??
+              lastPresetChange.fromId;
+            const toLabel =
+              PRESET_LABELS[lastPresetChange.toId]?.name[locale] ??
+              lastPresetChange.toId;
+            const fromBundle = PRESET_BUNDLES[lastPresetChange.fromId];
+            const toBundle = PRESET_BUNDLES[lastPresetChange.toId];
+            return (
+              <section className="space-y-2 rounded-md border border-primary/30 bg-primary/5 p-3">
+                <div className="flex items-start justify-between gap-2">
+                  <div className="text-[10.5px] uppercase tracking-[0.16em] text-primary font-medium">
+                    {isKo ? "프리셋 변경 영향" : "Preset Impact"}
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => onDismissPresetChange?.()}
+                    className="text-ink-muted-48 hover:text-ink text-[14px] leading-none"
+                    aria-label="dismiss"
+                  >
+                    ×
+                  </button>
+                </div>
+                <div className="text-[12.5px] text-ink">
+                  <span className="text-ink-muted-80">{fromLabel}</span>{" "}
+                  <span className="text-ink-muted-48">→</span>{" "}
+                  <span className="font-semibold">{toLabel}</span>
+                </div>
+                {fromBundle && toBundle && (
+                  <dl className="text-[12px] space-y-1">
+                    <div>
+                      <dt className="inline text-ink-muted-80">
+                        {isKo ? "스킬 타입: " : "Skill types: "}
+                      </dt>
+                      <dd className="inline font-mono text-ink">
+                        {fromBundle.includedSkillTypes.join(" + ")}{" "}
+                        <span className="text-ink-muted-48">→</span>{" "}
+                        {toBundle.includedSkillTypes.join(" + ")}
+                      </dd>
+                    </div>
+                    <div>
+                      <dt className="inline text-ink-muted-80">
+                        {isKo ? "초점: " : "Focus: "}
+                      </dt>
+                      <dd className="inline text-ink">
+                        {isKo ? fromBundle.focus.ko : fromBundle.focus.en}{" "}
+                        <span className="text-ink-muted-48">→</span>{" "}
+                        {isKo ? toBundle.focus.ko : toBundle.focus.en}
+                      </dd>
+                    </div>
+                    {diff.removedTypes.length > 0 && (
+                      <div>
+                        <dt className="inline text-ink-muted-80">
+                          {isKo ? "제거됨: " : "Removed: "}
+                        </dt>
+                        <dd className="inline font-mono text-ink">
+                          {diff.removedTypes.join(", ")}
+                        </dd>
+                      </div>
+                    )}
+                    {diff.addedTypes.length > 0 && (
+                      <div>
+                        <dt className="inline text-ink-muted-80">
+                          {isKo ? "추가됨: " : "Added: "}
+                        </dt>
+                        <dd className="inline font-mono text-ink">
+                          {diff.addedTypes.join(", ")}
+                        </dd>
+                      </div>
+                    )}
+                    {diff.removedGroups.length > 0 && (
+                      <div>
+                        <dt className="inline text-ink-muted-80">
+                          {isKo ? "사라진 파일 그룹: " : "File groups removed: "}
+                        </dt>
+                        <dd className="inline text-ink">
+                          {diff.removedGroups.join(", ")}
+                        </dd>
+                      </div>
+                    )}
+                    {diff.addedGroups.length > 0 && (
+                      <div>
+                        <dt className="inline text-ink-muted-80">
+                          {isKo ? "강조된 파일 그룹: " : "File groups emphasized: "}
+                        </dt>
+                        <dd className="inline text-ink">
+                          {diff.addedGroups.join(", ")}
+                        </dd>
+                      </div>
+                    )}
+                    {toBundle.emphasizedFiles.length > 0 && (
+                      <div>
+                        <dt className="inline text-ink-muted-80">
+                          {isKo ? "핵심 파일: " : "Headline files: "}
+                        </dt>
+                        <dd className="inline font-mono text-[11px] text-ink">
+                          {toBundle.emphasizedFiles.join(", ")}
+                        </dd>
+                      </div>
+                    )}
+                  </dl>
+                )}
+              </section>
+            );
+          })()}
         </div>
       </div>
     );
@@ -383,62 +522,110 @@ export function InspectorPanel({
 
   // ── Advanced Settings (sub-nav of per-section editors) ───────────────────
   if (target.type === "advanced") {
-    const advancedRows: {
+    const isKo = locale === "ko";
+    const isPresetMode = config?.buildMode !== "custom";
+    type AdvancedRow = {
+      group: string;
       section: SettingsTarget | "file-matrix";
       label: string;
       hint: string;
-    }[] = [
-      { section: "basic", label: "Basic Info", hint: "Name, package, description, target agent" },
-      { section: "role", label: "Role & Awareness", hint: "Role level, implementation / DS / business awareness" },
-      { section: "output", label: "Output Format", hint: "Markdown / JSON / tables / Cursor prompt / checklists / examples" },
-      { section: "workflow", label: "Workflow / Stages", hint: "Legacy workflow modules / stage display" },
-      { section: "packs", label: "Design Capability Add-ons", hint: "Optional UX/UI content packs" },
-      { section: "rules", label: "Quality Rules", hint: "Universal + category-specific rules" },
-      { section: "lang", label: "Language", hint: "Primary language (Korean translation is Phase 2)" },
-      { section: "pkg", label: "Raw Package Options", hint: "Per-folder include toggles (matrix-locked)" },
-      { section: "file-matrix", label: "File Matrix (raw view)", hint: "Folder counts of the current generation" },
-    ];
+    };
+    const advancedRows: AdvancedRow[] = isKo
+      ? [
+          { group: "스킬 타입", section: "packs", label: "디자인 캐퍼빌리티 애드온", hint: "선택적 UX/UI 콘텐츠 팩" },
+          { group: "파일 그룹", section: "file-matrix", label: "생성된 파일 매트릭스", hint: "폴더별 파일 개수 (derived view)" },
+          { group: "출력 템플릿", section: "output", label: "출력 포맷", hint: "Markdown / JSON / Cursor 프롬프트 / 체크리스트 / 예시" },
+          { group: "참조", section: "role", label: "역할·인지", hint: "역할 레벨, 구현·DS·비즈니스 인지" },
+          { group: "검증", section: "rules", label: "품질 규칙", hint: "Universal + 카테고리별 규칙" },
+          { group: "메타데이터", section: "basic", label: "기본 정보", hint: "이름·패키지·설명·타겟 에이전트" },
+          { group: "원본 옵션", section: "lang", label: "언어", hint: "기본 언어 (한국어 번역은 Phase 2)" },
+          { group: "원본 옵션", section: "pkg", label: "Raw Package Options", hint: "폴더별 포함 토글 (matrix-locked)" },
+          { group: "원본 옵션", section: "workflow", label: "워크플로 / 스테이지", hint: "legacy 워크플로 모듈 / 스테이지 표시" },
+        ]
+      : [
+          { group: "Skill Types", section: "packs", label: "Design Capability Add-ons", hint: "Optional UX/UI content packs" },
+          { group: "File Groups", section: "file-matrix", label: "Generated File Matrix", hint: "Folder counts (derived view)" },
+          { group: "Output Templates", section: "output", label: "Output Format", hint: "Markdown / JSON / Cursor prompt / checklists / examples" },
+          { group: "References", section: "role", label: "Role & Awareness", hint: "Role level, implementation / DS / business awareness" },
+          { group: "Validation", section: "rules", label: "Quality Rules", hint: "Universal + category-specific rules" },
+          { group: "Metadata", section: "basic", label: "Basic Info", hint: "Name, package, description, target agent" },
+          { group: "Raw Options", section: "lang", label: "Language", hint: "Primary language (Korean translation is Phase 2)" },
+          { group: "Raw Options", section: "pkg", label: "Raw Package Options", hint: "Per-folder include toggles (matrix-locked)" },
+          { group: "Raw Options", section: "workflow", label: "Workflow / Stages", hint: "Legacy workflow modules / stage display" },
+        ];
+    // Group rows by section
+    const grouped = advancedRows.reduce<Record<string, AdvancedRow[]>>(
+      (acc, r) => {
+        (acc[r.group] ??= []).push(r);
+        return acc;
+      },
+      {},
+    );
 
     return (
       <div className="flex flex-col h-full min-h-0">
         <div className="px-4 py-3 border-b border-hairline flex items-start gap-2 flex-shrink-0">
           <div className="flex-1 min-w-0">
             <div className="text-fine-print uppercase tracking-[0.16em] text-ink-muted-48">
-              Detail
+              {tr(UI.detailKicker, locale)}
             </div>
             <div className="text-body-strong text-ink mt-0.5">
-              Advanced Settings
+              {isKo ? "고급 설정" : "Advanced Settings"}
             </div>
             <div className="text-[12.5px] text-ink-muted-80 mt-1 leading-snug">
-              Detailed knobs. Most users won't need these; pick a preset
-              instead.
+              {isKo ? "프리셋에 의해 자동 구성됨" : "Auto-configured by preset"}
             </div>
           </div>
         </div>
-        <div className="flex-1 overflow-y-auto thin-scrollbar px-4 py-3 space-y-1">
-          {advancedRows.map((r) => (
-            <button
-              key={r.section}
-              type="button"
-              onClick={() => {
-                if (!onInspect) return;
-                if (r.section === "file-matrix") {
-                  onInspect({ type: "file-matrix" });
-                } else {
-                  onInspect({
-                    type: "settings",
-                    section: r.section,
-                    title: r.label,
-                  });
-                }
-              }}
-              className="w-full text-left rounded-md border border-hairline bg-canvas px-3 py-2 hover:bg-divider-soft transition"
-            >
-              <div className="text-[13px] font-medium text-ink">{r.label}</div>
-              <div className="text-[11.5px] text-ink-muted-80 mt-0.5 leading-snug">
-                {r.hint}
+        <div className="flex-1 overflow-y-auto thin-scrollbar px-4 py-3 space-y-4">
+          {isPresetMode && (
+            <div className="rounded-md border border-ink/20 bg-divider-soft px-3 py-2 text-[12.5px] text-ink leading-snug">
+              {isKo
+                ? "프리셋 모드에서는 기본적으로 읽기 전용입니다. 편집하려면 Skill Composition에서 Custom Mode로 전환하세요."
+                : "Read-only in Preset Mode. Switch to Custom Mode in Skill Composition to edit these settings."}
+            </div>
+          )}
+          {Object.entries(grouped).map(([group, rows]) => (
+            <section key={group} className="space-y-1.5">
+              <div className="text-[10.5px] uppercase tracking-[0.16em] text-ink-muted-48 font-medium px-1">
+                {group}
               </div>
-            </button>
+              <div className="space-y-1">
+                {rows.map((r) => (
+                  <button
+                    key={r.section}
+                    type="button"
+                    onClick={() => {
+                      if (!onInspect) return;
+                      if (r.section === "file-matrix") {
+                        onInspect({ type: "file-matrix" });
+                      } else {
+                        onInspect({
+                          type: "settings",
+                          section: r.section,
+                          title: r.label,
+                        });
+                      }
+                    }}
+                    className="w-full text-left rounded-md border border-hairline bg-canvas px-3 py-2 hover:bg-divider-soft transition"
+                  >
+                    <div className="flex items-center gap-2">
+                      <div className="text-[13px] font-medium text-ink flex-1">
+                        {r.label}
+                      </div>
+                      {isPresetMode && (
+                        <span className="text-[9.5px] uppercase tracking-wide text-ink-muted-48 border border-hairline rounded-sm px-1 py-[1px]">
+                          {isKo ? "프리셋 자동" : "auto"}
+                        </span>
+                      )}
+                    </div>
+                    <div className="text-[11.5px] text-ink-muted-80 mt-0.5 leading-snug">
+                      {r.hint}
+                    </div>
+                  </button>
+                ))}
+              </div>
+            </section>
           ))}
         </div>
       </div>

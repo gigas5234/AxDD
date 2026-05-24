@@ -241,6 +241,141 @@ export function buildUxUiTestSkillConfig(): SkillConfig {
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
+// Figma Manual Instruction Kit (template-skill primary, includes reference)
+// ─────────────────────────────────────────────────────────────────────────────
+export function buildFigmaManualKitConfig(): SkillConfig {
+  const ts = nowIso();
+  return {
+    id: "axdd-figma-manual-instruction-kit",
+    skillName: "Figma Manual Instruction Kit",
+    packageName: "axdd-figma-manual-instruction-kit",
+    description:
+      "Produce step-by-step Figma instructions when Figma MCP is blocked. Template-led, grounded in the design system and accessibility references.",
+    category: "ux-ui",
+    packageType: "template-skill",
+    includedSkillTypes: ["template-skill", "reference-skill"],
+    buildMode: "preset",
+    targetAgent: "generic",
+    roleProfile: {
+      roleLevel: "senior",
+      domainFocus: ["Figma", "Design System", "Manual Build"],
+      implementationAwareness: false,
+      designSystemAwareness: true,
+      businessAwareness: false,
+    },
+    workflowModules: [],
+    workflowStages: [],
+    capabilityPacks: ["design-taste", "web-best-practices"],
+    outputFormat: {
+      answerStyle: "structured",
+      includeMarkdown: true,
+      includeJson: false,
+      includeTables: true,
+      includeCursorPrompt: false,
+      includeChecklists: true,
+      includeExamples: true,
+    },
+    qualityRules: [
+      "avoid-vague-language",
+      "define-primary-action",
+      "include-screen-states",
+      "include-responsive-notes",
+      "include-accessibility",
+      "avoid-overlong-chat-response",
+    ],
+    language: {
+      primaryLanguage: "en",
+      previewLanguages: ["en", "ko"],
+      generateKoreanByDefault: false,
+      translationMode: "on-demand",
+    },
+    packageOptions: {
+      includeSkillMd: true,
+      includeReadme: true,
+      includeReferences: true,
+      includeTemplates: true,
+      includeExamples: true,
+      includeCatalogMd: true,
+      includeWorkUnitJson: false,
+      includeHooksJson: false,
+      includeChecklists: false,
+      includeTests: false,
+      exportFormat: "zip",
+    },
+    createdAt: ts,
+    updatedAt: ts,
+  };
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// UX Validation & Governance Kit (test-skill primary, includes metadata)
+// ─────────────────────────────────────────────────────────────────────────────
+export function buildUxValidationKitConfig(): SkillConfig {
+  const ts = nowIso();
+  return {
+    id: "axdd-ux-validation-governance-kit",
+    skillName: "UX Validation & Governance Kit",
+    packageName: "axdd-ux-validation-governance-kit",
+    description:
+      "Validate UX/UI deliverables, run sandbox scenarios, and produce governance logs. Test-led with kit-level metadata for discovery.",
+    category: "ux-ui",
+    packageType: "test-skill",
+    includedSkillTypes: ["test-skill", "metadata-skill"],
+    buildMode: "preset",
+    targetAgent: "generic",
+    roleProfile: {
+      roleLevel: "senior",
+      domainFocus: ["Validation", "Governance", "Accessibility"],
+      implementationAwareness: true,
+      designSystemAwareness: true,
+      businessAwareness: false,
+    },
+    workflowModules: [],
+    workflowStages: [],
+    capabilityPacks: ["web-best-practices"],
+    outputFormat: {
+      answerStyle: "structured",
+      includeMarkdown: true,
+      includeJson: true,
+      includeTables: true,
+      includeCursorPrompt: false,
+      includeChecklists: true,
+      includeExamples: false,
+    },
+    qualityRules: [
+      "avoid-vague-language",
+      "define-primary-action",
+      "include-information-hierarchy",
+      "include-screen-states",
+      "include-responsive-notes",
+      "include-accessibility",
+      "avoid-overlong-chat-response",
+    ],
+    language: {
+      primaryLanguage: "en",
+      previewLanguages: ["en", "ko"],
+      generateKoreanByDefault: false,
+      translationMode: "on-demand",
+    },
+    packageOptions: {
+      includeSkillMd: true,
+      includeReadme: true,
+      includeReferences: false,
+      includeTemplates: false,
+      includeExamples: false,
+      includeCatalogMd: true,
+      includeWorkUnitJson: false,
+      includeHooksJson: false,
+      includeChecklists: true,
+      includeTests: true,
+      exportFormat: "zip",
+    },
+    createdAt: ts,
+    updatedAt: ts,
+  };
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
 // Custom Mode default (user picks any combination of the 8 types)
 // ─────────────────────────────────────────────────────────────────────────────
 export function buildCustomDefaultConfig(): SkillConfig {
@@ -533,6 +668,34 @@ export const PRESETS: PresetDescriptor[] = [
     ],
     status: "available",
     buildConfig: buildUxUiTestSkillConfig,
+  },
+  {
+    id: "axdd-figma-manual-instruction-kit",
+    name: "Figma Manual Instruction Kit",
+    category: "ux-ui",
+    bestFor:
+      "Produce manual Figma AI instructions when Figma MCP is blocked. Template-led, with design-system and accessibility references.",
+    expectedOutput: [
+      "Primary kit structure: template-skill",
+      "Included skill types: template-skill, reference-skill",
+      "templates/figma-instruction-template.md emphasized + references/design-system-rules.md",
+    ],
+    status: "available",
+    buildConfig: buildFigmaManualKitConfig,
+  },
+  {
+    id: "axdd-ux-validation-governance-kit",
+    name: "UX Validation & Governance Kit",
+    category: "ux-ui",
+    bestFor:
+      "Validate UX/UI deliverables, run sandbox scenarios, and produce governance logs. Test-led with metadata for discovery.",
+    expectedOutput: [
+      "Primary kit structure: test-skill",
+      "Included skill types: test-skill, metadata-skill",
+      "tests/, checklists/, validation-log-template.md, KIT_MANIFEST.json + metadata/index.json",
+    ],
+    status: "available",
+    buildConfig: buildUxValidationKitConfig,
   },
 
   // ── Frontend variations (coming-soon) ─────────────────────────────────────

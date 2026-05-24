@@ -99,10 +99,15 @@ export const REQUIRED_FILES_BY_TYPE: Record<SkillPackageType, RequiredFiles> = {
 
 // Priority order for deriving the primary kit structure from a set of
 // included skill types. Earlier in the list wins.
+//
+// Rationale for template > test: when a kit includes both, the headline
+// artifact is the template (e.g. cursor-prompt-template) — tests are
+// supporting validation. The Reference-Based Review preset omits
+// template-skill, so it still resolves to test-skill correctly.
 export const PRIMARY_PRIORITY: SkillPackageType[] = [
   "full-step-skill",
-  "test-skill",
   "template-skill",
+  "test-skill",
   "reference-skill",
   "script-skill",
   "asset-skill",

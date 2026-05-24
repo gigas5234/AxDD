@@ -883,6 +883,26 @@ export const PRESET_LABELS: Record<
       ko: "Cursor 등 코드 에이전트에 UX/UI 명세를 전달. 템플릿 중심에 references·validation 포함. 기본 구조: template-skill.",
     },
   },
+  "axdd-figma-manual-instruction-kit": {
+    name: {
+      en: "Figma Manual Instruction Kit",
+      ko: "Figma 수동 지시 키트",
+    },
+    bestFor: {
+      en: "Manual Figma AI instructions when MCP is blocked. Template-led, design-system + accessibility grounded. Primary structure: template-skill.",
+      ko: "Figma MCP가 차단된 환경에서 수동 지시문을 생성. 디자인 시스템·접근성 참조 기반. 기본 구조: template-skill.",
+    },
+  },
+  "axdd-ux-validation-governance-kit": {
+    name: {
+      en: "UX Validation & Governance Kit",
+      ko: "UX 검증·거버넌스 키트",
+    },
+    bestFor: {
+      en: "Validate UX/UI work, run sandbox scenarios, ship governance logs. Test-led with kit metadata. Primary structure: test-skill.",
+      ko: "UX/UI 산출물 검증·샌드박스 시나리오·거버넌스 로그. 테스트 중심에 메타데이터 포함. 기본 구조: test-skill.",
+    },
+  },
   "design-system-starter": {
     name: { en: "Design System Starter", ko: "디자인 시스템 스타터" },
     bestFor: {
