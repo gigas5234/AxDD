@@ -355,12 +355,14 @@ export default function BuilderPage() {
           </aside>
         )}
 
-        {/* Main workspace — files + preview */}
+        {/* Main workspace — files + preview. The files column only
+            appears after a package has been generated so the workspace
+            isn't dominated by an empty 256px sidebar on first load. */}
         <main className="flex min-h-0 bg-canvas">
-          <div className="w-64 border-r border-hairline overflow-y-auto thin-scrollbar bg-canvas">
-            <div className="px-4 py-3 border-b border-hairline space-y-1">
-              <PanelLabel>{tr(UI.panelFiles, locale)}</PanelLabel>
-              {pkg && (
+          {pkg && (
+            <div className="w-64 border-r border-hairline overflow-y-auto thin-scrollbar bg-canvas flex-shrink-0">
+              <div className="px-4 py-3 border-b border-hairline space-y-1">
+                <PanelLabel>{tr(UI.panelFiles, locale)}</PanelLabel>
                 <div className="text-[11.5px] text-ink-muted-80 leading-snug">
                   <div className="font-mono text-ink truncate">
                     {pkg.packageName}
@@ -371,14 +373,14 @@ export default function BuilderPage() {
                     <span>{pkg.files.length} files</span>
                   </div>
                 </div>
-              )}
+              </div>
+              <FileTree
+                files={pkg.files}
+                selectedFileId={selectedFileId}
+                onSelect={(id) => setSelectedFileId(id)}
+              />
             </div>
-            <FileTree
-              files={pkg?.files ?? []}
-              selectedFileId={selectedFileId}
-              onSelect={(id) => setSelectedFileId(id)}
-            />
-          </div>
+          )}
 
           <section className="flex-1 flex flex-col min-w-0">
             <div className="h-11 border-b border-hairline px-4 flex items-center justify-between flex-shrink-0">

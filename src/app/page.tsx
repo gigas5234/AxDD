@@ -6,49 +6,52 @@ import { useLocale, tr, type Bilingual } from "@/lib/i18n/locale";
 import { UI } from "@/lib/i18n/strings";
 
 const HERO_TITLE: Bilingual = {
-  en: "Build AI Agent Skills without writing SKILL.md from scratch.",
-  ko: "SKILL.md를 처음부터 쓰지 않고, 업무 흐름에 맞는 AI Agent Skill을 조합하세요.",
+  en: "Compose AXDD Standard Kits without hand-writing SKILL.md, CATALOG.md, WORK_UNIT.json, or HOOKS.json.",
+  ko: "SKILL.md, CATALOG.md, WORK_UNIT.json, HOOKS.json을 직접 작성하지 않고 AXDD Standard Kit를 조합하세요.",
 };
 
 const HERO_BODY: Bilingual = {
-  en: "Compose, preview, edit, and download structured AI Agent Skill packages. The first MVP supports the UX/UI Designer category and generates a complete package from a deterministic template engine.",
-  ko: "구조화된 AI Agent Skill 패키지를 조합·미리보기·편집·다운로드합니다. MVP는 UX/UI 디자이너 카테고리를 지원하며, 결정론적 템플릿 엔진으로 패키지를 자동 생성합니다.",
+  en: "An AXDD Standard Kit Composer for UX/UI workflows. Pick a preset or compose any combination of the 8 AXDD skill package types — Reference, Template, Script, Asset, Full-Step, Metadata, Test, or Simple — preview every file, and download a ready-to-use kit.",
+  ko: "UX/UI 워크플로용 AXDD Standard Kit Composer. 프리셋을 선택하거나 8가지 AXDD 스킬 패키지 타입(Reference · Template · Script · Asset · Full-Step · Metadata · Test · Simple)을 자유롭게 조합해, 모든 파일을 미리보고 즉시 사용 가능한 키트를 다운로드합니다.",
 };
 
 const CTA_OPEN: Bilingual = { en: "Open Builder", ko: "빌더 열기" };
 const CTA_LEARN: Bilingual = { en: "Learn more", ko: "자세히 보기" };
 
 const FEAT_TITLE_1: Bilingual = {
-  en: "Deterministic generation",
-  ko: "결정론적 생성",
+  en: "Preset or Custom",
+  ko: "프리셋 또는 커스텀",
 };
 const FEAT_BODY_1: Bilingual = {
-  en: "No AI calls. Templates compose SKILL.md, README, references, templates, and examples directly from your settings.",
-  ko: "AI 호출 없이, 설정값에서 SKILL.md, README, references, templates, examples 파일을 곧바로 조합합니다.",
+  en: "Start from a recommended UX/UI kit — AXDD UX/UI Standard Kit, Reference-Based UX/UI Review, or Cursor Handoff Kit — or switch to Custom and select any of the 8 AXDD skill package types.",
+  ko: "추천 UX/UI 키트(AXDD UX/UI Standard Kit, Reference-Based UX/UI Review, Cursor Handoff Kit)로 시작하거나, Custom 모드로 전환해 8가지 AXDD 스킬 패키지 타입을 자유롭게 조합합니다.",
 };
 
 const FEAT_TITLE_2: Bilingual = {
-  en: "Preview before download",
-  ko: "다운로드 전에 미리보기",
+  en: "Deterministic, matrix-driven",
+  ko: "결정론적 · 매트릭스 기반 생성",
 };
 const FEAT_BODY_2: Bilingual = {
-  en: "A file tree, markdown render, and raw editor live in the same workspace. Edit any file before you export.",
-  ko: "파일 트리·마크다운 렌더·원본 에디터가 한 워크스페이스에서 같이 동작합니다. 내보내기 전에 어느 파일이든 직접 편집할 수 있습니다.",
+  en: "No AI calls. Required files come from a per-type matrix and are merged across every included skill type. The Primary Kit Structure is derived from your selection.",
+  ko: "AI 호출 없이, 타입별 매트릭스에서 필수 파일이 도출되고 선택한 모든 스킬 타입이 병합됩니다. Primary Kit Structure도 선택에 따라 자동으로 결정됩니다.",
 };
 
-const FEAT_TITLE_3: Bilingual = { en: "Quality score", ko: "품질 점수" };
+const FEAT_TITLE_3: Bilingual = {
+  en: "Preview, quality, ZIP",
+  ko: "미리보기 · 품질 검사 · ZIP",
+};
 const FEAT_BODY_3: Bilingual = {
-  en: "Eleven structural checks plus contextual warnings and suggestions, recomputed on every edit.",
-  ko: "11개의 구조적 체크와 맥락별 경고·제안이 편집할 때마다 다시 계산됩니다.",
+  en: "A file tree, markdown / JSON preview, raw editor, and live quality checker share one workspace. Edit any file, watch the score update, and export the whole kit as a ZIP.",
+  ko: "파일 트리·마크다운/JSON 미리보기·원본 에디터·실시간 품질 검사가 한 워크스페이스에 모여 있습니다. 어떤 파일이든 편집해 점수를 즉시 확인하고, 전체 키트를 ZIP으로 내보냅니다.",
 };
 
 const FOOTER_LEFT: Bilingual = {
-  en: "AxDD Skill Builder",
-  ko: "AxDD 스킬 빌더",
+  en: "AXDD Standard Kit Composer",
+  ko: "AXDD Standard Kit Composer",
 };
 const FOOTER_RIGHT: Bilingual = {
-  en: "UX/UI Designer category",
-  ko: "UX/UI 디자이너 카테고리",
+  en: "UX/UI category · 8 AXDD skill types",
+  ko: "UX/UI 카테고리 · 8가지 AXDD 스킬 타입",
 };
 
 export default function HomePage() {
@@ -94,12 +97,12 @@ export default function HomePage() {
           <div className="mt-10 flex items-center justify-center gap-3">
             <Link
               href="/builder"
-              className="inline-flex items-center justify-center rounded-pill bg-primary text-body-on-dark px-[22px] py-[11px] text-[17px] font-normal hover:opacity-95 transition"
+              className="inline-flex items-center justify-center rounded-pill bg-cta text-body-on-dark px-[22px] py-[11px] text-[17px] font-medium shadow-sm hover:bg-cta-hover transition"
             >
               {tr(CTA_OPEN, locale)}
             </Link>
             <span
-              className="inline-flex items-center justify-center rounded-pill border border-primary text-primary px-[22px] py-[11px] text-[17px] font-normal opacity-70 cursor-not-allowed select-none"
+              className="inline-flex items-center justify-center rounded-pill border border-ink/30 text-ink px-[22px] py-[11px] text-[17px] font-normal opacity-70 cursor-not-allowed select-none"
               title="Phase 2"
             >
               {tr(CTA_LEARN, locale)}
