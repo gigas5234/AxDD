@@ -286,7 +286,7 @@ export default function BuilderPage() {
             type="button"
             onClick={handleGenerate}
             disabled={isGenerating}
-            className="inline-flex items-center justify-center rounded-pill bg-primary text-body-on-dark px-[22px] py-[8px] text-[15px] font-normal hover:opacity-95 disabled:opacity-50 transition"
+            className="inline-flex items-center justify-center rounded-pill bg-cta text-body-on-dark px-[22px] py-[8px] text-[15px] font-medium shadow-sm hover:bg-cta-hover focus-visible:outline-cta-focus disabled:opacity-50 transition"
           >
             {isGenerating ? tr(UI.generating, locale) : tr(UI.generate, locale)}
           </button>

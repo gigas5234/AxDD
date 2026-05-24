@@ -40,6 +40,13 @@ const config: Config = {
         accent: "#4B4B52",
         "accent-soft": "#6B6B72",
 
+        // CTA — reserved for the primary call-to-action only.
+        // Brings back a red tone so the Generate button stands out,
+        // while the rest of the UI stays gray-toned.
+        cta: "#E60012",
+        "cta-focus": "#FF1A2C",
+        "cta-hover": "#C8000F",
+
         // Surface
         canvas: "#ffffff",
         "canvas-parchment": "#F4F4F6",
