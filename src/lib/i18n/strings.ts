@@ -30,7 +30,7 @@ export const UI = {
   // Sub-nav
   category: { en: "Category", ko: "카테고리" } as Bilingual,
   preset: { en: "Preset", ko: "프리셋" } as Bilingual,
-  generate: { en: "Generate Skill Package", ko: "스킬 패키지 생성" } as Bilingual,
+  generate: { en: "Generate Kit", ko: "킷 생성" } as Bilingual,
   generating: { en: "Generating…", ko: "생성 중…" } as Bilingual,
   comingSoon: { en: "Soon", ko: "예정" } as Bilingual,
 
@@ -65,8 +65,8 @@ export const UI = {
     ko: "패키지를 생성하고 파일을 선택하세요.",
   } as Bilingual,
   emptyHeroTitle: {
-    en: "Choose a preset and generate your first skill package.",
-    ko: "프리셋을 선택하고 첫 스킬 패키지를 생성하세요.",
+    en: "Choose a preset and generate your first kit.",
+    ko: "프리셋을 선택하고 첫 킷을 생성하세요.",
   } as Bilingual,
   emptyHeroBody: {
     en: "The file tree, preview, and quality score appear here once the package is generated.",

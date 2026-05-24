@@ -15,6 +15,7 @@ import {
 } from "@/lib/skill-builder/generate-package";
 import { downloadPackageAsZip } from "@/lib/skill-builder/zip-export";
 import { runQualityChecks } from "@/lib/skill-builder/quality-checker";
+import { mergeRequiredFiles } from "@/lib/skill-builder/package-matrix";
 import type {
   CapabilityPack,
   GeneratedFile,
@@ -237,7 +238,7 @@ export default function BuilderPage() {
           className="text-[11px] tracking-wide uppercase px-2 py-[2px] rounded-sm bg-body-on-dark/10 text-body-on-dark/80"
           title="AXDD Standard Kit Composer — demo build"
         >
-          AXDD Standard Kit Composer · v0.1
+          AXDD Standard Kit Composer · v0.1.1
         </span>
         <div className="ml-auto">
           <LangToggle variant="dark" />
@@ -406,21 +407,7 @@ export default function BuilderPage() {
                 <SimulatorPanel config={config} pkg={pkg} />
               )}
               {activeTab !== "simulate" && !selectedFile && (
-                <div className="px-8 py-16 max-w-2xl mx-auto text-center space-y-3">
-                  <div className="text-[10.5px] uppercase tracking-[0.16em] text-ink-muted-48">
-                    Workspace
-                  </div>
-                  <h2 className="text-[22px] font-semibold text-ink">
-                    {pkg
-                      ? "Select a file in the tree to preview"
-                      : "Press Generate Kit to compose your AXDD Standard Kit"}
-                  </h2>
-                  <p className="text-[13.5px] text-ink-muted-80 leading-snug">
-                    Use the left sidebar to review the kit overview, skill
-                    composition, generated files, governance, or advanced
-                    settings. Then press Generate Kit in the header.
-                  </p>
-                </div>
+                <EmptyWorkspaceState config={config} pkg={pkg} />
               )}
               {selectedFile && activeTab === "preview" && (
                 <MarkdownPreview
@@ -445,21 +432,147 @@ export default function BuilderPage() {
               </div>
               <div className="flex items-center gap-2">
                 {/* Korean preview button — Phase 2 roadmap; hidden in v0.1. */}
-                <button
-                  type="button"
-                  onClick={handleRegenerateFile}
-                  disabled={!selectedFile}
-                  title={tr(UI.btnRegenerateFileTitle, locale)}
-                  className="text-caption px-3 py-1.5 rounded-md border border-hairline bg-surface-pearl text-ink-muted-80 hover:bg-divider-soft disabled:opacity-50"
-                >
-                  {tr(UI.btnRegenerateFile, locale)}
-                </button>
+                {pkg && selectedFile && (
+                  <button
+                    type="button"
+                    onClick={handleRegenerateFile}
+                    title={tr(UI.btnRegenerateFileTitle, locale)}
+                    className="text-caption px-3 py-1.5 rounded-md border border-hairline bg-surface-pearl text-ink-muted-80 hover:bg-divider-soft"
+                  >
+                    {tr(UI.btnRegenerateFile, locale)}
+                  </button>
+                )}
               </div>
             </div>
           </section>
         </main>
 
       </div>
+    </div>
+  );
+}
+
+function EmptyWorkspaceState({
+  config,
+  pkg,
+}: {
+  config: SkillConfig;
+  pkg: GeneratedPackage | null;
+}) {
+  if (pkg) {
+    return (
+      <div className="px-8 py-16 max-w-2xl mx-auto text-center space-y-3">
+        <div className="text-[10.5px] uppercase tracking-[0.16em] text-ink-muted-48">
+          Workspace
+        </div>
+        <h2 className="text-[22px] font-semibold text-ink">
+          Select a file in the tree to preview
+        </h2>
+        <p className="text-[13.5px] text-ink-muted-80 leading-snug">
+          Use the left sidebar to review Kit Overview, Skill Composition,
+          Generated Files, Governance, or Advanced Settings.
+        </p>
+      </div>
+    );
+  }
+
+  // No package yet — show what Generate Kit will produce based on the
+  // current preset's included skill types + matrix.
+  const includedTypes =
+    config.includedSkillTypes.length > 0
+      ? config.includedSkillTypes
+      : [config.packageType];
+  const required = mergeRequiredFiles(includedTypes);
+  const planned: { path: string; required: boolean }[] = [
+    { path: "SKILL.md", required: required.skillMd },
+    { path: "CATALOG.md", required: required.catalogMd },
+    { path: "README.md", required: required.readmeMd },
+    { path: "WORK_UNIT.json", required: required.workUnitJson },
+    { path: "HOOKS.json", required: required.hooksJson },
+    { path: "KIT_MANIFEST.json", required: required.metadata },
+    { path: "references/", required: required.references },
+    { path: "templates/", required: required.templates },
+    { path: "checklists/", required: required.checklists },
+    { path: "tests/", required: required.tests },
+    { path: "examples/", required: required.examples },
+    { path: "scripts/", required: required.scripts },
+    { path: "metadata/", required: required.metadata },
+    { path: "assets/", required: required.assets },
+  ];
+
+  return (
+    <div className="px-8 py-12 max-w-2xl mx-auto space-y-5">
+      <div className="text-center space-y-2">
+        <div className="text-[10.5px] uppercase tracking-[0.16em] text-ink-muted-48">
+          Workspace
+        </div>
+        <h2 className="text-[22px] font-semibold text-ink">
+          Press Generate Kit to compose your AXDD Standard Kit
+        </h2>
+        <p className="text-[13.5px] text-ink-muted-80 leading-snug">
+          The current preset will produce the files listed below. Adjust
+          composition in the left sidebar, then press Generate Kit in the
+          header.
+        </p>
+      </div>
+
+      <section className="rounded-md border border-hairline bg-canvas overflow-hidden">
+        <header className="px-3 py-2 border-b border-divider-soft text-[10.5px] uppercase tracking-[0.16em] text-ink-muted-48 font-medium flex items-center gap-2">
+          <span className="flex-1">Will be generated</span>
+          <span className="font-mono text-[11px] normal-case tracking-normal text-ink-muted-80">
+            {planned.filter((p) => p.required).length} entries
+          </span>
+        </header>
+        <ul className="divide-y divide-divider-soft">
+          {planned.map((p) => (
+            <li
+              key={p.path}
+              className="px-3 py-1.5 flex items-center gap-2 text-[12.5px]"
+            >
+              <span
+                aria-hidden="true"
+                className={`inline-flex items-center justify-center w-3.5 h-3.5 rounded-sm border flex-shrink-0 ${
+                  p.required
+                    ? "bg-primary border-primary text-body-on-dark"
+                    : "bg-canvas border-hairline"
+                }`}
+              >
+                {p.required && (
+                  <svg
+                    viewBox="0 0 12 12"
+                    width="9"
+                    height="9"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2.4"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  >
+                    <polyline points="2.5,6.5 5,9 9.5,3.5" />
+                  </svg>
+                )}
+              </span>
+              <span
+                className={`font-mono ${
+                  p.required ? "text-ink" : "text-ink-muted-48 line-through"
+                }`}
+              >
+                {p.path}
+              </span>
+              {!p.required && (
+                <span className="text-[10.5px] uppercase tracking-wide text-ink-muted-48 ml-auto">
+                  not in this preset
+                </span>
+              )}
+            </li>
+          ))}
+        </ul>
+      </section>
+
+      <p className="text-fine-print text-ink-muted-48 leading-snug text-center">
+        Files appear in the tree on the left after generation. README.md opens
+        first.
+      </p>
     </div>
   );
 }
