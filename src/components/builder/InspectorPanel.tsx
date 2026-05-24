@@ -1,15 +1,23 @@
 "use client";
 
-import type { CapabilityPack, QualityReport } from "@/types/skill";
+import type {
+  CapabilityPack,
+  QualityReport,
+  SkillConfig,
+} from "@/types/skill";
 import { getCapabilityPack } from "@/lib/skill-builder/blocks/capability-packs";
 import { QualityPanel } from "./QualityPanel";
 import { MarkdownPreview } from "./MarkdownPreview";
+import { SettingsForm, type SettingsTarget } from "./SettingsForm";
 import { useLocale, tr } from "@/lib/i18n/locale";
 import { UI, PACK_LABELS } from "@/lib/i18n/strings";
 
 export type InspectorTarget =
   | { type: "quality" }
-  | { type: "capability-pack"; id: CapabilityPack };
+  | { type: "capability-pack"; id: CapabilityPack }
+  | { type: "settings"; section: SettingsTarget; title: string; helper?: string }
+  | { type: "file-matrix" }
+  | { type: "summary" };
 
 export function InspectorPanel({
   target,
@@ -17,14 +25,142 @@ export function InspectorPanel({
   isEnabled,
   onToggle,
   onClose,
+  config,
+  onConfigChange,
+  files,
 }: {
   target: InspectorTarget;
   report: QualityReport | null;
   isEnabled: (id: CapabilityPack) => boolean;
   onToggle: (id: CapabilityPack) => void;
   onClose: () => void;
+  config?: SkillConfig;
+  onConfigChange?: (next: SkillConfig) => void;
+  files?: { path: string; fileName: string }[];
 }) {
   const { locale } = useLocale();
+
+  if (target.type === "summary") {
+    return (
+      <div className="flex flex-col h-full min-h-0">
+        <div className="px-4 py-3 border-b border-hairline flex-shrink-0">
+          <div className="text-fine-print uppercase tracking-[0.16em] text-ink-muted-48">
+            Inspector
+          </div>
+          <div className="text-body-strong text-ink mt-0.5">
+            Select a setting on the left
+          </div>
+        </div>
+        <div className="flex-1 overflow-y-auto thin-scrollbar px-4 py-3 text-[13.5px] text-ink-muted-80 leading-relaxed">
+          Click an item in the left sidebar to edit it here. The kit preview
+          and file tree stay visible while you adjust settings.
+        </div>
+      </div>
+    );
+  }
+
+  if (target.type === "settings" && config && onConfigChange) {
+    const isPresetIncluded =
+      target.section === "included-types" && config.buildMode === "preset";
+    const helperText =
+      target.helper ??
+      (isPresetIncluded
+        ? "Preset mode uses a recommended skill combination. Switch to Custom mode to edit skill types manually."
+        : undefined);
+    return (
+      <div className="flex flex-col h-full min-h-0">
+        <div className="px-4 py-3 border-b border-hairline flex items-start gap-2 flex-shrink-0">
+          <div className="flex-1 min-w-0">
+            <div className="text-fine-print uppercase tracking-[0.16em] text-ink-muted-48">
+              Settings
+            </div>
+            <div className="text-body-strong text-ink mt-0.5">
+              {target.title}
+            </div>
+            {helperText && (
+              <div className="text-[12.5px] text-ink-muted-80 mt-1 leading-snug">
+                {helperText}
+              </div>
+            )}
+          </div>
+          <button
+            type="button"
+            onClick={onClose}
+            aria-label={tr(UI.inspCloseTitle, locale)}
+            className="text-ink-muted-48 hover:text-ink text-[18px] leading-none px-1"
+            title={tr(UI.inspCloseTitle, locale)}
+          >
+            ×
+          </button>
+        </div>
+        <div className="flex-1 overflow-y-auto thin-scrollbar px-4 py-3">
+          <SettingsForm
+            config={config}
+            onChange={onConfigChange}
+            inspector={target}
+            onInspect={() => {}}
+            targetOnly={target.section}
+          />
+        </div>
+      </div>
+    );
+  }
+
+  if (target.type === "file-matrix" && files) {
+    const folderCounts = new Map<string, number>();
+    for (const f of files) {
+      const parts = f.path.split("/");
+      const folder = parts.length >= 3 ? parts.slice(1, -1).join("/") || "(root)" : "(root)";
+      folderCounts.set(folder, (folderCounts.get(folder) ?? 0) + 1);
+    }
+    const rows = Array.from(folderCounts.entries()).sort((a, b) =>
+      a[0].localeCompare(b[0]),
+    );
+    return (
+      <div className="flex flex-col h-full min-h-0">
+        <div className="px-4 py-3 border-b border-hairline flex items-start gap-2 flex-shrink-0">
+          <div className="flex-1 min-w-0">
+            <div className="text-fine-print uppercase tracking-[0.16em] text-ink-muted-48">
+              Settings
+            </div>
+            <div className="text-body-strong text-ink mt-0.5">
+              Generated File Matrix
+            </div>
+            <div className="text-[12.5px] text-ink-muted-80 mt-1 leading-snug">
+              Files emitted for the currently included skill types. Derived from
+              the merged required-files matrix.
+            </div>
+          </div>
+          <button
+            type="button"
+            onClick={onClose}
+            aria-label={tr(UI.inspCloseTitle, locale)}
+            className="text-ink-muted-48 hover:text-ink text-[18px] leading-none px-1"
+            title={tr(UI.inspCloseTitle, locale)}
+          >
+            ×
+          </button>
+        </div>
+        <div className="flex-1 overflow-y-auto thin-scrollbar px-4 py-3 space-y-3">
+          <div className="text-[12px] text-ink-muted-80">
+            Total: <span className="font-mono">{files.length}</span> files
+          </div>
+          <ul className="divide-y divide-divider-soft border border-hairline rounded-md bg-canvas overflow-hidden">
+            {rows.map(([folder, count]) => (
+              <li key={folder} className="px-3 py-2 flex items-center gap-2">
+                <span className="font-mono text-[12.5px] text-ink flex-1 truncate">
+                  {folder}
+                </span>
+                <span className="text-[11.5px] font-mono text-ink-muted-80">
+                  {count}
+                </span>
+              </li>
+            ))}
+          </ul>
+        </div>
+      </div>
+    );
+  }
 
   if (target.type === "quality") {
     return (
@@ -41,6 +177,9 @@ export function InspectorPanel({
     );
   }
 
+  if (target.type !== "capability-pack") {
+    return null;
+  }
   const pack = getCapabilityPack(target.id);
   if (!pack) {
     return (

@@ -70,6 +70,7 @@ function Section({
   children,
   openSection,
   onToggleSection,
+  bare,
 }: {
   id: string;
   title: string;
@@ -77,7 +78,12 @@ function Section({
   children: React.ReactNode;
   openSection: string | null;
   onToggleSection: (id: string | null) => void;
+  bare?: boolean;
 }) {
+  if (bare) {
+    if (openSection !== id) return null;
+    return <div className="space-y-3">{children}</div>;
+  }
   const isOpen = openSection === id;
   return (
     <details
@@ -158,11 +164,30 @@ function Check({
   );
 }
 
+export type SettingsTarget =
+  | "build-mode"
+  | "primary-kit"
+  | "included-types"
+  | "basic"
+  | "role"
+  | "workflow"
+  | "packs"
+  | "output"
+  | "rules"
+  | "lang"
+  | "pkg";
+
 export type SettingsFormProps = {
   config: SkillConfig;
   onChange: (next: SkillConfig) => void;
   inspector: InspectorTarget;
   onInspect: (target: InspectorTarget) => void;
+  /**
+   * When set, SettingsForm renders only the matching section's body and
+   * suppresses the collapsible Section wrapper. Used by the right-side
+   * Inspector to show a single setting editor at a time.
+   */
+  targetOnly?: SettingsTarget;
 };
 
 export function SettingsForm({
@@ -170,9 +195,14 @@ export function SettingsForm({
   onChange,
   inspector,
   onInspect,
+  targetOnly,
 }: SettingsFormProps) {
   const { locale } = useLocale();
   const [openSection, setOpenSection] = useState<string | null>("basic");
+  const shouldRender = (id: SettingsTarget) =>
+    !targetOnly || targetOnly === id;
+  const sectionOpen = targetOnly ?? openSection;
+  const bare = !!targetOnly;
 
   // Category-scoped workflow modules, capability packs, and quality rules
   const categoryWorkflows = WORKFLOW_BY_CATEGORY[config.category] ?? [];
@@ -336,8 +366,9 @@ export function SettingsForm({
         id="buildmode"
         title={tr(UI.secBuildMode, locale)}
         hint={tr(isCustomMode ? UI.buildModeCustom : UI.buildModePreset, locale)}
-        openSection={openSection}
+        openSection={sectionOpen}
         onToggleSection={setOpenSection}
+        bare={bare}
       >
         <div role="tablist" className="inline-flex rounded-md border border-hairline overflow-hidden">
           {(["preset", "custom"] as BuildMode[]).map((m) => {
@@ -369,8 +400,9 @@ export function SettingsForm({
         id="primary-kit"
         title={tr(UI.secSkillPackageType, locale)}
         hint={tr(SKILL_PACKAGE_TYPE_LABELS[derivedPrimary].name, locale)}
-        openSection={openSection}
+        openSection={sectionOpen}
         onToggleSection={setOpenSection}
+        bare={bare}
       >
         <p className="text-fine-print text-ink-muted-80 leading-snug -mt-1">
           {tr(UI.skillPackageTypeIntro, locale)}
@@ -403,8 +435,9 @@ export function SettingsForm({
         id="included-types"
         title={tr(UI.secIncludedSkillTypes, locale)}
         hint={`${config.includedSkillTypes.length} / 8`}
-        openSection={openSection}
+        openSection={sectionOpen}
         onToggleSection={setOpenSection}
+        bare={bare}
       >
         <p className="text-fine-print text-ink-muted-80 leading-snug -mt-1">
           {tr(
@@ -474,8 +507,9 @@ export function SettingsForm({
       <Section
         id="basic"
         title={tr(UI.secBasic, locale)}
-        openSection={openSection}
+        openSection={sectionOpen}
         onToggleSection={setOpenSection}
+        bare={bare}
       >
         <Field label={tr(UI.fldSkillName, locale)}>
           <input
@@ -518,8 +552,9 @@ export function SettingsForm({
         id="role"
         title={tr(UI.secRole, locale)}
         hint={hintRole}
-        openSection={openSection}
+        openSection={sectionOpen}
         onToggleSection={setOpenSection}
+        bare={bare}
       >
         <Field label={tr(UI.fldRoleLevel, locale)}>
           <select
@@ -571,8 +606,9 @@ export function SettingsForm({
           id="workflow"
           title={tr(UI.secWorkflowStages, locale)}
           hint={hintWorkflowStages}
-          openSection={openSection}
+          openSection={sectionOpen}
           onToggleSection={setOpenSection}
+          bare={bare}
         >
           <p className="text-fine-print text-ink-muted-48 leading-snug -mt-1">
             {tr(UI.workflowStagesIntro, locale)}
@@ -607,8 +643,9 @@ export function SettingsForm({
           id="workflow"
           title={tr(UI.secWorkflow, locale)}
           hint={hintWorkflow}
-          openSection={openSection}
+          openSection={sectionOpen}
           onToggleSection={setOpenSection}
+          bare={bare}
         >
           <div className="grid grid-cols-1 gap-1.5">
             {(categoryWorkflows.length > 0 ? categoryWorkflows : ALL_WORKFLOWS).map(
@@ -641,8 +678,9 @@ export function SettingsForm({
         id="packs"
         title={tr(UI.secPacks, locale)}
         hint={hintPacks}
-        openSection={openSection}
+        openSection={sectionOpen}
         onToggleSection={setOpenSection}
+        bare={bare}
       >
         <p className="text-fine-print text-ink-muted-48 leading-snug -mt-1">
           {tr(UI.packsIntro, locale)}
@@ -716,8 +754,9 @@ export function SettingsForm({
         id="output"
         title={tr(UI.secOutput, locale)}
         hint={hintOutput}
-        openSection={openSection}
+        openSection={sectionOpen}
         onToggleSection={setOpenSection}
+        bare={bare}
       >
         <Field label={tr(UI.fldAnswerStyle, locale)}>
           <select
@@ -770,8 +809,9 @@ export function SettingsForm({
         id="rules"
         title={tr(UI.secRules, locale)}
         hint={hintRules}
-        openSection={openSection}
+        openSection={sectionOpen}
         onToggleSection={setOpenSection}
+        bare={bare}
       >
         <div className="grid grid-cols-1 gap-1.5">
           {(categoryRules.length > 0 ? categoryRules : ALL_RULES).map((r) => (
@@ -789,8 +829,9 @@ export function SettingsForm({
         id="lang"
         title={tr(UI.secLanguage, locale)}
         hint={hintLang}
-        openSection={openSection}
+        openSection={sectionOpen}
         onToggleSection={setOpenSection}
+        bare={bare}
       >
         <Field label={tr(UI.fldPrimaryLang, locale)}>
           <select
@@ -845,8 +886,9 @@ export function SettingsForm({
           locale,
         )}
         hint={hintPkg}
-        openSection={openSection}
+        openSection={sectionOpen}
         onToggleSection={setOpenSection}
+        bare={bare}
       >
         {(() => {
           const required = REQUIRED_FILES_BY_TYPE[config.packageType];

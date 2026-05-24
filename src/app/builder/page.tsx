@@ -22,7 +22,7 @@ import type {
   SkillCategory,
   SkillConfig,
 } from "@/types/skill";
-import { SettingsForm } from "@/components/builder/SettingsForm";
+import { SettingsNav } from "@/components/builder/SettingsNav";
 import { FileTree } from "@/components/builder/FileTree";
 import { MarkdownPreview } from "@/components/builder/MarkdownPreview";
 import { RawEditor } from "@/components/builder/RawEditor";
@@ -106,7 +106,7 @@ export default function BuilderPage() {
   const [isGenerating, setIsGenerating] = useState(false);
   const [isExporting, setIsExporting] = useState(false);
   const [inspector, setInspector] = useState<InspectorTarget>({
-    type: "quality",
+    type: "summary",
   });
   const [recommendation, setRecommendation] = useState<Recommendation | null>(
     null,
@@ -125,8 +125,8 @@ export default function BuilderPage() {
   // Esc → close inspector (back to Quality view)
   useEffect(() => {
     function onKey(e: KeyboardEvent) {
-      if (e.key === "Escape" && inspector.type !== "quality") {
-        setInspector({ type: "quality" });
+      if (e.key === "Escape" && inspector.type !== "summary") {
+        setInspector({ type: "summary" });
       }
     }
     document.addEventListener("keydown", onKey);
@@ -313,9 +313,10 @@ export default function BuilderPage() {
                 ↺ {tr(UI.qbReset, locale)}
               </button>
             </div>
-            <SettingsForm
+            <SettingsNav
               config={config}
-              onChange={setConfig}
+              selectedPresetId={selectedPresetId}
+              pkg={pkg}
               inspector={inspector}
               onInspect={setInspector}
             />
@@ -325,8 +326,20 @@ export default function BuilderPage() {
         {/* Center panel — white canvas */}
         <main className="flex min-h-0 bg-canvas">
           <div className="w-64 border-r border-hairline overflow-y-auto thin-scrollbar bg-canvas">
-            <div className="px-4 py-3 border-b border-hairline">
+            <div className="px-4 py-3 border-b border-hairline space-y-1">
               <PanelLabel>{tr(UI.panelFiles, locale)}</PanelLabel>
+              {pkg && (
+                <div className="text-[11.5px] text-ink-muted-80 leading-snug">
+                  <div className="font-mono text-ink truncate">
+                    {pkg.packageName}
+                  </div>
+                  <div className="flex items-center gap-1.5 mt-0.5 text-ink-muted-80">
+                    <span className="font-mono">{pkg.config.packageType}</span>
+                    <span>·</span>
+                    <span>{pkg.files.length} files</span>
+                  </div>
+                </div>
+              )}
             </div>
             <FileTree
               files={pkg?.files ?? []}
@@ -520,7 +533,10 @@ export default function BuilderPage() {
               report={pkg?.qualityReport ?? null}
               isEnabled={(id) => config.capabilityPacks.includes(id)}
               onToggle={togglePack}
-              onClose={() => setInspector({ type: "quality" })}
+              onClose={() => setInspector({ type: "summary" })}
+              config={config}
+              onConfigChange={setConfig}
+              files={pkg?.files}
             />
           </div>
           <QualityFooter
