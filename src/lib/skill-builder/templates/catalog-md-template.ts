@@ -111,6 +111,14 @@ const ENTRY_INDEX: Record<string, Omit<Entry, "id" | "path">> = {
     outputs: ["log row"],
     related: ["checklists/release-checklist.md"],
   },
+  // references/ (framework)
+  "skill-framework.md": {
+    whenToUse:
+      "When deciding which AXDD package type applies to a new or existing kit.",
+    inputs: ["proposed kit purpose", "expected required files"],
+    outputs: ["chosen package type with rationale"],
+    related: ["SKILL.md", "CATALOG.md"],
+  },
   // references/stage-guides/
   "requirement-intake-guide.md": {
     whenToUse: "While running the Requirement Intake stage.",
@@ -220,6 +228,19 @@ export function renderCatalogMd(
     "Inventory of every skill, template, checklist, and test bundled in this kit.",
     "Each entry lists when to use it, expected inputs, produced outputs, and related files inside the kit.",
   ];
+
+  // ── Package Classification — only for full-step kits ─────────────────────
+  if (config.packageType === "full-step-skill") {
+    sections.push("", "## Package Classification", "");
+    sections.push("- **Framework:** AXDD 8-Type Skill Framework");
+    sections.push(`- **Current package type:** \`${config.packageType}\``);
+    sections.push(
+      "- **Reason:** this kit ships an end-to-end multi-stage workflow with `WORK_UNIT.json` (6 stages), `HOOKS.json` routing, references / templates / checklists / tests, and a release gate — which matches the `full-step-skill` definition.",
+    );
+    sections.push(
+      "- **Reference:** see `references/skill-framework.md` for the full 8-type taxonomy and selection rules.",
+    );
+  }
 
   // ── Workflow Skills (one per stage) — only for full-step kits ─────────────
   if (config.packageType === "full-step-skill") {

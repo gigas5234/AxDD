@@ -536,6 +536,21 @@ export function runQualityChecks(
     }
   }
 
+  // 20-pre. AXDD 8-Type Skill Framework reference — full-step kits should ship it
+  if (config.packageType === "full-step-skill") {
+    if (hasFile(files, "/references/skill-framework.md")) {
+      checks.push(pass("skill-framework-ref", "skill-framework.md present"));
+    } else {
+      checks.push(
+        warn(
+          "skill-framework-ref",
+          "skill-framework.md missing",
+          "Full-step kits should include references/skill-framework.md so the package type can be self-documented.",
+        ),
+      );
+    }
+  }
+
   // 20a. Stage guides — full-step kits must ship one per stage
   if (config.packageType === "full-step-skill") {
     const stageGuideFiles = files.filter((f) =>

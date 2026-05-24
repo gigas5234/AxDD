@@ -58,6 +58,7 @@ export function renderReadmeMd(config: SkillConfig): string {
       lines.push(`│   ├── ${pack.referenceFile.fileName}`);
     }
     if (config.packageType === "full-step-skill") {
+      lines.push("│   ├── skill-framework.md");
       lines.push("│   └── stage-guides/");
       lines.push("│       ├── requirement-intake-guide.md");
       lines.push("│       ├── ux-foundation-guide.md");
@@ -136,6 +137,14 @@ export function renderReadmeMd(config: SkillConfig): string {
       "- **`examples/`** — realistic walk-throughs showing the kit end to end.",
     );
   lines.push("");
+
+  if (config.packageType === "full-step-skill") {
+    lines.push("## Skill framework classification");
+    lines.push(
+      `This kit is classified as a \`full-step-skill\` under the **AXDD 8-Type Skill Framework**. See [\`references/skill-framework.md\`](references/skill-framework.md) for the full taxonomy (\`simple-skill\`, \`reference-skill\`, \`template-skill\`, \`script-skill\`, \`asset-skill\`, \`full-step-skill\`, \`metadata-skill\`, \`test-skill\`) and the rules that determine which package type to use.`,
+      "",
+    );
+  }
 
   lines.push("## How to install or use");
   lines.push(

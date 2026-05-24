@@ -11,6 +11,7 @@ import { buildExampleFiles } from "./templates/examples-templates";
 import { buildChecklistFiles } from "./templates/checklists-templates";
 import { buildTestFiles } from "./templates/tests-templates";
 import { buildStageGuideFiles } from "./templates/stage-guides-templates";
+import { SKILL_FRAMEWORK_REFERENCE } from "./templates/skill-framework-template";
 import { renderWorkUnitJson } from "./templates/work-unit-template";
 import { renderHooksJson } from "./templates/hooks-template";
 import { renderCatalogMd } from "./templates/catalog-md-template";
@@ -130,6 +131,16 @@ export function generatePackage(config: SkillConfig): GeneratedPackage {
           ),
         );
       }
+      // AXDD 8-Type Skill Framework classification reference.
+      files.push(
+        mdFile(
+          pkg,
+          `${pkg}/references/skill-framework.md`,
+          "skill-framework.md",
+          SKILL_FRAMEWORK_REFERENCE,
+          ["ref-skill-framework"],
+        ),
+      );
     }
   }
 
