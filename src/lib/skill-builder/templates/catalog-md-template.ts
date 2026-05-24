@@ -209,10 +209,19 @@ export function renderCatalogMd(
     if (!(folder in grouped)) continue;
     const meta = ENTRY_INDEX[f.fileName];
     if (!meta) continue;
+    // Filter related-files to ones actually present in this kit — keeps
+    // CATALOG cross-refs honest when generating a smaller package type.
+    const presentSuffixes = new Set(
+      files.map((g) => g.path.split("/").slice(-2).join("/")),
+    );
+    const relatedFiltered = meta.related.filter(
+      (r) => r === "SKILL.md" || presentSuffixes.has(r),
+    );
     grouped[folder].push({
       id: `catalog-${f.fileName.replace(/\.[^.]+$/, "")}`,
       path: `${folder}${f.fileName}`,
       ...meta,
+      related: relatedFiltered,
     });
   }
 

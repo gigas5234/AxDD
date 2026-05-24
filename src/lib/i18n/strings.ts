@@ -187,6 +187,22 @@ export const UI = {
     en: "This kit is a full-step-skill because it includes staged workflow logic, CATALOG.md, WORK_UNIT.json, HOOKS.json, references, templates, checklists, tests, and examples.",
     ko: "이 키트는 단계형 워크플로 로직과 CATALOG.md, WORK_UNIT.json, HOOKS.json, references, templates, checklists, tests, examples를 포함하므로 full-step-skill입니다.",
   } as Bilingual,
+  referenceWhyThisKit: {
+    en: "This kit is a reference-skill because it ships SKILL.md, README.md, CATALOG.md, and a focused references/ bundle (no workflow stages, hooks, or tests).",
+    ko: "이 키트는 SKILL.md, README.md, CATALOG.md와 references/ 번들만 포함하는 reference-skill입니다 (워크플로·훅·테스트 없음).",
+  } as Bilingual,
+  testWhyThisKit: {
+    en: "This kit is a test-skill because it ships SKILL.md, README.md, CATALOG.md, checklists/, and tests/ — focused on validation and release gates rather than generation.",
+    ko: "이 키트는 SKILL.md, README.md, CATALOG.md, checklists/, tests/ 중심의 test-skill입니다 — 생성보다 검증·릴리스 게이트에 초점.",
+  } as Bilingual,
+  secReferenceSkillFiles: {
+    en: "Reference Skill Files",
+    ko: "Reference Skill 파일",
+  } as Bilingual,
+  secTestSkillFiles: {
+    en: "Validation Skill Files",
+    ko: "검증 Skill 파일",
+  } as Bilingual,
   addonsHelper: {
     en: "Capability add-ons enrich the UX/UI content of the kit. They do not change the package type.",
     ko: "능력 추가 모듈은 키트의 UX/UI 콘텐츠를 보강합니다. 패키지 타입을 바꾸지 않습니다.",
@@ -808,6 +824,23 @@ export const PRESET_LABELS: Record<
     bestFor: {
       en: "Turning screenshots, Figma descriptions, or UI references into React/Tailwind implementation plans.",
       ko: "스크린샷·Figma 설명·UI 레퍼런스를 React/Tailwind 구현 계획으로 변환합니다.",
+    },
+  },
+  "axdd-ux-ui-reference-skill": {
+    name: { en: "UX/UI Reference Skill", ko: "UX/UI Reference Skill" },
+    bestFor: {
+      en: "Lightweight UX/UI skill — guide AI outputs from references (principles, patterns, design-system rules, accessibility, implementation mapping).",
+      ko: "참조 문서(원칙·패턴·디자인 시스템·접근성·구현 매핑)로 AI 출력을 안내하는 경량 UX/UI 스킬입니다.",
+    },
+  },
+  "axdd-ux-ui-review-validation-skill": {
+    name: {
+      en: "UX/UI Review & Validation Skill",
+      ko: "UX/UI 리뷰·검증 Skill",
+    },
+    bestFor: {
+      en: "Validation-focused UX/UI skill — audit screens, prompts, Figma instructions, and handoff deliverables.",
+      ko: "화면·프롬프트·Figma 지침·핸드오프 산출물을 검증하는 UX/UI 스킬입니다.",
     },
   },
   "design-system-starter": {

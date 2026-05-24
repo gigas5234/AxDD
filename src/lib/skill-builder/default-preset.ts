@@ -101,6 +101,136 @@ export function buildUxUiDefaultConfig(): SkillConfig {
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
+// UX/UI Reference Skill (lightweight references-focused)
+// ─────────────────────────────────────────────────────────────────────────────
+export function buildUxUiReferenceSkillConfig(): SkillConfig {
+  const ts = nowIso();
+  return {
+    id: "axdd-ux-ui-reference-skill",
+    skillName: "UX/UI Reference Skill",
+    packageName: "axdd-ux-ui-reference-skill",
+    description:
+      "Lightweight UX/UI skill that guides AI outputs using design principles, design system rules, accessibility rules, and implementation mapping references.",
+    category: "ux-ui",
+    packageType: "reference-skill",
+    targetAgent: "generic",
+    roleProfile: {
+      roleLevel: "senior",
+      domainFocus: ["UX Principles", "UI Patterns", "Design Systems", "Accessibility"],
+      implementationAwareness: true,
+      designSystemAwareness: true,
+      businessAwareness: false,
+    },
+    workflowModules: [],
+    workflowStages: [],
+    capabilityPacks: ["design-taste", "web-best-practices", "tailwind-first"],
+    outputFormat: {
+      answerStyle: "structured",
+      includeMarkdown: true,
+      includeJson: false,
+      includeTables: false,
+      includeCursorPrompt: false,
+      includeChecklists: false,
+      includeExamples: true,
+    },
+    qualityRules: [
+      "avoid-vague-language",
+      "define-primary-action",
+      "include-information-hierarchy",
+      "include-accessibility",
+      "avoid-overlong-chat-response",
+    ],
+    language: {
+      primaryLanguage: "en",
+      previewLanguages: ["en", "ko"],
+      generateKoreanByDefault: false,
+      translationMode: "on-demand",
+    },
+    packageOptions: {
+      includeSkillMd: true,
+      includeReadme: true,
+      includeReferences: true,
+      includeTemplates: false,
+      includeExamples: true,
+      includeCatalogMd: true,
+      includeWorkUnitJson: false,
+      includeHooksJson: false,
+      includeChecklists: false,
+      includeTests: false,
+      exportFormat: "zip",
+    },
+    createdAt: ts,
+    updatedAt: ts,
+  };
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// UX/UI Review & Validation Skill (test-skill — validation-focused)
+// ─────────────────────────────────────────────────────────────────────────────
+export function buildUxUiTestSkillConfig(): SkillConfig {
+  const ts = nowIso();
+  return {
+    id: "axdd-ux-ui-review-validation-skill",
+    skillName: "UX/UI Review & Validation Skill",
+    packageName: "axdd-ux-ui-review-validation-skill",
+    description:
+      "Validation-focused UX/UI skill — audits screens, prompts, Figma instructions, and handoff deliverables against UX/UI quality and accessibility checklists.",
+    category: "ux-ui",
+    packageType: "test-skill",
+    targetAgent: "generic",
+    roleProfile: {
+      roleLevel: "senior",
+      domainFocus: ["UX Review", "Accessibility", "Handoff Validation"],
+      implementationAwareness: true,
+      designSystemAwareness: true,
+      businessAwareness: false,
+    },
+    workflowModules: [],
+    workflowStages: [],
+    capabilityPacks: ["web-best-practices"],
+    outputFormat: {
+      answerStyle: "structured",
+      includeMarkdown: true,
+      includeJson: true,
+      includeTables: true,
+      includeCursorPrompt: false,
+      includeChecklists: true,
+      includeExamples: true,
+    },
+    qualityRules: [
+      "avoid-vague-language",
+      "define-primary-action",
+      "include-information-hierarchy",
+      "include-screen-states",
+      "include-responsive-notes",
+      "include-accessibility",
+      "avoid-overlong-chat-response",
+    ],
+    language: {
+      primaryLanguage: "en",
+      previewLanguages: ["en", "ko"],
+      generateKoreanByDefault: false,
+      translationMode: "on-demand",
+    },
+    packageOptions: {
+      includeSkillMd: true,
+      includeReadme: true,
+      includeReferences: false,
+      includeTemplates: false,
+      includeExamples: true,
+      includeCatalogMd: true,
+      includeWorkUnitJson: false,
+      includeHooksJson: false,
+      includeChecklists: true,
+      includeTests: true,
+      exportFormat: "zip",
+    },
+    createdAt: ts,
+    updatedAt: ts,
+  };
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
 // Frontend Implementation
 // ─────────────────────────────────────────────────────────────────────────────
 export function buildFrontendDefaultConfig(): SkillConfig {
@@ -345,31 +475,33 @@ export const PRESETS: PresetDescriptor[] = [
   //   ...
   // },
   {
-    id: "figma-to-code-helper",
-    name: "Figma to Code Helper",
+    id: "axdd-ux-ui-reference-skill",
+    name: "UX/UI Reference Skill",
     category: "ux-ui",
     bestFor:
-      "Turning screenshots, Figma descriptions, or UI references into React/Tailwind implementation plans.",
+      "Lightweight UX/UI skill — guide AI outputs from references (principles, patterns, design-system rules, accessibility, implementation mapping).",
     expectedOutput: [
-      "Scene graph output rules",
-      "Asset map template",
-      "Tailwind implementation rules",
-      "Cursor prompt template",
+      "SKILL.md, README.md, CATALOG.md",
+      "references/ (principles + patterns + design system + accessibility + tailwind mapping)",
+      "examples/",
     ],
-    status: "coming-soon",
+    status: "available",
+    buildConfig: buildUxUiReferenceSkillConfig,
   },
   {
-    id: "ux-review-assistant",
-    name: "UX Review Assistant",
+    id: "axdd-ux-ui-review-validation-skill",
+    name: "UX/UI Review & Validation Skill",
     category: "ux-ui",
-    bestFor: "Reviewing existing screens and finding UX/UI issues.",
+    bestFor:
+      "Validation-focused UX/UI skill — audit screens, prompts, Figma instructions, and handoff deliverables.",
     expectedOutput: [
-      "Review framework",
-      "Usability checklist",
-      "Accessibility checklist",
-      "Prioritized fix format",
+      "SKILL.md, README.md, CATALOG.md",
+      "checklists/ (ux-foundation, ui-design, handoff, release)",
+      "tests/ (sandbox-test-scenario, validation-log-template)",
+      "examples/",
     ],
-    status: "coming-soon",
+    status: "available",
+    buildConfig: buildUxUiTestSkillConfig,
   },
 
   // ── Frontend variations (coming-soon) ─────────────────────────────────────

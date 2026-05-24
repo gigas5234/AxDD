@@ -318,7 +318,11 @@ export function SettingsForm({
           {tr(UI.skillPackageTypeIntro, locale)}
         </p>
         {(() => {
-          const availableTypes: SkillPackageType[] = ["full-step-skill"];
+          const availableTypes: SkillPackageType[] = [
+            "full-step-skill",
+            "reference-skill",
+            "test-skill",
+          ];
           const comingSoonTypes: SkillPackageType[] = allPackageTypes.filter(
             (pt) => !availableTypes.includes(pt),
           );
@@ -326,7 +330,6 @@ export function SettingsForm({
           const renderCard = (pt: SkillPackageType, isEnabled: boolean) => {
             const meta = SKILL_PACKAGE_TYPE_LABELS[pt];
             const selected = config.packageType === pt;
-            const isFullStep = pt === "full-step-skill";
             return (
               <label
                 key={pt}
@@ -374,9 +377,18 @@ export function SettingsForm({
                   <div className="text-[11px] text-ink-muted-80 mt-1 font-mono leading-snug break-words">
                     <span className="not-italic">Required:</span> {meta.required}
                   </div>
-                  {selected && isFullStep && (
+                  {selected && (
                     <div className="mt-2 text-[11.5px] text-ink-muted-80 leading-snug border-l-2 border-primary/40 pl-2">
-                      {tr(UI.fullStepWhyThisKit, locale)}
+                      {tr(
+                        pt === "full-step-skill"
+                          ? UI.fullStepWhyThisKit
+                          : pt === "reference-skill"
+                            ? UI.referenceWhyThisKit
+                            : pt === "test-skill"
+                              ? UI.testWhyThisKit
+                              : UI.skillPackageTypeIntro,
+                        locale,
+                      )}
                     </div>
                   )}
                 </div>
@@ -776,7 +788,16 @@ export function SettingsForm({
 
       <Section
         id="pkg"
-        title={tr(isFullStep ? UI.secStandardKitFiles : UI.secPackage, locale)}
+        title={tr(
+          config.packageType === "full-step-skill"
+            ? UI.secStandardKitFiles
+            : config.packageType === "reference-skill"
+              ? UI.secReferenceSkillFiles
+              : config.packageType === "test-skill"
+                ? UI.secTestSkillFiles
+                : UI.secPackage,
+          locale,
+        )}
         hint={hintPkg}
         openSection={openSection}
         onToggleSection={setOpenSection}
@@ -789,7 +810,8 @@ export function SettingsForm({
             requiredKey: keyof typeof required;
             optionKey: keyof SkillConfig["packageOptions"];
           };
-          const rows: Row[] = isFullStep
+          const useMatrixView = config.packageType !== "simple-skill";
+          const rows: Row[] = useMatrixView
             ? [
                 { label: tr(UI.fldIncSkillMd, locale), requiredKey: "skillMd", optionKey: "includeSkillMd" },
                 { label: tr(UI.fldIncCatalog, locale), requiredKey: "catalogMd", optionKey: "includeCatalogMd" },
@@ -804,10 +826,6 @@ export function SettingsForm({
               ]
             : [
                 { label: tr(UI.fldIncSkillMd, locale), requiredKey: "skillMd", optionKey: "includeSkillMd" },
-                { label: tr(UI.fldIncReadme, locale), requiredKey: "readmeMd", optionKey: "includeReadme" },
-                { label: tr(UI.fldIncReferences, locale), requiredKey: "references", optionKey: "includeReferences" },
-                { label: tr(UI.fldIncTemplates, locale), requiredKey: "templates", optionKey: "includeTemplates" },
-                { label: tr(UI.fldIncExamples, locale), requiredKey: "examples", optionKey: "includeExamples" },
               ];
           return (
             <div className="space-y-1">

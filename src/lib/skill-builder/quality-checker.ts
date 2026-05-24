@@ -87,7 +87,14 @@ export function runQualityChecks(
   }
 
   // ── 3. Workflow count (Goldilocks) ────────────────────────────────────────
-  if (wfCount === 0) {
+  // Skip entirely for package types that legitimately have no workflow
+  // modules (reference-skill, test-skill, simple-skill, asset-skill,
+  // metadata-skill, script-skill, template-skill).
+  const usesLegacyWorkflow =
+    config.packageType === "full-step-skill" || wfCount > 0;
+  if (!usesLegacyWorkflow) {
+    // no check emitted — N/A
+  } else if (wfCount === 0) {
     checks.push(
       fail("workflow-count", "Workflow modules", "No workflow modules selected."),
     );
