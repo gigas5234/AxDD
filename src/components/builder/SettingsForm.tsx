@@ -322,23 +322,33 @@ export function SettingsForm({
             const meta = SKILL_PACKAGE_TYPE_LABELS[pt];
             const selected = config.packageType === pt;
             const isFullStep = pt === "full-step-skill";
+            const isEnabled = isFullStep; // v0.1.2 — only full-step is selectable
             return (
               <label
                 key={pt}
                 role="radio"
                 aria-checked={selected}
-                className={`rounded-md border p-3 cursor-pointer transition flex items-start gap-2.5 ${
+                aria-disabled={!isEnabled}
+                className={`rounded-md border p-3 transition flex items-start gap-2.5 ${
                   selected
                     ? "border-primary bg-primary/5"
-                    : "border-hairline bg-canvas hover:bg-divider-soft"
+                    : isEnabled
+                      ? "border-hairline bg-canvas hover:bg-divider-soft cursor-pointer"
+                      : "border-hairline bg-canvas opacity-60 cursor-not-allowed"
                 }`}
+                title={
+                  isEnabled
+                    ? undefined
+                    : tr(UI.skillPackageTypeComingSoon, locale)
+                }
               >
                 <input
                   type="radio"
                   name="skill-package-type"
                   className="mt-1 accent-primary"
                   checked={selected}
-                  onChange={() => update("packageType", pt)}
+                  disabled={!isEnabled}
+                  onChange={() => isEnabled && update("packageType", pt)}
                 />
                 <div className="min-w-0 flex-1">
                   <div className="flex items-center gap-2 flex-wrap">
@@ -348,9 +358,9 @@ export function SettingsForm({
                     <span className="text-[10.5px] font-mono text-ink-muted-48">
                       {pt}
                     </span>
-                    {!isFullStep && (
+                    {!isEnabled && (
                       <span className="text-[10.5px] uppercase tracking-wide text-ink-muted-48 border border-hairline rounded-sm px-1.5 py-[1px]">
-                        {tr(UI.skillPackageTypePreview, locale)}
+                        {tr(UI.skillPackageTypeComingSoon, locale)}
                       </span>
                     )}
                   </div>
@@ -364,6 +374,11 @@ export function SettingsForm({
                   <div className="text-[11px] text-ink-muted-48 mt-0.5 font-mono leading-snug break-words">
                     <span className="not-italic">Required:</span> {meta.required}
                   </div>
+                  {selected && isFullStep && (
+                    <div className="mt-2 text-[11.5px] text-ink-muted-80 leading-snug border-l-2 border-primary/40 pl-2">
+                      {tr(UI.fullStepWhyThisKit, locale)}
+                    </div>
+                  )}
                 </div>
               </label>
             );

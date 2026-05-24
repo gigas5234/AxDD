@@ -164,24 +164,28 @@ export const UI = {
   } as Bilingual,
   secPacks: { en: "4. Design Capability Add-ons", ko: "4. 디자인 능력 추가 모듈" } as Bilingual,
   secSkillPackageType: {
-    en: "0. Skill Package Type",
-    ko: "0. 스킬 패키지 타입",
+    en: "Skill Package Type",
+    ko: "스킬 패키지 타입",
   } as Bilingual,
   skillPackageTypeIntro: {
-    en: "Pick the AXDD package type for this kit. Required files come from the matrix; the UI below configures the content.",
-    ko: "이 키트의 AXDD 패키지 타입을 선택하세요. 필수 파일은 매트릭스에서 자동 결정되며, 아래에서 내용을 구성합니다.",
+    en: "Package type controls the required file structure, quality checks, and workflow model.",
+    ko: "패키지 타입은 필수 파일 구조·품질 검사·워크플로 모델을 결정합니다.",
   } as Bilingual,
-  skillPackageTypePreview: {
-    en: "preview — full-step-skill is the v0.1.2 default",
-    ko: "프리뷰 — v0.1.2 기본은 full-step-skill",
+  skillPackageTypeComingSoon: {
+    en: "Coming soon",
+    ko: "지원 예정",
+  } as Bilingual,
+  fullStepWhyThisKit: {
+    en: "This kit is a full-step-skill because it includes staged workflow logic, CATALOG.md, WORK_UNIT.json, HOOKS.json, references, templates, checklists, tests, and examples.",
+    ko: "이 키트는 단계형 워크플로 로직과 CATALOG.md, WORK_UNIT.json, HOOKS.json, references, templates, checklists, tests, examples를 포함하므로 full-step-skill입니다.",
   } as Bilingual,
   addonsHelper: {
-    en: "Capability add-ons modify the UX/UI content of the kit. They do not change the package type.",
+    en: "Capability add-ons enrich the UX/UI content of the kit. They do not change the package type.",
     ko: "능력 추가 모듈은 키트의 UX/UI 콘텐츠를 보강합니다. 패키지 타입을 바꾸지 않습니다.",
   } as Bilingual,
   secStandardKitFiles: {
-    en: "8. Standard Kit Files",
-    ko: "8. 표준 키트 파일",
+    en: "Standard Kit Files",
+    ko: "표준 키트 파일",
   } as Bilingual,
   secOutput: { en: "5. Output Format", ko: "5. 출력 형식" } as Bilingual,
   secRules: { en: "6. Quality Rules", ko: "6. 품질 규칙" } as Bilingual,
