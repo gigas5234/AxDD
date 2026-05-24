@@ -70,9 +70,9 @@ Record one row per validation run. Keep history; do not overwrite prior rows.
 
 | Run date   | Kit version | Scenario ID | Result | Notes | Follow-up actions |
 |------------|-------------|-------------|--------|-------|-------------------|
-| YYYY-MM-DD | 0.1.0       | S-001       | pass   |       |                   |
-| YYYY-MM-DD | 0.1.0       | S-002       | warn   |       |                   |
-| YYYY-MM-DD | 0.1.0       | S-003       | fail   |       |                   |
+| YYYY-MM-DD | 0.1.1       | S-001       | pass   |       |                   |
+| YYYY-MM-DD | 0.1.1       | S-002       | warn   |       |                   |
+| YYYY-MM-DD | 0.1.1       | S-003       | fail   |       |                   |
 
 ## Result legend
 

@@ -1,5 +1,6 @@
 import type { SkillConfig } from "@/types/skill";
 import { REQUIRED_FILES_BY_TYPE } from "../package-matrix";
+import { CAPABILITY_PACKS } from "../blocks/capability-packs";
 
 export function renderReadmeMd(config: SkillConfig): string {
   const required = REQUIRED_FILES_BY_TYPE[config.packageType];
@@ -49,6 +50,13 @@ export function renderReadmeMd(config: SkillConfig): string {
       lines.push("│   ├── design-system-rules.md");
     if (config.qualityRules.includes("include-accessibility"))
       lines.push("│   ├── accessibility-checklist.md");
+    // Capability-pack-driven reference files (e.g. design-taste,
+    // web-best-practices, tailwind-mapping).
+    for (const pack of CAPABILITY_PACKS) {
+      if (!config.capabilityPacks.includes(pack.id)) continue;
+      if (!pack.referenceFile) continue;
+      lines.push(`│   ├── ${pack.referenceFile.fileName}`);
+    }
     if (config.packageType === "full-step-skill") {
       lines.push("│   └── stage-guides/");
       lines.push("│       ├── requirement-intake-guide.md");
