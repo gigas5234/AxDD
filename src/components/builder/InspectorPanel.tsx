@@ -149,35 +149,30 @@ export function InspectorPanel({
             </div>
           </div>
         </div>
-        <div className="flex-1 overflow-y-auto thin-scrollbar px-4 py-3 space-y-4">
-          {/* Build mode toggle reused from per-section settings */}
-          <div className="rounded-md border border-hairline bg-canvas">
-            <SettingsForm
-              config={config}
-              onChange={onConfigChange}
-              inspector={target}
-              onInspect={() => {}}
-              targetOnly="build-mode"
-            />
-          </div>
-          <div className="rounded-md border border-hairline bg-canvas">
-            <SettingsForm
-              config={config}
-              onChange={onConfigChange}
-              inspector={target}
-              onInspect={() => {}}
-              targetOnly="included-types"
-            />
-          </div>
-          <div className="rounded-md border border-hairline bg-canvas">
-            <SettingsForm
-              config={config}
-              onChange={onConfigChange}
-              inspector={target}
-              onInspect={() => {}}
-              targetOnly="primary-kit"
-            />
-          </div>
+        <div className="flex-1 overflow-y-auto thin-scrollbar px-4 py-4 space-y-5 bg-canvas">
+          <SettingsForm
+            config={config}
+            onChange={onConfigChange}
+            inspector={target}
+            onInspect={() => {}}
+            targetOnly="build-mode"
+          />
+          <hr className="border-divider-soft" />
+          <SettingsForm
+            config={config}
+            onChange={onConfigChange}
+            inspector={target}
+            onInspect={() => {}}
+            targetOnly="included-types"
+          />
+          <hr className="border-divider-soft" />
+          <SettingsForm
+            config={config}
+            onChange={onConfigChange}
+            inspector={target}
+            onInspect={() => {}}
+            targetOnly="primary-kit"
+          />
         </div>
       </div>
     );
