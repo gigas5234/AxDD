@@ -27,12 +27,18 @@ import { useLocale, tr } from "@/lib/i18n/locale";
 import {
   UI,
   WORKFLOW_LABELS as WORKFLOW_I18N,
+  WORKFLOW_STAGE_LABELS,
   QUALITY_LABELS as QUALITY_I18N,
   PACK_LABELS,
   ROLE_LEVEL_LABELS,
   ANSWER_STYLE_LABELS,
   TRANSLATION_MODE_LABELS,
 } from "@/lib/i18n/strings";
+import {
+  REQUIRED_FILES_BY_TYPE,
+  ALL_STAGES,
+  STAGE_METADATA,
+} from "@/lib/skill-builder/package-matrix";
 
 const ROLE_LEVELS: RoleLevel[] = ["junior", "mid", "senior", "expert"];
 const TARGET_AGENTS: TargetAgent[] = [
@@ -188,8 +194,25 @@ export function SettingsForm({
       ? tr(UI.langKorean, locale)
       : tr(UI.langEnglish, locale);
   const hintLang = `${langLabel} · ${tr(TRANSLATION_MODE_LABELS[config.language.translationMode], locale)}`;
+  const isFullStep = config.packageType === "full-step-skill";
   const hintPkg = (() => {
     const o = config.packageOptions;
+    if (isFullStep) {
+      const flags = [
+        o.includeSkillMd,
+        o.includeCatalogMd,
+        o.includeReadme,
+        o.includeWorkUnitJson,
+        o.includeHooksJson,
+        o.includeReferences,
+        o.includeTemplates,
+        o.includeChecklists,
+        o.includeTests,
+        o.includeExamples,
+      ];
+      const count = flags.filter(Boolean).length;
+      return `${count}/${flags.length} ${includedWord}`;
+    }
     const count = [
       o.includeSkillMd,
       o.includeReadme,
@@ -199,6 +222,9 @@ export function SettingsForm({
     ].filter(Boolean).length;
     return `${count}/5 ${includedWord}`;
   })();
+  const hintWorkflowStages = `${
+    (config.workflowStages.length || ALL_STAGES.length)
+  }/${ALL_STAGES.length}`;
   function update<K extends keyof SkillConfig>(key: K, value: SkillConfig[K]) {
     onChange({ ...config, [key]: value, updatedAt: new Date().toISOString() });
   }
@@ -359,38 +385,76 @@ export function SettingsForm({
         />
       </Section>
 
-      <Section
-        id="workflow"
-        title={tr(UI.secWorkflow, locale)}
-        hint={hintWorkflow}
-        openSection={openSection}
-        onToggleSection={setOpenSection}
-      >
-        <div className="grid grid-cols-1 gap-1.5">
-          {(categoryWorkflows.length > 0 ? categoryWorkflows : ALL_WORKFLOWS).map(
-            (m) => {
-              const hasViolation = workflowHasUnmetDeps(violations, m);
+      {isFullStep ? (
+        <Section
+          id="workflow"
+          title={tr(UI.secWorkflowStages, locale)}
+          hint={hintWorkflowStages}
+          openSection={openSection}
+          onToggleSection={setOpenSection}
+        >
+          <p className="text-fine-print text-ink-muted-48 leading-snug -mt-1">
+            {tr(UI.workflowStagesIntro, locale)}
+          </p>
+          <ol className="space-y-1.5">
+            {ALL_STAGES.map((id) => {
+              const meta = STAGE_METADATA[id];
               return (
-                <div key={m} className="flex items-center gap-2">
-                  <Check
-                    label={tr(WORKFLOW_I18N[m], locale)}
-                    checked={config.workflowModules.includes(m)}
-                    onChange={() => toggleWorkflow(m)}
-                  />
-                  {hasViolation && (
-                    <span
-                      className="text-[11px] text-primary font-medium"
-                      title={tr(UI.depsUnmet, locale)}
-                    >
-                      ⚠
-                    </span>
-                  )}
-                </div>
+                <li
+                  key={id}
+                  className="flex items-start gap-2 text-[13.5px] text-ink"
+                  title={meta.purpose}
+                >
+                  <span className="inline-flex items-center justify-center w-5 h-5 rounded-sm bg-ink/5 text-ink-muted-80 text-[11px] font-mono">
+                    {meta.order}
+                  </span>
+                  <div className="min-w-0">
+                    <div className="font-medium">
+                      {tr(WORKFLOW_STAGE_LABELS[id], locale)}
+                    </div>
+                    <div className="text-[11.5px] text-ink-muted-48 font-mono truncate">
+                      {id}
+                    </div>
+                  </div>
+                </li>
               );
-            },
-          )}
-        </div>
-      </Section>
+            })}
+          </ol>
+        </Section>
+      ) : (
+        <Section
+          id="workflow"
+          title={tr(UI.secWorkflow, locale)}
+          hint={hintWorkflow}
+          openSection={openSection}
+          onToggleSection={setOpenSection}
+        >
+          <div className="grid grid-cols-1 gap-1.5">
+            {(categoryWorkflows.length > 0 ? categoryWorkflows : ALL_WORKFLOWS).map(
+              (m) => {
+                const hasViolation = workflowHasUnmetDeps(violations, m);
+                return (
+                  <div key={m} className="flex items-center gap-2">
+                    <Check
+                      label={tr(WORKFLOW_I18N[m], locale)}
+                      checked={config.workflowModules.includes(m)}
+                      onChange={() => toggleWorkflow(m)}
+                    />
+                    {hasViolation && (
+                      <span
+                        className="text-[11px] text-primary font-medium"
+                        title={tr(UI.depsUnmet, locale)}
+                      >
+                        ⚠
+                      </span>
+                    )}
+                  </div>
+                );
+              },
+            )}
+          </div>
+        </Section>
+      )}
 
       <Section
         id="packs"
@@ -591,31 +655,66 @@ export function SettingsForm({
         openSection={openSection}
         onToggleSection={setOpenSection}
       >
-        <Check
-          label={tr(UI.fldIncSkillMd, locale)}
-          checked={config.packageOptions.includeSkillMd}
-          onChange={(v) => updatePkg("includeSkillMd", v)}
-        />
-        <Check
-          label={tr(UI.fldIncReadme, locale)}
-          checked={config.packageOptions.includeReadme}
-          onChange={(v) => updatePkg("includeReadme", v)}
-        />
-        <Check
-          label={tr(UI.fldIncReferences, locale)}
-          checked={config.packageOptions.includeReferences}
-          onChange={(v) => updatePkg("includeReferences", v)}
-        />
-        <Check
-          label={tr(UI.fldIncTemplates, locale)}
-          checked={config.packageOptions.includeTemplates}
-          onChange={(v) => updatePkg("includeTemplates", v)}
-        />
-        <Check
-          label={tr(UI.fldIncExamples, locale)}
-          checked={config.packageOptions.includeExamples}
-          onChange={(v) => updatePkg("includeExamples", v)}
-        />
+        {(() => {
+          const required = REQUIRED_FILES_BY_TYPE[config.packageType];
+          const lockedLabel = tr(UI.fldLockedRequired, locale);
+          type Row = {
+            label: string;
+            requiredKey: keyof typeof required;
+            optionKey: keyof SkillConfig["packageOptions"];
+          };
+          const rows: Row[] = isFullStep
+            ? [
+                { label: tr(UI.fldIncSkillMd, locale), requiredKey: "skillMd", optionKey: "includeSkillMd" },
+                { label: tr(UI.fldIncCatalog, locale), requiredKey: "catalogMd", optionKey: "includeCatalogMd" },
+                { label: tr(UI.fldIncReadme, locale), requiredKey: "readmeMd", optionKey: "includeReadme" },
+                { label: tr(UI.fldIncWorkUnit, locale), requiredKey: "workUnitJson", optionKey: "includeWorkUnitJson" },
+                { label: tr(UI.fldIncHooks, locale), requiredKey: "hooksJson", optionKey: "includeHooksJson" },
+                { label: tr(UI.fldIncReferences, locale), requiredKey: "references", optionKey: "includeReferences" },
+                { label: tr(UI.fldIncTemplates, locale), requiredKey: "templates", optionKey: "includeTemplates" },
+                { label: tr(UI.fldIncChecklists, locale), requiredKey: "checklists", optionKey: "includeChecklists" },
+                { label: tr(UI.fldIncTests, locale), requiredKey: "tests", optionKey: "includeTests" },
+                { label: tr(UI.fldIncExamples, locale), requiredKey: "examples", optionKey: "includeExamples" },
+              ]
+            : [
+                { label: tr(UI.fldIncSkillMd, locale), requiredKey: "skillMd", optionKey: "includeSkillMd" },
+                { label: tr(UI.fldIncReadme, locale), requiredKey: "readmeMd", optionKey: "includeReadme" },
+                { label: tr(UI.fldIncReferences, locale), requiredKey: "references", optionKey: "includeReferences" },
+                { label: tr(UI.fldIncTemplates, locale), requiredKey: "templates", optionKey: "includeTemplates" },
+                { label: tr(UI.fldIncExamples, locale), requiredKey: "examples", optionKey: "includeExamples" },
+              ];
+          return (
+            <div className="space-y-1">
+              {rows.map((r) => {
+                const isRequired = required[r.requiredKey];
+                const isChecked = isRequired
+                  ? true
+                  : Boolean(config.packageOptions[r.optionKey]);
+                return (
+                  <div key={String(r.optionKey)} className="flex items-center gap-2">
+                    <Check
+                      label={r.label}
+                      checked={isChecked}
+                      onChange={(v) =>
+                        !isRequired &&
+                        updatePkg(r.optionKey, v as never)
+                      }
+                      disabled={isRequired}
+                    />
+                    {isRequired && (
+                      <span
+                        className="text-[10.5px] uppercase tracking-wide text-ink-muted-48"
+                        title={lockedLabel}
+                      >
+                        🔒 {lockedLabel}
+                      </span>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+          );
+        })()}
       </Section>
     </div>
   );

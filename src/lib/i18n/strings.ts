@@ -7,6 +7,7 @@ import type {
   SkillCategory,
   TranslationMode,
   WorkflowModule,
+  WorkflowStageId,
 } from "@/types/skill";
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -152,6 +153,14 @@ export const UI = {
   secBasic: { en: "1. Basic Info", ko: "1. 기본 정보" } as Bilingual,
   secRole: { en: "2. Role Profile", ko: "2. 역할 프로필" } as Bilingual,
   secWorkflow: { en: "3. Workflow Modules", ko: "3. 워크플로 모듈" } as Bilingual,
+  secWorkflowStages: {
+    en: "3. Workflow Stages",
+    ko: "3. 워크플로 단계",
+  } as Bilingual,
+  workflowStagesIntro: {
+    en: "Full-step kits use the canonical AXDD 6-stage workflow defined in WORK_UNIT.json. Stages are locked for v0.1.",
+    ko: "Full-step 키트는 WORK_UNIT.json에 정의된 표준 6단계 워크플로를 사용합니다. v0.1에서는 고정값입니다.",
+  } as Bilingual,
   secPacks: { en: "4. Capability Packs", ko: "4. 능력 팩" } as Bilingual,
   secOutput: { en: "5. Output Format", ko: "5. 출력 형식" } as Bilingual,
   secRules: { en: "6. Quality Rules", ko: "6. 품질 규칙" } as Bilingual,
@@ -195,10 +204,22 @@ export const UI = {
     ko: "MVP에서 한국어 번역은 비활성 상태입니다 — 미리보기의 한국어 탭 참고.",
   } as Bilingual,
   fldIncSkillMd: { en: "Include SKILL.md", ko: "SKILL.md 포함" } as Bilingual,
+  fldIncCatalog: { en: "Include CATALOG.md", ko: "CATALOG.md 포함" } as Bilingual,
   fldIncReadme: { en: "Include README.md", ko: "README.md 포함" } as Bilingual,
+  fldIncWorkUnit: {
+    en: "Include WORK_UNIT.json",
+    ko: "WORK_UNIT.json 포함",
+  } as Bilingual,
+  fldIncHooks: { en: "Include HOOKS.json", ko: "HOOKS.json 포함" } as Bilingual,
   fldIncReferences: { en: "Include references/", ko: "references/ 포함" } as Bilingual,
   fldIncTemplates: { en: "Include templates/", ko: "templates/ 포함" } as Bilingual,
+  fldIncChecklists: { en: "Include checklists/", ko: "checklists/ 포함" } as Bilingual,
+  fldIncTests: { en: "Include tests/", ko: "tests/ 포함" } as Bilingual,
   fldIncExamples: { en: "Include examples/", ko: "examples/ 포함" } as Bilingual,
+  fldLockedRequired: {
+    en: "required by matrix",
+    ko: "매트릭스 필수",
+  } as Bilingual,
 
   // Language value labels
   langEnglish: { en: "English", ko: "영어" } as Bilingual,
@@ -343,6 +364,15 @@ export const TRANSLATION_MODE_LABELS: Record<TranslationMode, Bilingual> = {
 // ─────────────────────────────────────────────────────────────────────────────
 // Workflow / Rule / Category / Pack / Preset label maps
 // ─────────────────────────────────────────────────────────────────────────────
+
+export const WORKFLOW_STAGE_LABELS: Record<WorkflowStageId, Bilingual> = {
+  "requirement-intake": { en: "Requirement Intake", ko: "요구사항 인테이크" },
+  "ux-foundation": { en: "UX Foundation", ko: "UX 기초" },
+  "ui-design-foundation": { en: "UI Design Foundation", ko: "UI 디자인 기초" },
+  "prototype-planning": { en: "Prototype Planning", ko: "프로토타입 계획" },
+  "review-validation": { en: "Review & Validation", ko: "리뷰 및 검증" },
+  handoff: { en: "Handoff", ko: "핸드오프" },
+};
 
 export const WORKFLOW_LABELS: Record<WorkflowModule, Bilingual> = {
   // UX/UI
@@ -629,12 +659,12 @@ export const PRESET_LABELS: Record<
 > = {
   "ux-ui-axdd-default": {
     name: {
-      en: "UX/UI Designer — AxDD Default",
-      ko: "UX/UI 디자이너 — AxDD 기본",
+      en: "AXDD UX/UI Standard Kit",
+      ko: "AXDD UX/UI 표준 키트",
     },
     bestFor: {
-      en: "Turning rough service ideas into UX structures, screens, and implementation prompts.",
-      ko: "거친 서비스 아이디어를 UX 구조·화면·구현 프롬프트로 변환합니다.",
+      en: "Compose the full UX/UI Standard Kit (SKILL + CATALOG + WORK_UNIT + HOOKS + references / templates / checklists / tests / examples).",
+      ko: "UX/UI 표준 키트 전체 구성 (SKILL + CATALOG + WORK_UNIT + HOOKS + references / templates / checklists / tests / examples).",
     },
   },
   "figma-to-code-helper": {

@@ -483,21 +483,7 @@ export default function BuilderPage() {
                   onChange={handleEditContent}
                 />
               )}
-              {selectedFile && activeTab === "korean" && (
-                <div className="px-6 py-6">
-                  <div className="rounded-lg border border-hairline bg-canvas-parchment p-5">
-                    <div className="text-caption uppercase tracking-[0.16em] text-ink-muted-48">
-                      {tr(UI.btnKoreanPreview, locale)}
-                    </div>
-                    <p className="mt-2 text-ink" style={{ fontSize: 17 }}>
-                      {tr(UI.koPreviewLine1, locale)}
-                    </p>
-                    <p className="mt-2 text-ink-muted-48" style={{ fontSize: 14 }}>
-                      {tr(UI.koPreviewLine2, locale)}
-                    </p>
-                  </div>
-                </div>
-              )}
+              {/* Korean preview tab body removed in v0.1 — see Phase 2 roadmap. */}
             </div>
 
             <div className="h-12 border-t border-hairline px-4 flex items-center justify-between flex-shrink-0">
@@ -507,14 +493,7 @@ export default function BuilderPage() {
                   : ""}
               </div>
               <div className="flex items-center gap-2">
-                <button
-                  type="button"
-                  disabled
-                  title={tr(UI.btnKoreanPreviewTitle, locale)}
-                  className="text-caption px-3 py-1.5 rounded-md border border-hairline bg-surface-pearl text-ink-muted-48 cursor-not-allowed"
-                >
-                  {tr(UI.btnKoreanPreview, locale)}
-                </button>
+                {/* Korean preview button — Phase 2 roadmap; hidden in v0.1. */}
                 <button
                   type="button"
                   onClick={handleRegenerateFile}
