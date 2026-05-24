@@ -296,8 +296,8 @@ export default function BuilderPage() {
       {/* 3-column body */}
       <div className="flex-1 grid grid-cols-[320px_minmax(0,1fr)_320px] min-h-0">
         {/* Left panel — settings-dominant */}
-        <aside className="border-r border-hairline bg-canvas-parchment overflow-y-auto thin-scrollbar">
-          <div className="p-4 space-y-3">
+        <aside className="border-r border-hairline bg-canvas-parchment overflow-y-auto thin-scrollbar min-h-0 h-full">
+          <div className="p-4 space-y-3 pb-12">
             <div className="flex items-center justify-between">
               <PanelLabel>{tr(UI.panelDetailedSettings, locale)}</PanelLabel>
               <button
