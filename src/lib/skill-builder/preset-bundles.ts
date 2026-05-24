@@ -47,11 +47,12 @@ export const PRESET_BUNDLES: Record<string, PresetBundle> = {
   "axdd-ux-ui-reference-review": {
     id: "axdd-ux-ui-reference-review",
     focus: { en: "Review & validation", ko: "리뷰 및 검증" },
-    includedSkillTypes: ["reference-skill", "test-skill"],
+    includedSkillTypes: ["reference-skill", "template-skill", "test-skill"],
     primaryKitStructure: "test-skill",
     expectedFileGroups: [
       "Core",
       "Knowledge",
+      "Templates",
       "Checklists",
       "Tests",
       "Examples",
@@ -59,7 +60,7 @@ export const PRESET_BUNDLES: Record<string, PresetBundle> = {
     emphasizedFiles: [
       "templates/design-review-template.md",
       "checklists/ui-design-checklist.md",
-      "tests/sandbox-test-scenario.md",
+      "tests/scenarios/R001-review-existing-screen.md",
     ],
   },
   "axdd-cursor-handoff-kit": {

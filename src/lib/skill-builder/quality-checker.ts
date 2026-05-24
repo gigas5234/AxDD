@@ -534,8 +534,14 @@ export function runQualityChecks(
     }
   }
 
-  // 19. Figma manual fallback (ux-ui kits)
-  if (config.category === "ux-ui" && required.templates) {
+  // 19. Figma manual fallback — only required for the full-step UX/UI Standard
+  // Kit. Narrow presets (review, handoff, figma-manual itself) intentionally
+  // ship a smaller template subset, so this check would fire spuriously.
+  if (
+    config.category === "ux-ui" &&
+    required.templates &&
+    includedTypes.includes("full-step-skill")
+  ) {
     if (hasFile(files, "/templates/figma-instruction-template.md")) {
       checks.push(pass("figma-fallback", "Figma manual fallback present"));
     } else {
@@ -543,7 +549,7 @@ export function runQualityChecks(
         warn(
           "figma-fallback",
           "Figma manual fallback missing",
-          "UX/UI kits should ship templates/figma-instruction-template.md for enterprise environments where Figma MCP is blocked.",
+          "Full-step UX/UI kits should ship templates/figma-instruction-template.md for enterprise environments where Figma MCP is blocked.",
         ),
       );
     }
@@ -762,6 +768,122 @@ export function runQualityChecks(
             "Expected assets/asset-index.md.",
           ),
     );
+  }
+
+  // 24. Tests/expected references must point at files this kit actually ships.
+  // Walks every tests/expected/*.md and tests/scenarios/*.md and checks that
+  // any backtick-wrapped `path/something.md` token resolves inside the kit.
+  // Top-level filenames (SKILL.md, CATALOG.md, …) are always allowed.
+  if (required.tests) {
+    const testFiles = files.filter(
+      (f) =>
+        f.path.includes("/tests/scenarios/") ||
+        f.path.includes("/tests/expected/"),
+    );
+    const presentSuffixes = new Set<string>();
+    for (const f of files) {
+      const parts = f.path.split("/");
+      // last 1-3 path segments after the package root
+      const rel = parts.slice(1).join("/");
+      presentSuffixes.add(rel);
+      const last = parts[parts.length - 1];
+      presentSuffixes.add(last);
+    }
+    const phantom: string[] = [];
+    for (const f of testFiles) {
+      const refs = Array.from(
+        f.content.matchAll(/`([a-z0-9_\-/.]+\.(?:md|json))`/gi),
+      ).map((m) => m[1]);
+      for (const r of refs) {
+        // tolerate bare filenames + folder/file forms
+        if (presentSuffixes.has(r)) continue;
+        if (presentSuffixes.has(r.replace(/^[a-z]+\//, ""))) continue;
+        phantom.push(`${f.fileName}: ${r}`);
+      }
+    }
+    if (phantom.length === 0) {
+      checks.push(
+        pass(
+          "tests-no-phantom-refs",
+          "tests/expected references resolve",
+        ),
+      );
+    } else {
+      checks.push(
+        warn(
+          "tests-no-phantom-refs",
+          "tests reference paths not in the kit",
+          phantom.slice(0, 4).join("; ") + (phantom.length > 4 ? "…" : ""),
+        ),
+      );
+    }
+  }
+
+  // 25. Non-full-step kits must not have tests whose positive instructions
+  // (Expected route / Required outputs) reference hook-* / WORK_UNIT /
+  // HOOKS / workflow stage routing. Mentions inside a "Forbidden" section
+  // are fine — those are explicit "must NOT" instructions.
+  if (
+    required.tests &&
+    !includedTypes.includes("full-step-skill")
+  ) {
+    const testFiles = files.filter(
+      (f) =>
+        f.path.includes("/tests/scenarios/") ||
+        f.path.includes("/tests/expected/"),
+    );
+    const offenders: string[] = [];
+    for (const f of testFiles) {
+      // Trim the file content to everything BEFORE the "## Forbidden" section.
+      const trimmed = f.content.split(/^##\s+Forbidden/m)[0];
+      const STAGE_IDS =
+        /`(?:requirement-intake|ux-foundation|ui-design-foundation|prototype-planning|review-validation|handoff)`/;
+      if (
+        /\bhook-[a-z-]+\b/.test(trimmed) ||
+        /WORK_UNIT\.json/.test(trimmed) ||
+        /HOOKS\.json/.test(trimmed) ||
+        STAGE_IDS.test(trimmed)
+      ) {
+        offenders.push(f.fileName);
+      }
+    }
+    if (offenders.length === 0) {
+      checks.push(
+        pass(
+          "tests-no-workflow-refs",
+          "non-full-step tests stay out of workflow routing",
+        ),
+      );
+    } else {
+      checks.push(
+        warn(
+          "tests-no-workflow-refs",
+          "non-full-step tests reference hook / workflow routing",
+          offenders.slice(0, 4).join(", "),
+        ),
+      );
+    }
+  }
+
+  // 26. Reference-review preset must ship the design-review template.
+  if (config.id === "axdd-ux-ui-reference-review") {
+    const hasReviewTpl = hasFile(
+      files,
+      "/templates/design-review-template.md",
+    );
+    if (hasReviewTpl) {
+      checks.push(
+        pass("review-template", "Review template present"),
+      );
+    } else {
+      checks.push(
+        warn(
+          "review-template",
+          "Review template missing",
+          "Reference-review kits should ship templates/design-review-template.md.",
+        ),
+      );
+    }
   }
 
   // ── Aggregate weighted score ─────────────────────────────────────────────

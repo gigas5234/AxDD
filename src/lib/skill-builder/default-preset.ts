@@ -120,7 +120,7 @@ export function buildUxUiReferenceSkillConfig(): SkillConfig {
       "Review UX/UI work against design principles, design-system rules, accessibility, and implementation mappings. Reference-led, with light validation assets.",
     category: "ux-ui",
     packageType: "test-skill",
-    includedSkillTypes: ["reference-skill", "test-skill"],
+    includedSkillTypes: ["reference-skill", "template-skill", "test-skill"],
     buildMode: "preset",
     targetAgent: "generic",
     roleProfile: {

@@ -31,6 +31,38 @@ function makeId(prefix: string): string {
   return `${prefix}-${Math.random().toString(36).slice(2, 10)}`;
 }
 
+/**
+ * Per-preset template allowlist. Narrow presets ship a smaller subset of
+ * templates so the kit reads as "review-focused" or "handoff-focused"
+ * instead of carrying every UX/UI template by default. Return null to
+ * mean "ship all" (the default for full-step and custom kits).
+ */
+function templateAllowlistForPreset(presetId: string): Set<string> | null {
+  if (presetId === "axdd-ux-ui-reference-review") {
+    // Review-focused: only the review template + screen spec for reference.
+    return new Set([
+      "design-review-template.md",
+      "screen-spec-template.md",
+    ]);
+  }
+  if (presetId === "axdd-cursor-handoff-kit") {
+    // Handoff-focused: Cursor prompt + screen spec + Figma manual fallback.
+    return new Set([
+      "cursor-prompt-template.md",
+      "screen-spec-template.md",
+      "figma-instruction-template.md",
+    ]);
+  }
+  if (presetId === "axdd-figma-manual-instruction-kit") {
+    // Manual-instruction-focused: figma + screen spec only.
+    return new Set([
+      "figma-instruction-template.md",
+      "screen-spec-template.md",
+    ]);
+  }
+  return null;
+}
+
 function mdFile(
   pkg: string,
   path: string,
@@ -174,7 +206,11 @@ export function generatePackage(config: SkillConfig): GeneratedPackage {
     const tpls = buildTemplateFiles({
       includeCursorPrompt: config.outputFormat.includeCursorPrompt,
     });
+    // Narrow per-preset template allowlist. null = no filter (ship all).
+    const allow = templateAllowlistForPreset(config.id);
+    const allowed = (name: string) => !allow || allow.has(name);
     for (const t of tpls) {
+      if (!allowed(t.fileName)) continue;
       files.push(
         mdFile(
           pkg,
@@ -185,8 +221,9 @@ export function generatePackage(config: SkillConfig): GeneratedPackage {
         ),
       );
     }
-    // Figma manual fallback — required for ux-ui kits.
-    if (config.category === "ux-ui") {
+    // Figma manual fallback — required for ux-ui kits unless the preset
+    // explicitly narrows away from it.
+    if (config.category === "ux-ui" && allowed("figma-instruction-template.md")) {
       files.push(
         mdFile(
           pkg,
@@ -214,7 +251,7 @@ export function generatePackage(config: SkillConfig): GeneratedPackage {
   }
 
   if (want.tests) {
-    for (const t of buildTestFiles()) {
+    for (const t of buildTestFiles(config)) {
       const sub = t.subPath ? `${t.subPath}/` : "";
       files.push(
         mdFile(

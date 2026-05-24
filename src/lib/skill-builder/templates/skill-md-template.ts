@@ -19,20 +19,56 @@ function frontmatter(config: SkillConfig): string {
 }
 
 function whenToUseBlock(config: SkillConfig): string {
-  const triggers: string[] = [];
-  triggers.push("The user is designing a screen, flow, or product surface.");
-  triggers.push(
-    "The user provides a rough idea, requirement, screenshot, or feature request that needs UX structure.",
+  let triggers: string[] = [];
+  switch (config.id) {
+    case "axdd-cursor-handoff-kit":
+      triggers = [
+        "The user has a completed screen specification and wants an implementation-ready Cursor / Claude Code prompt.",
+        "The user wants to audit an existing handoff prompt against the release checklist.",
+        "The user wants to check that tokens / acceptance criteria are concrete before shipping.",
+      ];
+      break;
+    case "axdd-ux-ui-reference-review":
+      triggers = [
+        "The user has an existing screen, prompt, Figma frame, or handoff deliverable and wants it audited against UX/UI references.",
+        "The user wants an accessibility, design-system, or consistency audit.",
+        "The user wants a prioritized fix list backed by references — not taste opinions.",
+      ];
+      break;
+    case "axdd-figma-manual-instruction-kit":
+      triggers = [
+        "Figma MCP is unavailable / blocked and the user needs manual build instructions.",
+        "The user has a screen specification and needs frame-by-frame Figma steps.",
+        "The user needs the parity checklist that ties a Figma build back to the spec.",
+      ];
+      break;
+    case "axdd-ux-validation-governance-kit":
+      triggers = [
+        "The user wants to validate a deliverable against sandbox scenarios.",
+        "The user needs to record validation runs and accepted exceptions in a governance log.",
+        "The user needs kit-level metadata (KIT_MANIFEST.json) for asset discovery.",
+      ];
+      break;
+    default:
+      // Full-step (Standard Kit) or any other category — generic triggers.
+      triggers.push("The user is designing a screen, flow, or product surface.");
+      triggers.push(
+        "The user provides a rough idea, requirement, screenshot, or feature request that needs UX structure.",
+      );
+      if (config.outputFormat.includeCursorPrompt) {
+        triggers.push(
+          "The user wants an implementation-ready prompt for a code agent (Cursor, Claude Code, etc.).",
+        );
+      }
+      if (config.workflowModules.includes("ux-review")) {
+        triggers.push(
+          "The user wants to review an existing screen for UX/UI issues.",
+        );
+      }
+  }
+  return ["## When to use this skill", ...triggers.map((t) => `- ${t}`)].join(
+    "\n",
   );
-  if (config.outputFormat.includeCursorPrompt) {
-    triggers.push(
-      "The user wants an implementation-ready prompt for a code agent (Cursor, Claude Code, etc.).",
-    );
-  }
-  if (config.workflowModules.includes("ux-review")) {
-    triggers.push("The user wants to review an existing screen for UX/UI issues.");
-  }
-  return ["## When to use this skill", ...triggers.map((t) => `- ${t}`)].join("\n");
 }
 
 function roleSection(config: SkillConfig): string {
@@ -50,11 +86,30 @@ function roleSection(config: SkillConfig): string {
   ].join("\n");
 }
 
-function corePrincipleBlock(): string {
-  return [
-    "## Core principle",
-    "Do not jump directly into visual styling. Define the user problem, the primary action, and the information hierarchy first. Visual decisions follow structure, not the other way around.",
-  ].join("\n");
+function corePrincipleBlock(config: SkillConfig): string {
+  let body: string;
+  switch (config.id) {
+    case "axdd-cursor-handoff-kit":
+      body =
+        "Do not ship a handoff prompt without a complete screen specification, concrete acceptance criteria, and a ticked release checklist. Tokens go in by reference, never as raw values.";
+      break;
+    case "axdd-ux-ui-reference-review":
+      body =
+        "Every finding must cite a reference and propose a concrete fix. Taste opinions are not findings. Do not invoke workflow stages this kit does not ship.";
+      break;
+    case "axdd-figma-manual-instruction-kit":
+      body =
+        "Use the manual instruction template when Figma MCP is unavailable. Build by frame, name by convention, apply tokens — never hardcode raw values. Log any missing tokens as open issues.";
+      break;
+    case "axdd-ux-validation-governance-kit":
+      body =
+        "Validation is binary per criterion. Log every run; accepted exceptions need a reviewer signature. Metadata exists so other kits can discover this one.";
+      break;
+    default:
+      body =
+        "Do not jump directly into visual styling. Define the user problem, the primary action, and the information hierarchy first. Visual decisions follow structure, not the other way around.";
+  }
+  return ["## Core principle", body].join("\n");
 }
 
 function workflowSection(config: SkillConfig): string {
@@ -201,7 +256,7 @@ export function renderSkillMd(config: SkillConfig): string {
     "",
     roleSection(config),
     "",
-    corePrincipleBlock(),
+    corePrincipleBlock(config),
     "",
     workflowSection(config),
     "",
