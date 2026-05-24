@@ -44,7 +44,13 @@ export const UI = {
   } as Bilingual,
 
   // Panel labels (uppercase chips)
-  panelDetailedSettings: { en: "Detailed settings", ko: "상세 설정" } as Bilingual,
+  panelDetailedSettings: { en: "Kit composition", ko: "킷 구성" } as Bilingual,
+  // Inspector / detail panel
+  detailKicker: { en: "Detail", ko: "구성 상세" } as Bilingual,
+  detailKitOverview: { en: "Kit Overview", ko: "킷 개요" } as Bilingual,
+  detailIdentity: { en: "Identity", ko: "기본 정보" } as Bilingual,
+  detailExpectedOutput: { en: "Expected output", ko: "예상 결과" } as Bilingual,
+  detailActions: { en: "Actions", ko: "실행" } as Bilingual,
   panelFiles: { en: "Files", ko: "파일" } as Bilingual,
   panelQualityDetails: { en: "Quality details", ko: "품질 상세" } as Bilingual,
   panelCapabilityPack: { en: "Capability Pack", ko: "능력 팩" } as Bilingual,

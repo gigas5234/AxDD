@@ -33,11 +33,7 @@ export function InspectorPanel({
   config,
   onConfigChange,
   files,
-  onGenerate,
-  onDownload,
   onInspect,
-  isGenerating,
-  isExporting,
 }: {
   target: InspectorTarget;
   report: QualityReport | null;
@@ -47,10 +43,6 @@ export function InspectorPanel({
   config?: SkillConfig;
   onConfigChange?: (next: SkillConfig) => void;
   files?: { path: string; fileName: string }[];
-  onGenerate?: () => void;
-  onDownload?: () => void;
-  isGenerating?: boolean;
-  isExporting?: boolean;
   onInspect?: (target: InspectorTarget) => void;
 }) {
   const { locale } = useLocale();
@@ -60,42 +52,53 @@ export function InspectorPanel({
     const fails =
       report?.checks.filter((c) => c.status === "fail").length ?? 0;
     const hasPkg = !!files;
+    const isKo = locale === "ko";
+    const identityRows: [string, string][] = isKo
+      ? [
+          ["스킬 이름", config.skillName],
+          ["패키지", config.packageName],
+          ["카테고리", config.category],
+          ["빌드 모드", config.buildMode],
+          ["기본 키트 구조", config.packageType],
+          ["포함된 타입", `${config.includedSkillTypes.length} / 8`],
+          ["설명", config.description],
+        ]
+      : [
+          ["Skill name", config.skillName],
+          ["Package", config.packageName],
+          ["Category", config.category],
+          ["Build mode", config.buildMode],
+          ["Primary kit", config.packageType],
+          ["Included types", `${config.includedSkillTypes.length} / 8`],
+          ["Description", config.description],
+        ];
     return (
       <div className="flex flex-col h-full min-h-0">
         <div className="px-4 py-3 border-b border-hairline flex-shrink-0">
           <div className="text-fine-print uppercase tracking-[0.16em] text-ink-muted-48">
-            Detail
+            {tr(UI.detailKicker, locale)}
           </div>
-          <div className="text-body-strong text-ink mt-0.5">Kit Overview</div>
+          <div className="text-body-strong text-ink mt-0.5">
+            {tr(UI.detailKitOverview, locale)}
+          </div>
           <div className="text-[12.5px] text-ink-muted-80 mt-1 leading-snug">
-            What this kit will produce and how to ship it.
+            {isKo
+              ? "이 킷이 무엇을 만들고 어떻게 배포되는지 요약합니다."
+              : "What this kit will produce and how to ship it."}
           </div>
         </div>
         <div className="flex-1 overflow-y-auto thin-scrollbar px-4 py-3 space-y-4 text-[13.5px]">
           <section className="space-y-2">
             <div className="text-[10.5px] uppercase tracking-[0.16em] text-ink-muted-48 font-medium">
-              Identity
+              {tr(UI.detailIdentity, locale)}
             </div>
             <dl className="rounded-md border border-hairline bg-canvas divide-y divide-divider-soft text-[12.5px]">
-              {[
-                ["Skill name", config.skillName],
-                ["Package", config.packageName],
-                ["Category", config.category],
-                ["Build mode", config.buildMode],
-                ["Primary kit", config.packageType],
-                ["Included types", `${config.includedSkillTypes.length} / 8`],
-                ["Description", config.description],
-              ].map(([k, v]) => (
-                <div
-                  key={String(k)}
-                  className="flex gap-3 px-3 py-2 items-start"
-                >
+              {identityRows.map(([k, v]) => (
+                <div key={k} className="flex gap-3 px-3 py-2 items-start">
                   <dt className="text-ink-muted-80 min-w-[110px] flex-shrink-0">
                     {k}
                   </dt>
-                  <dd className="text-ink leading-snug break-words">
-                    {String(v)}
-                  </dd>
+                  <dd className="text-ink leading-snug break-words">{v}</dd>
                 </div>
               ))}
             </dl>
@@ -103,44 +106,24 @@ export function InspectorPanel({
 
           <section className="space-y-2">
             <div className="text-[10.5px] uppercase tracking-[0.16em] text-ink-muted-48 font-medium">
-              Expected output
+              {tr(UI.detailExpectedOutput, locale)}
             </div>
             <div className="rounded-md border border-hairline bg-canvas px-3 py-2 text-[12.5px] text-ink-muted-80 leading-snug">
               {hasPkg
-                ? `${files!.length} files generated. ${
-                    report
-                      ? `Quality ${report.totalScore} / 100 · ${fails} fails.`
-                      : ""
-                  }`
-                : "Press Generate Kit to compose the AXDD Standard Kit. Files appear here and in the workspace."}
-            </div>
-          </section>
-
-          <section className="space-y-2">
-            <div className="text-[10.5px] uppercase tracking-[0.16em] text-ink-muted-48 font-medium">
-              Actions
-            </div>
-            <div className="flex flex-col gap-2">
-              {onGenerate && (
-                <button
-                  type="button"
-                  onClick={onGenerate}
-                  disabled={!!isGenerating}
-                  className="w-full inline-flex items-center justify-center rounded-pill bg-cta text-body-on-dark px-[20px] py-[8px] text-[14px] font-medium shadow-sm hover:bg-cta-hover disabled:opacity-50 transition"
-                >
-                  {isGenerating ? "Generating…" : "Generate Kit"}
-                </button>
-              )}
-              {onDownload && (
-                <button
-                  type="button"
-                  onClick={onDownload}
-                  disabled={!hasPkg || !!isExporting}
-                  className="w-full inline-flex items-center justify-center rounded-pill border border-ink/30 bg-canvas text-ink px-[18px] py-[8px] text-[13.5px] font-medium hover:bg-divider-soft disabled:opacity-50 transition"
-                >
-                  {isExporting ? "Preparing ZIP…" : "Download ZIP"}
-                </button>
-              )}
+                ? isKo
+                  ? `${files!.length}개의 파일이 생성되었습니다.${
+                      report
+                        ? ` 품질 ${report.totalScore} / 100 · ${fails} fails.`
+                        : ""
+                    }`
+                  : `${files!.length} files generated.${
+                      report
+                        ? ` Quality ${report.totalScore} / 100 · ${fails} fails.`
+                        : ""
+                    }`
+                : isKo
+                  ? "상단 헤더의 Generate Kit 버튼을 눌러 AXDD Standard Kit를 생성하세요."
+                  : "Press Generate Kit in the header to compose the AXDD Standard Kit."}
             </div>
           </section>
         </div>

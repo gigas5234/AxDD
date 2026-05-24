@@ -120,7 +120,14 @@ export default function BuilderPage() {
     try {
       const next = generatePackage(config);
       setPkg(next);
-      setSelectedFileId(next.files[0]?.id ?? null);
+      // After generation, open the most "front door" file first.
+      // Fallback order: README.md → SKILL.md → CATALOG.md → first file.
+      const priority = ["README.md", "SKILL.md", "CATALOG.md"];
+      const preferred =
+        priority
+          .map((name) => next.files.find((f) => f.fileName === name))
+          .find((f) => !!f) ?? next.files[0];
+      setSelectedFileId(preferred?.id ?? null);
       setActiveTab("preview");
     } finally {
       setIsGenerating(false);
@@ -310,10 +317,6 @@ export default function BuilderPage() {
             config={config}
             onConfigChange={setConfig}
             files={pkg?.files}
-            onGenerate={handleGenerate}
-            onDownload={handleDownloadZip}
-            isGenerating={isGenerating}
-            isExporting={isExporting}
           />
         </aside>
 
