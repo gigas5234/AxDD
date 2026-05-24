@@ -30,7 +30,6 @@ import {
   InspectorPanel,
   type InspectorTarget,
 } from "@/components/builder/InspectorPanel";
-import { QualityFooter } from "@/components/builder/QualityFooter";
 import { Dropdown, type DropdownItem } from "@/components/builder/Dropdown";
 import { LangToggle } from "@/components/builder/LangToggle";
 import { RecipeCard } from "@/components/builder/RecipeCard";
@@ -294,12 +293,27 @@ export default function BuilderPage() {
           >
             {isGenerating ? tr(UI.generating, locale) : tr(UI.generate, locale)}
           </button>
+          <button
+            type="button"
+            onClick={handleDownloadZip}
+            disabled={!pkg || isExporting}
+            title={tr(UI.qfDownload, locale)}
+            className="inline-flex items-center justify-center rounded-pill border border-ink/30 bg-canvas text-ink px-[18px] py-[8px] text-[14px] font-medium hover:bg-divider-soft disabled:opacity-50 transition"
+          >
+            {isExporting ? tr(UI.qfDownloading, locale) : tr(UI.qfDownload, locale)}
+          </button>
         </div>
       </div>
 
-      {/* 3-column body */}
-      <div className="flex-1 grid grid-cols-[320px_minmax(0,1fr)_320px] min-h-0">
-        {/* Left panel — settings-dominant */}
+      {/* Body — left nav, optional detail panel, main workspace */}
+      <div
+        className={`flex-1 grid min-h-0 ${
+          inspector.type === "summary"
+            ? "grid-cols-[280px_minmax(0,1fr)]"
+            : "grid-cols-[280px_380px_minmax(0,1fr)]"
+        }`}
+      >
+        {/* Left panel — settings nav (compact, no expansion) */}
         <aside className="border-r border-hairline bg-canvas-parchment overflow-y-auto thin-scrollbar min-h-0 h-full">
           <div className="p-4 space-y-3 pb-12">
             <div className="flex items-center justify-between">
@@ -323,7 +337,25 @@ export default function BuilderPage() {
           </div>
         </aside>
 
-        {/* Center panel — white canvas */}
+        {/* Settings detail panel — appears next to the left nav when a
+            setting (or related target) is selected. Pushes the main
+            workspace to the right. */}
+        {inspector.type !== "summary" && (
+          <aside className="border-r border-hairline bg-canvas-parchment min-h-0 h-full overflow-hidden flex flex-col">
+            <InspectorPanel
+              target={inspector}
+              report={pkg?.qualityReport ?? null}
+              isEnabled={(id) => config.capabilityPacks.includes(id)}
+              onToggle={togglePack}
+              onClose={() => setInspector({ type: "summary" })}
+              config={config}
+              onConfigChange={setConfig}
+              files={pkg?.files}
+            />
+          </aside>
+        )}
+
+        {/* Main workspace — files + preview */}
         <main className="flex min-h-0 bg-canvas">
           <div className="w-64 border-r border-hairline overflow-y-auto thin-scrollbar bg-canvas">
             <div className="px-4 py-3 border-b border-hairline space-y-1">
@@ -525,26 +557,6 @@ export default function BuilderPage() {
           </section>
         </main>
 
-        {/* Right panel — Inspector (flex-1) + Quality/Export footer (fixed) */}
-        <aside className="border-l border-hairline bg-canvas-parchment flex flex-col min-h-0 overflow-hidden">
-          <div className="flex-1 min-h-0 overflow-hidden">
-            <InspectorPanel
-              target={inspector}
-              report={pkg?.qualityReport ?? null}
-              isEnabled={(id) => config.capabilityPacks.includes(id)}
-              onToggle={togglePack}
-              onClose={() => setInspector({ type: "summary" })}
-              config={config}
-              onConfigChange={setConfig}
-              files={pkg?.files}
-            />
-          </div>
-          <QualityFooter
-            onDownload={handleDownloadZip}
-            isDownloading={isExporting}
-            hasPackage={!!pkg}
-          />
-        </aside>
       </div>
     </div>
   );
