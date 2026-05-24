@@ -3,6 +3,7 @@
 import { useState } from "react";
 import type {
   AnswerStyle,
+  BuildMode,
   CapabilityPack,
   QualityRule,
   RoleLevel,
@@ -40,6 +41,7 @@ import {
   REQUIRED_FILES_BY_TYPE,
   ALL_STAGES,
   STAGE_METADATA,
+  derivePrimaryKitStructure,
 } from "@/lib/skill-builder/package-matrix";
 
 const ROLE_LEVELS: RoleLevel[] = ["junior", "mid", "senior", "expert"];
@@ -300,136 +302,101 @@ export function SettingsForm({
     "metadata-skill",
     "test-skill",
   ];
-  const hintPkgType = tr(
-    SKILL_PACKAGE_TYPE_LABELS[config.packageType].name,
-    locale,
+  const derivedPrimary = derivePrimaryKitStructure(
+    config.includedSkillTypes.length > 0
+      ? config.includedSkillTypes
+      : [config.packageType],
   );
+  const isCustomMode = config.buildMode === "custom";
+  const isPresetMode = !isCustomMode;
+
+  function setBuildMode(mode: BuildMode) {
+    update("buildMode", mode);
+  }
+
+  function toggleIncludedType(pt: SkillPackageType) {
+    if (!isCustomMode) return;
+    const has = config.includedSkillTypes.includes(pt);
+    const next = has
+      ? config.includedSkillTypes.filter((x) => x !== pt)
+      : [...config.includedSkillTypes, pt];
+    const safe = next.length === 0 ? (["simple-skill"] as SkillPackageType[]) : next;
+    const nextPrimary = derivePrimaryKitStructure(safe);
+    onChange({
+      ...config,
+      includedSkillTypes: safe,
+      packageType: nextPrimary,
+      updatedAt: new Date().toISOString(),
+    });
+  }
 
   return (
     <div className="space-y-3">
       <Section
-        id="pkgtype"
-        title={tr(UI.secSkillPackageType, locale)}
-        hint={hintPkgType}
+        id="buildmode"
+        title={tr(UI.secBuildMode, locale)}
+        hint={tr(isCustomMode ? UI.buildModeCustom : UI.buildModePreset, locale)}
         openSection={openSection}
         onToggleSection={setOpenSection}
       >
-        <p className="text-fine-print text-ink-muted-48 leading-snug -mt-1">
+        <div role="tablist" className="inline-flex rounded-md border border-hairline overflow-hidden">
+          {(["preset", "custom"] as BuildMode[]).map((m) => {
+            const active = config.buildMode === m;
+            return (
+              <button
+                key={m}
+                type="button"
+                role="tab"
+                aria-selected={active}
+                onClick={() => setBuildMode(m)}
+                className={`px-3 py-1.5 text-[13px] transition ${
+                  active
+                    ? "bg-primary text-body-on-dark"
+                    : "bg-canvas text-ink hover:bg-divider-soft"
+                }`}
+              >
+                {tr(m === "preset" ? UI.buildModePreset : UI.buildModeCustom, locale)}
+              </button>
+            );
+          })}
+        </div>
+        <p className="text-fine-print text-ink-muted-80 leading-snug">
+          {tr(isCustomMode ? UI.buildModeCustomHelper : UI.buildModePresetHelper, locale)}
+        </p>
+      </Section>
+
+      <Section
+        id="primary-kit"
+        title={tr(UI.secSkillPackageType, locale)}
+        hint={tr(SKILL_PACKAGE_TYPE_LABELS[derivedPrimary].name, locale)}
+        openSection={openSection}
+        onToggleSection={setOpenSection}
+      >
+        <p className="text-fine-print text-ink-muted-80 leading-snug -mt-1">
           {tr(UI.skillPackageTypeIntro, locale)}
         </p>
-        {(() => {
-          // v0.1.2: Primary Kit Structure is auto-selected by the preset.
-          // The four "available" types reflect what current presets can drive;
-          // the rest stay tagged as roadmap. All cards are read-only here —
-          // the user changes Primary Kit Structure by choosing a preset.
-          const availableTypes: SkillPackageType[] = [
-            "full-step-skill",
-            "reference-skill",
-            "template-skill",
-            "test-skill",
-          ];
-          const comingSoonTypes: SkillPackageType[] = allPackageTypes.filter(
-            (pt) => !availableTypes.includes(pt),
-          );
-
-          const renderCard = (pt: SkillPackageType, isEnabled: boolean) => {
-            const meta = SKILL_PACKAGE_TYPE_LABELS[pt];
-            const selected = config.packageType === pt;
-            return (
-              <div
-                key={pt}
-                role="radio"
-                aria-checked={selected}
-                aria-disabled
-                className={`rounded-md border p-3 transition flex items-start gap-2.5 cursor-default ${
-                  selected
-                    ? "border-primary bg-primary/5"
-                    : isEnabled
-                      ? "border-hairline bg-canvas"
-                      : "border-hairline border-dashed bg-canvas-parchment"
-                }`}
-                title={
-                  isEnabled
-                    ? undefined
-                    : tr(UI.skillPackageTypeComingSoon, locale)
-                }
-              >
-                <input
-                  type="radio"
-                  name="skill-package-type"
-                  className="mt-1 accent-primary"
-                  checked={selected}
-                  disabled
-                  readOnly
-                />
-                <div className="min-w-0 flex-1">
-                  <div className="flex items-center gap-2 flex-wrap">
-                    <span className="text-[13.5px] font-semibold text-ink">
-                      {tr(meta.name, locale)}
-                    </span>
-                    <span className="text-[10.5px] font-mono text-ink-muted-80">
-                      {pt}
-                    </span>
-                    {!isEnabled && (
-                      <span className="text-[10.5px] uppercase tracking-wide text-ink-muted-80 bg-divider-soft border border-hairline rounded-sm px-1.5 py-[1px]">
-                        {tr(UI.skillPackageTypeComingSoon, locale)}
-                      </span>
-                    )}
-                  </div>
-                  <div className="text-[12.5px] text-ink-muted-80 mt-0.5">
-                    {tr(meta.tagline, locale)}
-                  </div>
-                  <div className="text-[11px] text-ink-muted-80 mt-1 font-mono leading-snug break-words">
-                    <span className="not-italic">Required:</span> {meta.required}
-                  </div>
-                  {selected && (
-                    <div className="mt-2 text-[11.5px] text-ink-muted-80 leading-snug border-l-2 border-primary/40 pl-2">
-                      {tr(
-                        pt === "full-step-skill"
-                          ? UI.fullStepWhyThisKit
-                          : pt === "reference-skill"
-                            ? UI.referenceWhyThisKit
-                            : pt === "template-skill"
-                              ? UI.templateWhyThisKit
-                              : pt === "test-skill"
-                                ? UI.testWhyThisKit
-                                : UI.skillPackageTypeIntro,
-                        locale,
-                      )}
-                    </div>
-                  )}
-                </div>
-              </div>
-            );
-          };
-
-          const subHeader = (label: string) => (
-            <div className="text-[10.5px] uppercase tracking-[0.16em] text-ink-muted-80 font-medium mt-1">
-              {label}
+        <div className="rounded-md border border-primary bg-primary/5 p-3 flex items-start gap-2.5">
+          <div className="min-w-0 flex-1">
+            <div className="flex items-center gap-2 flex-wrap">
+              <span className="text-[13.5px] font-semibold text-ink">
+                {tr(SKILL_PACKAGE_TYPE_LABELS[derivedPrimary].name, locale)}
+              </span>
+              <span className="text-[10.5px] font-mono text-ink-muted-80">
+                {derivedPrimary}
+              </span>
+              <span className="text-[10.5px] uppercase tracking-wide text-primary border border-primary/40 rounded-sm px-1.5 py-[1px]">
+                {tr(UI.primaryKitDerivedLabel, locale)}
+              </span>
             </div>
-          );
-
-          return (
-            <div role="radiogroup" className="space-y-3">
-              <div className="space-y-1.5">
-                {subHeader(tr(UI.skillPackageTypeAvailable, locale))}
-                <div className="grid grid-cols-1 gap-2">
-                  {availableTypes.map((pt) => renderCard(pt, true))}
-                </div>
-              </div>
-
-              <div className="space-y-1.5">
-                {subHeader(tr(UI.skillPackageTypeComingSoon, locale))}
-                <p className="text-fine-print text-ink-muted-80 leading-snug">
-                  {tr(UI.skillPackageTypeRoadmapHelper, locale)}
-                </p>
-                <div className="grid grid-cols-1 gap-2">
-                  {comingSoonTypes.map((pt) => renderCard(pt, false))}
-                </div>
-              </div>
+            <div className="text-[12.5px] text-ink-muted-80 mt-0.5">
+              {tr(SKILL_PACKAGE_TYPE_LABELS[derivedPrimary].tagline, locale)}
             </div>
-          );
-        })()}
+            <div className="text-[11px] text-ink-muted-80 mt-1 font-mono leading-snug break-words">
+              <span className="not-italic">Required:</span>{" "}
+              {SKILL_PACKAGE_TYPE_LABELS[derivedPrimary].required}
+            </div>
+          </div>
+        </div>
       </Section>
 
       <Section
@@ -440,32 +407,65 @@ export function SettingsForm({
         onToggleSection={setOpenSection}
       >
         <p className="text-fine-print text-ink-muted-80 leading-snug -mt-1">
-          {tr(UI.includedSkillTypesIntro, locale)}
+          {tr(
+            isCustomMode ? UI.buildModeCustomHelper : UI.includedSkillTypesIntro,
+            locale,
+          )}
         </p>
-        <div className="flex flex-wrap gap-1.5">
-          {config.includedSkillTypes.map((pt) => {
+        <div className="grid grid-cols-1 gap-2">
+          {allPackageTypes.map((pt) => {
             const meta = SKILL_PACKAGE_TYPE_LABELS[pt];
-            const isPrimary = pt === config.packageType;
+            const checked = config.includedSkillTypes.includes(pt);
+            const isPrimary = pt === derivedPrimary && checked;
             return (
-              <span
+              <label
                 key={pt}
-                title={tr(meta.tagline, locale)}
-                className={`inline-flex items-center gap-1.5 rounded-pill border px-2.5 py-[3px] text-[12px] ${
+                className={`rounded-md border p-3 transition flex items-start gap-2.5 ${
+                  isCustomMode ? "cursor-pointer" : "cursor-default"
+                } ${
                   isPrimary
-                    ? "border-primary bg-primary/10 text-ink"
-                    : "border-hairline bg-canvas text-ink"
+                    ? "border-primary bg-primary/5"
+                    : checked
+                      ? "border-ink/30 bg-canvas"
+                      : isCustomMode
+                        ? "border-hairline bg-canvas hover:bg-divider-soft"
+                        : "border-hairline border-dashed bg-canvas-parchment"
                 }`}
+                title={tr(meta.tagline, locale)}
               >
-                <span className="font-medium">{tr(meta.name, locale)}</span>
-                <span className="font-mono text-[10.5px] text-ink-muted-80">
-                  {pt}
-                </span>
-                {isPrimary && (
-                  <span className="text-[9.5px] uppercase tracking-wide text-primary border border-primary/40 rounded-sm px-1 leading-none py-[1px]">
-                    {tr(UI.includedSkillTypesPrimaryBadge, locale)}
-                  </span>
-                )}
-              </span>
+                <input
+                  type="checkbox"
+                  className="mt-1 accent-primary"
+                  checked={checked}
+                  disabled={isPresetMode}
+                  onChange={() => toggleIncludedType(pt)}
+                />
+                <div className="min-w-0 flex-1">
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <span className="text-[13.5px] font-semibold text-ink">
+                      {tr(meta.name, locale)}
+                    </span>
+                    <span className="text-[10.5px] font-mono text-ink-muted-80">
+                      {pt}
+                    </span>
+                    {isPrimary && (
+                      <span className="text-[9.5px] uppercase tracking-wide text-primary border border-primary/40 rounded-sm px-1 leading-none py-[1px]">
+                        {tr(UI.includedSkillTypesPrimaryBadge, locale)}
+                      </span>
+                    )}
+                  </div>
+                  <div className="text-[12.5px] text-ink-muted-80 mt-0.5">
+                    {tr(meta.tagline, locale)}
+                  </div>
+                  <div className="text-[11.5px] text-ink-muted-48 mt-1 leading-snug">
+                    <span className="font-medium">When to use:</span>{" "}
+                    {tr(meta.whenToUse, locale)}
+                  </div>
+                  <div className="text-[11px] text-ink-muted-80 mt-0.5 font-mono leading-snug break-words">
+                    <span className="not-italic">Required:</span> {meta.required}
+                  </div>
+                </div>
+              </label>
             );
           })}
         </div>

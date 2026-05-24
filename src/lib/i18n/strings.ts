@@ -163,13 +163,31 @@ export const UI = {
     ko: "Full-step 키트는 WORK_UNIT.json에 정의된 표준 6단계 워크플로를 사용합니다. v0.1에서는 고정값입니다.",
   } as Bilingual,
   secPacks: { en: "4. Design Capability Add-ons", ko: "4. 디자인 능력 추가 모듈" } as Bilingual,
+  secBuildMode: {
+    en: "Build Mode",
+    ko: "빌드 모드",
+  } as Bilingual,
+  buildModePreset: { en: "Preset", ko: "프리셋" } as Bilingual,
+  buildModeCustom: { en: "Custom", ko: "커스텀" } as Bilingual,
+  buildModePresetHelper: {
+    en: "Pick a recommended UX/UI kit. Included Skill Types are auto-set.",
+    ko: "추천 UX/UI 키트를 선택하면 Included Skill Types가 자동 설정됩니다.",
+  } as Bilingual,
+  buildModeCustomHelper: {
+    en: "Pick any combination of the 8 AXDD skill package types. Primary Kit Structure is derived automatically.",
+    ko: "8가지 AXDD 스킬 패키지 타입을 자유롭게 조합하세요. 기본 키트 구조는 자동으로 결정됩니다.",
+  } as Bilingual,
   secSkillPackageType: {
     en: "Primary Kit Structure",
     ko: "기본 키트 구조",
   } as Bilingual,
   skillPackageTypeIntro: {
-    en: "This controls the exported file structure and quality checks. It is auto-selected by the preset.",
-    ko: "내보낼 파일 구조와 품질 검사를 결정합니다. 프리셋에 의해 자동 선택됩니다.",
+    en: "Derived from the included skill types. It controls the exported file structure and quality checks.",
+    ko: "포함된 스킬 타입에 의해 결정됩니다. 내보낼 파일 구조와 품질 검사를 통제합니다.",
+  } as Bilingual,
+  primaryKitDerivedLabel: {
+    en: "derived",
+    ko: "자동 결정",
   } as Bilingual,
   secIncludedSkillTypes: {
     en: "Included Skill Types",

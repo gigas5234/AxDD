@@ -4,7 +4,7 @@ import type {
   QualityReport,
   SkillConfig,
 } from "@/types/skill";
-import { REQUIRED_FILES_BY_TYPE, ALL_STAGES } from "./package-matrix";
+import { mergeRequiredFiles, ALL_STAGES } from "./package-matrix";
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Score model
@@ -353,7 +353,13 @@ export function runQualityChecks(
   }
 
   // ── AXDD Standard Kit checks ─────────────────────────────────────────────
-  const required = REQUIRED_FILES_BY_TYPE[config.packageType];
+  // Merge the matrix across every included skill type (custom mode can
+  // combine multiple). For legacy/back-compat, fall back to packageType.
+  const includedTypes =
+    config.includedSkillTypes.length > 0
+      ? config.includedSkillTypes
+      : [config.packageType];
+  const required = mergeRequiredFiles(includedTypes);
   const fileMissing = (folder: string) =>
     !files.some((f) => f.path.includes(`/${folder}/`));
 
@@ -544,7 +550,7 @@ export function runQualityChecks(
   }
 
   // 20-pre. AXDD 8-Type Skill Framework reference — full-step kits should ship it
-  if (config.packageType === "full-step-skill") {
+  if (includedTypes.includes("full-step-skill")) {
     if (hasFile(files, "/references/skill-framework.md")) {
       checks.push(pass("skill-framework-ref", "skill-framework.md present"));
     } else {
@@ -559,7 +565,7 @@ export function runQualityChecks(
   }
 
   // 20a. Stage guides — full-step kits must ship one per stage
-  if (config.packageType === "full-step-skill") {
+  if (includedTypes.includes("full-step-skill")) {
     const stageGuideFiles = files.filter((f) =>
       f.path.includes("/references/stage-guides/"),
     );
@@ -710,6 +716,52 @@ export function runQualityChecks(
         ),
       );
     }
+  }
+
+  // 21. script-skill stubs
+  if (includedTypes.includes("script-skill")) {
+    const ok =
+      hasFile(files, "/scripts/example-script.ts") &&
+      hasFile(files, "/config/script-config.json");
+    checks.push(
+      ok
+        ? pass("script-stubs", "script-skill stubs present")
+        : fail(
+            "script-stubs",
+            "script-skill stubs missing",
+            "Expected scripts/example-script.ts and config/script-config.json.",
+          ),
+    );
+  }
+
+  // 22. metadata-skill stubs
+  if (includedTypes.includes("metadata-skill")) {
+    const ok =
+      hasFile(files, "/KIT_MANIFEST.json") &&
+      hasFile(files, "/metadata/index.json");
+    checks.push(
+      ok
+        ? pass("metadata-stubs", "metadata-skill stubs present")
+        : fail(
+            "metadata-stubs",
+            "metadata-skill stubs missing",
+            "Expected KIT_MANIFEST.json and metadata/index.json.",
+          ),
+    );
+  }
+
+  // 23. asset-skill stub
+  if (includedTypes.includes("asset-skill")) {
+    const ok = hasFile(files, "/assets/asset-index.md");
+    checks.push(
+      ok
+        ? pass("asset-stubs", "asset-skill stub present")
+        : fail(
+            "asset-stubs",
+            "asset-skill stub missing",
+            "Expected assets/asset-index.md.",
+          ),
+    );
   }
 
   // ── Aggregate weighted score ─────────────────────────────────────────────

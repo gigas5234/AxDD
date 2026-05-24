@@ -42,6 +42,7 @@ export function buildUxUiDefaultConfig(): SkillConfig {
       "template-skill",
       "test-skill",
     ],
+    buildMode: "preset",
     targetAgent: "generic",
     roleProfile: {
       roleLevel: "senior",
@@ -118,8 +119,9 @@ export function buildUxUiReferenceSkillConfig(): SkillConfig {
     description:
       "Review UX/UI work against design principles, design-system rules, accessibility, and implementation mappings. Reference-led, with light validation assets.",
     category: "ux-ui",
-    packageType: "reference-skill",
+    packageType: "test-skill",
     includedSkillTypes: ["reference-skill", "test-skill"],
+    buildMode: "preset",
     targetAgent: "generic",
     roleProfile: {
       roleLevel: "senior",
@@ -185,6 +187,7 @@ export function buildUxUiTestSkillConfig(): SkillConfig {
     category: "ux-ui",
     packageType: "template-skill",
     includedSkillTypes: ["template-skill", "reference-skill", "test-skill"],
+    buildMode: "preset",
     targetAgent: "cursor",
     roleProfile: {
       roleLevel: "senior",
@@ -238,6 +241,22 @@ export function buildUxUiTestSkillConfig(): SkillConfig {
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
+// Custom Mode default (user picks any combination of the 8 types)
+// ─────────────────────────────────────────────────────────────────────────────
+export function buildCustomDefaultConfig(): SkillConfig {
+  const base = buildUxUiDefaultConfig();
+  return {
+    ...base,
+    id: "axdd-ux-ui-custom",
+    skillName: "Custom UX/UI Kit",
+    packageName: "axdd-ux-ui-custom",
+    description:
+      "Custom UX/UI kit — pick any combination of the 8 AXDD skill package types.",
+    buildMode: "custom",
+  };
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
 // Frontend Implementation
 // ─────────────────────────────────────────────────────────────────────────────
 export function buildFrontendDefaultConfig(): SkillConfig {
@@ -251,6 +270,7 @@ export function buildFrontendDefaultConfig(): SkillConfig {
     category: "frontend",
     packageType: "full-step-skill",
     includedSkillTypes: ["full-step-skill"],
+    buildMode: "preset",
     targetAgent: "cursor",
     roleProfile: {
       roleLevel: "senior",
@@ -315,6 +335,7 @@ export function buildDesignSystemDefaultConfig(): SkillConfig {
     category: "design-system",
     packageType: "full-step-skill",
     includedSkillTypes: ["full-step-skill"],
+    buildMode: "preset",
     targetAgent: "generic",
     roleProfile: {
       roleLevel: "expert",
@@ -379,6 +400,7 @@ export function buildHarnessDefaultConfig(): SkillConfig {
     category: "harness",
     packageType: "full-step-skill",
     includedSkillTypes: ["full-step-skill"],
+    buildMode: "preset",
     targetAgent: "claude-code",
     roleProfile: {
       roleLevel: "senior",

@@ -11,70 +11,64 @@ export type RequiredFiles = {
   checklists: boolean;
   tests: boolean;
   examples: boolean;
+  // v0.1.3 — stub support for the remaining package types
+  scripts: boolean;
+  assets: boolean;
+  metadata: boolean;
+};
+
+const blank: RequiredFiles = {
+  skillMd: false,
+  catalogMd: false,
+  readmeMd: false,
+  workUnitJson: false,
+  hooksJson: false,
+  references: false,
+  templates: false,
+  checklists: false,
+  tests: false,
+  examples: false,
+  scripts: false,
+  assets: false,
+  metadata: false,
 };
 
 export const REQUIRED_FILES_BY_TYPE: Record<SkillPackageType, RequiredFiles> = {
-  "simple-skill": {
-    skillMd: true,
-    catalogMd: false,
-    readmeMd: true,
-    workUnitJson: false,
-    hooksJson: false,
-    references: false,
-    templates: false,
-    checklists: false,
-    tests: false,
-    examples: false,
-  },
+  "simple-skill": { ...blank, skillMd: true, readmeMd: true },
   "reference-skill": {
+    ...blank,
     skillMd: true,
     catalogMd: true,
     readmeMd: true,
-    workUnitJson: false,
-    hooksJson: false,
     references: true,
-    templates: false,
-    checklists: false,
-    tests: false,
-    examples: false,
   },
   "template-skill": {
+    ...blank,
     skillMd: true,
     catalogMd: true,
     readmeMd: true,
-    workUnitJson: false,
-    hooksJson: false,
-    references: false,
     templates: true,
-    checklists: false,
-    tests: false,
     examples: true,
   },
   "script-skill": {
+    ...blank,
     skillMd: true,
     catalogMd: true,
     readmeMd: true,
-    workUnitJson: false,
     hooksJson: true,
-    references: false,
-    templates: false,
-    checklists: false,
-    tests: false,
     examples: true,
+    scripts: true,
   },
   "asset-skill": {
+    ...blank,
     skillMd: true,
     catalogMd: true,
     readmeMd: true,
-    workUnitJson: false,
-    hooksJson: false,
-    references: false,
-    templates: false,
-    checklists: false,
-    tests: false,
     examples: true,
+    assets: true,
   },
   "full-step-skill": {
+    ...blank,
     skillMd: true,
     catalogMd: true,
     readmeMd: true,
@@ -87,30 +81,56 @@ export const REQUIRED_FILES_BY_TYPE: Record<SkillPackageType, RequiredFiles> = {
     examples: true,
   },
   "metadata-skill": {
+    ...blank,
     skillMd: true,
     catalogMd: true,
-    readmeMd: false,
-    workUnitJson: false,
     hooksJson: true,
-    references: false,
-    templates: false,
-    checklists: false,
-    tests: false,
-    examples: false,
+    metadata: true,
   },
   "test-skill": {
+    ...blank,
     skillMd: true,
     catalogMd: true,
     readmeMd: true,
-    workUnitJson: false,
-    hooksJson: false,
-    references: false,
-    templates: false,
     checklists: true,
     tests: true,
-    examples: false,
   },
 };
+
+// Priority order for deriving the primary kit structure from a set of
+// included skill types. Earlier in the list wins.
+export const PRIMARY_PRIORITY: SkillPackageType[] = [
+  "full-step-skill",
+  "test-skill",
+  "template-skill",
+  "reference-skill",
+  "script-skill",
+  "asset-skill",
+  "metadata-skill",
+  "simple-skill",
+];
+
+export function derivePrimaryKitStructure(
+  included: SkillPackageType[],
+): SkillPackageType {
+  for (const pt of PRIMARY_PRIORITY) {
+    if (included.includes(pt)) return pt;
+  }
+  return "simple-skill";
+}
+
+export function mergeRequiredFiles(
+  types: SkillPackageType[],
+): RequiredFiles {
+  const out: RequiredFiles = { ...blank };
+  for (const pt of types) {
+    const r = REQUIRED_FILES_BY_TYPE[pt];
+    (Object.keys(out) as Array<keyof RequiredFiles>).forEach((k) => {
+      if (r[k]) out[k] = true;
+    });
+  }
+  return out;
+}
 
 export type StageMetadata = {
   id: WorkflowStageId;

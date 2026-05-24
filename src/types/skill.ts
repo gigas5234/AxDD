@@ -160,6 +160,8 @@ export type CustomExample = {
   expectedOutput: string;
 };
 
+export type BuildMode = "preset" | "custom";
+
 export type SkillConfig = {
   id: string;
   skillName: string;
@@ -168,6 +170,7 @@ export type SkillConfig = {
   category: SkillCategory;
   packageType: SkillPackageType;
   includedSkillTypes: SkillPackageType[];
+  buildMode: BuildMode;
   targetAgent: TargetAgent;
   roleProfile: RoleProfileSettings;
   workflowModules: WorkflowModule[];

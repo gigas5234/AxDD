@@ -78,9 +78,13 @@ function DemoSummary({ pkg }: { pkg: GeneratedPackage }) {
   return (
     <div
       className="flex items-center gap-1.5"
-      title="Demo summary for AXDD Standard Kit Composer v0.1"
+      title="Demo summary for AXDD Standard Kit Composer"
     >
-      <span className={chip}>type: {pkg.config.packageType}</span>
+      <span className={chip}>mode: {pkg.config.buildMode}</span>
+      <span className={chip}>primary: {pkg.config.packageType}</span>
+      <span className={chip}>
+        included: {pkg.config.includedSkillTypes.length}/8
+      </span>
       <span className={chip}>files: {pkg.files.length}</span>
       <span className={chip}>JSON: {jsonOk ? "passed" : "failed"}</span>
       <span className={chip}>

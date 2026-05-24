@@ -16,7 +16,15 @@ import { renderWorkUnitJson } from "./templates/work-unit-template";
 import { renderHooksJson } from "./templates/hooks-template";
 import { renderCatalogMd } from "./templates/catalog-md-template";
 import { FIGMA_INSTRUCTION_TEMPLATE } from "./templates/figma-instruction-template";
-import { REQUIRED_FILES_BY_TYPE } from "./package-matrix";
+import {
+  buildScriptSkillFiles,
+  buildMetadataSkillFiles,
+  buildAssetSkillFiles,
+} from "./templates/stubs-templates";
+import {
+  derivePrimaryKitStructure,
+  mergeRequiredFiles,
+} from "./package-matrix";
 import { runQualityChecks } from "./quality-checker";
 
 function makeId(prefix: string): string {
@@ -65,12 +73,20 @@ function jsonFile(
 
 export function generatePackage(config: SkillConfig): GeneratedPackage {
   const pkg = config.packageName;
-  const required = REQUIRED_FILES_BY_TYPE[config.packageType];
+  // Merge required files across every included skill type. A type's
+  // contribution may stack — e.g. reference-skill + test-skill brings
+  // references/, checklists/, and tests/ together. Empty includedSkillTypes
+  // falls back to the single packageType (back-compat for legacy configs).
+  const includedTypes =
+    config.includedSkillTypes.length > 0
+      ? config.includedSkillTypes
+      : [config.packageType];
+  const required = mergeRequiredFiles(includedTypes);
   const opts = config.packageOptions;
   const files: GeneratedFile[] = [];
 
-  // Matrix wins: a file is emitted if the matrix requires it OR the user
-  // explicitly opted in. The matrix minimum cannot be turned off.
+  // Matrix wins: a file is emitted if the merged matrix requires it OR the
+  // user explicitly opted in. The matrix minimum cannot be turned off.
   const want = {
     skillMd: required.skillMd || opts.includeSkillMd,
     readmeMd: required.readmeMd || opts.includeReadme,
@@ -82,7 +98,17 @@ export function generatePackage(config: SkillConfig): GeneratedPackage {
     checklists: required.checklists || opts.includeChecklists,
     tests: required.tests || opts.includeTests,
     examples: required.examples || opts.includeExamples,
+    scripts: required.scripts,
+    assets: required.assets,
+    metadata: required.metadata,
   };
+  // Keep config.packageType in sync with the merged inclusion set — callers
+  // may pass a stale packageType (e.g. when the user toggles types in custom
+  // mode and the local state hasn't recomputed yet).
+  const primaryKitStructure = derivePrimaryKitStructure(includedTypes);
+  if (config.packageType !== primaryKitStructure) {
+    config = { ...config, packageType: primaryKitStructure };
+  }
 
   if (want.skillMd) {
     files.push(
@@ -119,7 +145,7 @@ export function generatePackage(config: SkillConfig): GeneratedPackage {
       );
     }
     // Per-stage deep guides — required for full-step kits.
-    if (config.packageType === "full-step-skill") {
+    if (includedTypes.includes("full-step-skill")) {
       for (const g of buildStageGuideFiles()) {
         files.push(
           mdFile(
@@ -237,6 +263,60 @@ export function generatePackage(config: SkillConfig): GeneratedPackage {
         ["hooks-template"],
       ),
     );
+  }
+
+  // script-skill stubs → scripts/ + config/
+  if (want.scripts) {
+    for (const s of buildScriptSkillFiles()) {
+      const folder = s.fileName.endsWith(".ts") ? "scripts" : "config";
+      files.push({
+        id: makeId("file"),
+        path: `${pkg}/${folder}/${s.fileName}`,
+        fileName: s.fileName,
+        language: s.language,
+        content: s.content,
+        isEdited: false,
+        isGenerated: true,
+        generatedFrom: s.generatedFrom,
+        lastGeneratedAt: new Date().toISOString(),
+      });
+    }
+  }
+
+  // asset-skill stub → assets/asset-index.md
+  if (want.assets) {
+    for (const a of buildAssetSkillFiles()) {
+      files.push(
+        mdFile(
+          pkg,
+          `${pkg}/assets/${a.fileName}`,
+          a.fileName,
+          a.content,
+          a.generatedFrom,
+        ),
+      );
+    }
+  }
+
+  // metadata-skill stubs → top-level KIT_MANIFEST.json + metadata/index.json
+  if (want.metadata) {
+    for (const m of buildMetadataSkillFiles()) {
+      const path =
+        m.fileName === "KIT_MANIFEST.json"
+          ? `${pkg}/KIT_MANIFEST.json`
+          : `${pkg}/metadata/${m.fileName}`;
+      files.push({
+        id: makeId("file"),
+        path,
+        fileName: m.fileName,
+        language: m.language,
+        content: m.content,
+        isEdited: false,
+        isGenerated: true,
+        generatedFrom: m.generatedFrom,
+        lastGeneratedAt: new Date().toISOString(),
+      });
+    }
   }
 
   // CATALOG.md is rendered last so it can see every other file in the kit.
