@@ -317,12 +317,16 @@ export function SettingsForm({
         <p className="text-fine-print text-ink-muted-48 leading-snug -mt-1">
           {tr(UI.skillPackageTypeIntro, locale)}
         </p>
-        <div role="radiogroup" className="grid grid-cols-1 gap-2">
-          {allPackageTypes.map((pt) => {
+        {(() => {
+          const availableTypes: SkillPackageType[] = ["full-step-skill"];
+          const comingSoonTypes: SkillPackageType[] = allPackageTypes.filter(
+            (pt) => !availableTypes.includes(pt),
+          );
+
+          const renderCard = (pt: SkillPackageType, isEnabled: boolean) => {
             const meta = SKILL_PACKAGE_TYPE_LABELS[pt];
             const selected = config.packageType === pt;
             const isFullStep = pt === "full-step-skill";
-            const isEnabled = isFullStep; // v0.1.2 — only full-step is selectable
             return (
               <label
                 key={pt}
@@ -334,7 +338,7 @@ export function SettingsForm({
                     ? "border-primary bg-primary/5"
                     : isEnabled
                       ? "border-hairline bg-canvas hover:bg-divider-soft cursor-pointer"
-                      : "border-hairline bg-canvas opacity-60 cursor-not-allowed"
+                      : "border-hairline border-dashed bg-canvas-parchment cursor-not-allowed"
                 }`}
                 title={
                   isEnabled
@@ -355,11 +359,11 @@ export function SettingsForm({
                     <span className="text-[13.5px] font-semibold text-ink">
                       {tr(meta.name, locale)}
                     </span>
-                    <span className="text-[10.5px] font-mono text-ink-muted-48">
+                    <span className="text-[10.5px] font-mono text-ink-muted-80">
                       {pt}
                     </span>
                     {!isEnabled && (
-                      <span className="text-[10.5px] uppercase tracking-wide text-ink-muted-48 border border-hairline rounded-sm px-1.5 py-[1px]">
+                      <span className="text-[10.5px] uppercase tracking-wide text-ink-muted-80 bg-divider-soft border border-hairline rounded-sm px-1.5 py-[1px]">
                         {tr(UI.skillPackageTypeComingSoon, locale)}
                       </span>
                     )}
@@ -367,11 +371,7 @@ export function SettingsForm({
                   <div className="text-[12.5px] text-ink-muted-80 mt-0.5">
                     {tr(meta.tagline, locale)}
                   </div>
-                  <div className="text-[11.5px] text-ink-muted-48 mt-1 leading-snug">
-                    <span className="font-medium">When to use:</span>{" "}
-                    {tr(meta.whenToUse, locale)}
-                  </div>
-                  <div className="text-[11px] text-ink-muted-48 mt-0.5 font-mono leading-snug break-words">
+                  <div className="text-[11px] text-ink-muted-80 mt-1 font-mono leading-snug break-words">
                     <span className="not-italic">Required:</span> {meta.required}
                   </div>
                   {selected && isFullStep && (
@@ -382,8 +382,35 @@ export function SettingsForm({
                 </div>
               </label>
             );
-          })}
-        </div>
+          };
+
+          const subHeader = (label: string) => (
+            <div className="text-[10.5px] uppercase tracking-[0.16em] text-ink-muted-80 font-medium mt-1">
+              {label}
+            </div>
+          );
+
+          return (
+            <div role="radiogroup" className="space-y-3">
+              <div className="space-y-1.5">
+                {subHeader(tr(UI.skillPackageTypeAvailable, locale))}
+                <div className="grid grid-cols-1 gap-2">
+                  {availableTypes.map((pt) => renderCard(pt, true))}
+                </div>
+              </div>
+
+              <div className="space-y-1.5">
+                {subHeader(tr(UI.skillPackageTypeComingSoon, locale))}
+                <p className="text-fine-print text-ink-muted-80 leading-snug">
+                  {tr(UI.skillPackageTypeRoadmapHelper, locale)}
+                </p>
+                <div className="grid grid-cols-1 gap-2">
+                  {comingSoonTypes.map((pt) => renderCard(pt, false))}
+                </div>
+              </div>
+            </div>
+          );
+        })()}
       </Section>
 
       <Section

@@ -175,6 +175,14 @@ export const UI = {
     en: "Coming soon",
     ko: "지원 예정",
   } as Bilingual,
+  skillPackageTypeAvailable: {
+    en: "Available now",
+    ko: "지금 사용 가능",
+  } as Bilingual,
+  skillPackageTypeRoadmapHelper: {
+    en: "v0.1.2 currently supports full-step-skill generation. Other package types are shown as the AXDD framework roadmap.",
+    ko: "v0.1.2는 현재 full-step-skill 생성만 지원합니다. 나머지 타입은 AXDD 프레임워크 로드맵으로 표시됩니다.",
+  } as Bilingual,
   fullStepWhyThisKit: {
     en: "This kit is a full-step-skill because it includes staged workflow logic, CATALOG.md, WORK_UNIT.json, HOOKS.json, references, templates, checklists, tests, and examples.",
     ko: "이 키트는 단계형 워크플로 로직과 CATALOG.md, WORK_UNIT.json, HOOKS.json, references, templates, checklists, tests, examples를 포함하므로 full-step-skill입니다.",
