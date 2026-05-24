@@ -536,6 +536,127 @@ export function runQualityChecks(
     }
   }
 
+  // 20a. Stage guides — full-step kits must ship one per stage
+  if (config.packageType === "full-step-skill") {
+    const stageGuideFiles = files.filter((f) =>
+      f.path.includes("/references/stage-guides/"),
+    );
+    if (stageGuideFiles.length === 0) {
+      checks.push(
+        fail(
+          "stage-guides-folder",
+          "references/stage-guides/ missing",
+          "Full-step kits must include references/stage-guides/.",
+        ),
+      );
+    } else {
+      checks.push(pass("stage-guides-folder", "stage-guides folder present"));
+      const requiredGuides = [
+        "requirement-intake-guide.md",
+        "ux-foundation-guide.md",
+        "ui-design-foundation-guide.md",
+        "prototype-planning-guide.md",
+        "review-validation-guide.md",
+        "handoff-guide.md",
+      ];
+      const missingGuides = requiredGuides.filter(
+        (g) =>
+          !files.some((f) => f.path.endsWith(`/references/stage-guides/${g}`)),
+      );
+      if (missingGuides.length === 0) {
+        checks.push(pass("stage-guides-set", "all 6 stage guides present"));
+      } else {
+        checks.push(
+          fail(
+            "stage-guides-set",
+            "stage guides missing",
+            `Missing: ${missingGuides.join(", ")}`,
+          ),
+        );
+      }
+      // CATALOG references the stage guides
+      const catalog = fileContent(files, "/CATALOG.md");
+      const guideRefsMissing = requiredGuides.filter(
+        (g) => !catalog.includes(`references/stage-guides/${g}`),
+      );
+      if (guideRefsMissing.length === 0) {
+        checks.push(pass("catalog-stage-guides", "CATALOG references stage guides"));
+      } else {
+        checks.push(
+          warn(
+            "catalog-stage-guides",
+            "CATALOG missing stage-guide references",
+            `Missing: ${guideRefsMissing.join(", ")}`,
+          ),
+        );
+      }
+    }
+
+    // WORK_UNIT.json must include the new per-stage fields
+    const wuRaw = fileContent(files, "/WORK_UNIT.json");
+    if (wuRaw) {
+      try {
+        const parsed = JSON.parse(wuRaw) as {
+          stages: Array<Record<string, unknown>>;
+        };
+        const requiredKeys = [
+          "entryCriteria",
+          "procedure",
+          "decisionRules",
+          "qualityGate",
+          "failureHandling",
+          "nextStage",
+        ];
+        const missingPerStage: string[] = [];
+        for (const s of parsed.stages ?? []) {
+          for (const k of requiredKeys) {
+            if (!(k in s))
+              missingPerStage.push(`${String(s.id)}::${k}`);
+          }
+        }
+        if (missingPerStage.length === 0) {
+          checks.push(
+            pass("work-unit-depth", "WORK_UNIT.json has full per-stage fields"),
+          );
+        } else {
+          checks.push(
+            fail(
+              "work-unit-depth",
+              "WORK_UNIT.json stage fields missing",
+              `Missing: ${missingPerStage.slice(0, 5).join(", ")}${missingPerStage.length > 5 ? "…" : ""}`,
+            ),
+          );
+        }
+      } catch {
+        // already handled by check 16
+      }
+    }
+
+    // README package tree must mention the new top-level files / folders
+    const readme = fileContent(files, "/README.md");
+    if (readme) {
+      const mustMention = [
+        "CATALOG.md",
+        "WORK_UNIT.json",
+        "HOOKS.json",
+        "checklists/",
+        "tests/",
+      ];
+      const missingMentions = mustMention.filter((m) => !readme.includes(m));
+      if (missingMentions.length === 0) {
+        checks.push(pass("readme-tree", "README package tree is complete"));
+      } else {
+        checks.push(
+          warn(
+            "readme-tree",
+            "README package tree missing entries",
+            `Missing: ${missingMentions.join(", ")}`,
+          ),
+        );
+      }
+    }
+  }
+
   // 20. Governance files (when tests/checklists required)
   if (required.tests) {
     if (!hasFile(files, "/tests/sandbox-test-scenario.md")) {

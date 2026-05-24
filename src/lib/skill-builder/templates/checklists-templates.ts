@@ -4,55 +4,72 @@ export type ChecklistFileSpec = {
   generatedFrom: string[];
 };
 
+const HOW_TO_USE = `> **How to use this checklist** — for each item, fill all four columns. \`Evidence\` is what proves it passes (a spec link, a screenshot, a number). \`Issue\` is what's wrong if it doesn't pass. \`Fix\` is the concrete change. \`Accepted exception\` is the reviewer-signed reason it's OK to ship anyway. An item with neither passing Evidence nor an Accepted exception blocks the stage.`;
+
 const UX_FOUNDATION = `# UX Foundation Checklist
 
-Exit gate for the **UX Foundation** stage. All boxes must be ticked or have an accepted exception logged in \`tests/validation-log-template.md\`.
+${HOW_TO_USE}
 
-- [ ] Primary user is named and precise (not "the customer").
-- [ ] Primary action per screen is defined.
-- [ ] User flow covers entry, happy path, and at least one alternate / failure branch.
-- [ ] Information architecture lists every screen with a one-sentence purpose.
-- [ ] Each screen has its primary action identified.
-- [ ] Unknowns are logged as ask / default / defer (no silent assumptions).
+| # | Item | Evidence | Issue | Fix | Accepted exception |
+|---|------|----------|-------|-----|--------------------|
+| 1 | Primary user is named and precise (not "the customer"). | | | | |
+| 2 | Primary action per screen is defined. | | | | |
+| 3 | User flow covers entry, happy path, and at least one alternate / failure branch. | | | | |
+| 4 | Information architecture lists every screen with a one-sentence purpose. | | | | |
+| 5 | Each screen has its primary action identified. | | | | |
+| 6 | Every alternate branch terminates (success / retry / exit). | | | | |
+| 7 | Navigation model is named and consistent across screens. | | | | |
+| 8 | Unknowns are logged as ask / default / defer (no silent assumptions). | | | | |
 `;
 
 const UI_DESIGN = `# UI Design Checklist
 
-Exit gate for **UI Design Foundation** and used again during **Review & Validation**.
+${HOW_TO_USE}
 
-- [ ] Each screen has a written specification using \`templates/screen-spec-template.md\`.
-- [ ] Components are named, reused across screens, and documented (props / variants / states).
-- [ ] Every screen lists all 4 states: default / empty / loading / error.
-- [ ] Empty state has a defined "next step".
-- [ ] Error state has a defined recovery path.
-- [ ] Responsive notes exist for mobile / tablet / desktop.
-- [ ] Tokens are used for color / type / spacing / radius (no raw values).
-- [ ] Accessibility: contrast AA, focus visible, touch targets meet minimums.
+| # | Item | Evidence | Issue | Fix | Accepted exception |
+|---|------|----------|-------|-----|--------------------|
+| 1 | Each screen has a written specification (\`templates/screen-spec-template.md\`). | | | | |
+| 2 | Components are named, reused across screens, and documented (props / variants / states). | | | | |
+| 3 | Every screen lists all 4 states: default / empty / loading / error. | | | | |
+| 4 | Empty state has a defined "next step". | | | | |
+| 5 | Error state has a defined recovery path. | | | | |
+| 6 | Responsive notes exist for mobile / tablet / desktop. | | | | |
+| 7 | Tokens are used for color / type / spacing / radius (no raw values). | | | | |
+| 8 | Accessibility: contrast AA, focus visible, touch targets meet minimums. | | | | |
+| 9 | Hierarchy ranked and ≤ 5 items per screen. | | | | |
 `;
 
 const HANDOFF = `# Handoff Checklist
 
-Exit gate for the **Handoff** stage before engineering picks up the work.
+${HOW_TO_USE}
 
-- [ ] Implementation prompt generated using \`templates/cursor-prompt-template.md\`.
-- [ ] Screen specifications attached or linked from the handoff package.
-- [ ] Tokens / theme references included.
-- [ ] Open questions resolved or explicitly deferred.
-- [ ] Validation log shows no unresolved blockers (\`tests/validation-log-template.md\`).
-- [ ] Release checklist (\`checklists/release-checklist.md\`) is fully ticked.
+| # | Item | Evidence | Issue | Fix | Accepted exception |
+|---|------|----------|-------|-----|--------------------|
+| 1 | Implementation prompt generated (\`templates/cursor-prompt-template.md\`). | | | | |
+| 2 | Screen specifications attached or linked from the handoff package. | | | | |
+| 3 | Tokens / theme references included. | | | | |
+| 4 | Telemetry events listed per screen. | | | | |
+| 5 | Open questions resolved or explicitly deferred. | | | | |
+| 6 | Validation log shows no unresolved blockers. | | | | |
+| 7 | Release checklist (\`checklists/release-checklist.md\`) is fully ticked. | | | | |
+| 8 | Owner + escalation path documented. | | | | |
 `;
 
 const RELEASE = `# Release Checklist
 
-Final gate before this kit (or its output) is released. Every item must be ticked.
+${HOW_TO_USE}
 
-- [ ] All WORK_UNIT.json stage \`exitCriteria\` are met.
-- [ ] All sandbox scenarios in \`tests/sandbox-test-scenario.md\` pass or have an accepted exception in \`tests/validation-log-template.md\`.
-- [ ] \`CATALOG.md\` lists every file present in the kit.
-- [ ] \`HOOKS.json\` triggers reviewed for collisions (no two hooks share a trigger).
-- [ ] Version bumped in \`SKILL.md\` frontmatter.
-- [ ] \`README.md\` install / usage section reflects the current kit structure.
-- [ ] Ownership and escalation path documented for the released kit.
+| # | Item | Evidence | Issue | Fix | Accepted exception |
+|---|------|----------|-------|-----|--------------------|
+| 1 | All WORK_UNIT.json stage \`exitCriteria\` are met. | | | | |
+| 2 | All sandbox scenarios in \`tests/sandbox-test-scenario.md\` pass or have an accepted exception in \`tests/validation-log-template.md\`. | | | | |
+| 3 | \`CATALOG.md\` lists every file present in the kit. | | | | |
+| 4 | \`HOOKS.json\` triggers reviewed for collisions. | | | | |
+| 5 | Every \`HOOKS.json\` \`routeTo.stage\` resolves to a stage in \`WORK_UNIT.json\`. | | | | |
+| 6 | Version bumped in \`SKILL.md\` frontmatter. | | | | |
+| 7 | \`README.md\` install / usage section reflects the current kit structure. | | | | |
+| 8 | Ownership and escalation path documented for the released kit. | | | | |
+| 9 | Stage guides under \`references/stage-guides/\` exist for every stage in \`WORK_UNIT.json\`. | | | | |
 `;
 
 export function buildChecklistFiles(): ChecklistFileSpec[] {

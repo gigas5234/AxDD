@@ -1,4 +1,5 @@
 import type { GeneratedFile, SkillConfig } from "@/types/skill";
+import { ALL_STAGES, STAGE_METADATA } from "../package-matrix";
 
 type Entry = {
   id: string;
@@ -110,6 +111,49 @@ const ENTRY_INDEX: Record<string, Omit<Entry, "id" | "path">> = {
     outputs: ["log row"],
     related: ["checklists/release-checklist.md"],
   },
+  // references/stage-guides/
+  "requirement-intake-guide.md": {
+    whenToUse: "While running the Requirement Intake stage.",
+    inputs: ["raw product idea"],
+    outputs: ["UX brief draft"],
+    related: ["templates/ux-brief-template.md"],
+  },
+  "ux-foundation-guide.md": {
+    whenToUse: "While running the UX Foundation stage.",
+    inputs: ["UX brief"],
+    outputs: ["user flow", "screen inventory"],
+    related: ["checklists/ux-foundation-checklist.md"],
+  },
+  "ui-design-foundation-guide.md": {
+    whenToUse: "While running the UI Design Foundation stage.",
+    inputs: ["screen inventory"],
+    outputs: ["screen specifications"],
+    related: ["templates/screen-spec-template.md"],
+  },
+  "prototype-planning-guide.md": {
+    whenToUse: "While running the Prototype Planning stage.",
+    inputs: ["screen specifications"],
+    outputs: ["prototype plan"],
+    related: ["templates/figma-instruction-template.md"],
+  },
+  "review-validation-guide.md": {
+    whenToUse: "While running the Review & Validation stage.",
+    inputs: ["screen specs", "built frames"],
+    outputs: ["findings", "scenario results"],
+    related: [
+      "templates/design-review-template.md",
+      "tests/sandbox-test-scenario.md",
+    ],
+  },
+  "handoff-guide.md": {
+    whenToUse: "While running the Handoff stage.",
+    inputs: ["validated specs", "passing validation log"],
+    outputs: ["implementation prompt", "handoff package"],
+    related: [
+      "templates/cursor-prompt-template.md",
+      "checklists/release-checklist.md",
+    ],
+  },
   // examples/
   "ux-ui-example.md": {
     whenToUse: "Reference example showing the full workflow end to end.",
@@ -140,6 +184,7 @@ export function renderCatalogMd(
 ): string {
   const grouped: Record<string, Entry[]> = {
     "references/": [],
+    "references/stage-guides/": [],
     "templates/": [],
     "checklists/": [],
     "tests/": [],
@@ -149,7 +194,10 @@ export function renderCatalogMd(
   for (const f of files) {
     const parts = f.path.split("/");
     if (parts.length < 3) continue; // skip top-level files
-    const folder = `${parts[parts.length - 2]}/`;
+    let folder = `${parts[parts.length - 2]}/`;
+    if (parts.length >= 4 && parts[parts.length - 2] === "stage-guides") {
+      folder = "references/stage-guides/";
+    }
     if (!(folder in grouped)) continue;
     const meta = ENTRY_INDEX[f.fileName];
     if (!meta) continue;
@@ -172,6 +220,59 @@ export function renderCatalogMd(
     "Inventory of every skill, template, checklist, and test bundled in this kit.",
     "Each entry lists when to use it, expected inputs, produced outputs, and related files inside the kit.",
   ];
+
+  // ── Workflow Skills (one per stage) — only for full-step kits ─────────────
+  if (config.packageType === "full-step-skill") {
+    sections.push("", "## Workflow Skills", "");
+    sections.push(
+      "Each workflow stage is itself a skill the agent invokes. Stages are defined in `WORK_UNIT.json` and routed by `HOOKS.json`.",
+      "",
+    );
+    for (const id of ALL_STAGES) {
+      const s = STAGE_METADATA[id];
+      const guidePath = `references/stage-guides/${id}-guide.md`;
+      const next = s.nextStage ?? "—";
+      sections.push(`### \`${id}\` — ${s.title}`);
+      sections.push(`- **id:** \`${id}\``);
+      sections.push(`- **type:** \`stage-skill\``);
+      sections.push(`- **When to use:** ${s.purpose}`);
+      sections.push(
+        `- **Required inputs:** ${s.inputs.length ? s.inputs.join(", ") : "—"}`,
+      );
+      sections.push(
+        `- **Outputs:** ${s.outputs.length ? s.outputs.join(", ") : "—"}`,
+      );
+      sections.push(
+        `- **Related templates:** ${
+          s.usesTemplates.length
+            ? s.usesTemplates.map((t) => `\`${t}\``).join(", ")
+            : "—"
+        }`,
+      );
+      sections.push(
+        `- **Related references:** ${
+          s.usesReferences.length
+            ? s.usesReferences.map((r) => `\`${r}\``).join(", ")
+            : "—"
+        }`,
+      );
+      sections.push(
+        `- **Related checklists:** ${
+          s.usesChecklists.length
+            ? s.usesChecklists.map((c) => `\`${c}\``).join(", ")
+            : "—"
+        }`,
+      );
+      sections.push(
+        `- **Quality gate:** ${
+          s.qualityGate.length ? s.qualityGate.join("; ") : "—"
+        }`,
+      );
+      sections.push(`- **Next stage:** ${next === "—" ? "—" : `\`${next}\``}`);
+      sections.push(`- **Stage guide:** \`${guidePath}\``);
+      sections.push("");
+    }
+  }
 
   for (const [folder, entries] of Object.entries(grouped)) {
     if (entries.length === 0) continue;

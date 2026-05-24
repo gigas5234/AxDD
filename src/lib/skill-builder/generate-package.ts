@@ -10,6 +10,7 @@ import { buildTemplateFiles } from "./templates/templates-templates";
 import { buildExampleFiles } from "./templates/examples-templates";
 import { buildChecklistFiles } from "./templates/checklists-templates";
 import { buildTestFiles } from "./templates/tests-templates";
+import { buildStageGuideFiles } from "./templates/stage-guides-templates";
 import { renderWorkUnitJson } from "./templates/work-unit-template";
 import { renderHooksJson } from "./templates/hooks-template";
 import { renderCatalogMd } from "./templates/catalog-md-template";
@@ -115,6 +116,20 @@ export function generatePackage(config: SkillConfig): GeneratedPackage {
           r.generatedFrom,
         ),
       );
+    }
+    // Per-stage deep guides — required for full-step kits.
+    if (config.packageType === "full-step-skill") {
+      for (const g of buildStageGuideFiles()) {
+        files.push(
+          mdFile(
+            pkg,
+            `${pkg}/references/stage-guides/${g.fileName}`,
+            g.fileName,
+            g.content,
+            g.generatedFrom,
+          ),
+        );
+      }
     }
   }
 

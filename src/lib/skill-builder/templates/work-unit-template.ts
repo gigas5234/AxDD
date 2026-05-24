@@ -17,7 +17,13 @@ export function renderWorkUnitJson(config: SkillConfig): string {
       usesTemplates: meta.usesTemplates,
       usesReferences: meta.usesReferences,
       usesChecklists: meta.usesChecklists,
+      entryCriteria: meta.entryCriteria,
+      procedure: meta.procedure,
+      decisionRules: meta.decisionRules,
+      qualityGate: meta.qualityGate,
+      failureHandling: meta.failureHandling,
       exitCriteria: meta.exitCriteria,
+      nextStage: meta.nextStage,
     };
   });
 
