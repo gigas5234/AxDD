@@ -17,7 +17,12 @@ export type InspectorTarget =
   | { type: "capability-pack"; id: CapabilityPack }
   | { type: "settings"; section: SettingsTarget; title: string; helper?: string }
   | { type: "file-matrix" }
-  | { type: "summary" };
+  | { type: "summary" }
+  | { type: "overview" }
+  | { type: "composition" }
+  | { type: "files-grouped" }
+  | { type: "governance" }
+  | { type: "advanced" };
 
 export function InspectorPanel({
   target,
@@ -28,6 +33,11 @@ export function InspectorPanel({
   config,
   onConfigChange,
   files,
+  onGenerate,
+  onDownload,
+  onInspect,
+  isGenerating,
+  isExporting,
 }: {
   target: InspectorTarget;
   report: QualityReport | null;
@@ -37,8 +47,425 @@ export function InspectorPanel({
   config?: SkillConfig;
   onConfigChange?: (next: SkillConfig) => void;
   files?: { path: string; fileName: string }[];
+  onGenerate?: () => void;
+  onDownload?: () => void;
+  isGenerating?: boolean;
+  isExporting?: boolean;
+  onInspect?: (target: InspectorTarget) => void;
 }) {
   const { locale } = useLocale();
+
+  // ── Kit Overview ─────────────────────────────────────────────────────────
+  if (target.type === "overview" && config) {
+    const fails =
+      report?.checks.filter((c) => c.status === "fail").length ?? 0;
+    const hasPkg = !!files;
+    return (
+      <div className="flex flex-col h-full min-h-0">
+        <div className="px-4 py-3 border-b border-hairline flex-shrink-0">
+          <div className="text-fine-print uppercase tracking-[0.16em] text-ink-muted-48">
+            Detail
+          </div>
+          <div className="text-body-strong text-ink mt-0.5">Kit Overview</div>
+          <div className="text-[12.5px] text-ink-muted-80 mt-1 leading-snug">
+            What this kit will produce and how to ship it.
+          </div>
+        </div>
+        <div className="flex-1 overflow-y-auto thin-scrollbar px-4 py-3 space-y-4 text-[13.5px]">
+          <section className="space-y-2">
+            <div className="text-[10.5px] uppercase tracking-[0.16em] text-ink-muted-48 font-medium">
+              Identity
+            </div>
+            <dl className="rounded-md border border-hairline bg-canvas divide-y divide-divider-soft text-[12.5px]">
+              {[
+                ["Skill name", config.skillName],
+                ["Package", config.packageName],
+                ["Category", config.category],
+                ["Build mode", config.buildMode],
+                ["Primary kit", config.packageType],
+                ["Included types", `${config.includedSkillTypes.length} / 8`],
+                ["Description", config.description],
+              ].map(([k, v]) => (
+                <div
+                  key={String(k)}
+                  className="flex gap-3 px-3 py-2 items-start"
+                >
+                  <dt className="text-ink-muted-80 min-w-[110px] flex-shrink-0">
+                    {k}
+                  </dt>
+                  <dd className="text-ink leading-snug break-words">
+                    {String(v)}
+                  </dd>
+                </div>
+              ))}
+            </dl>
+          </section>
+
+          <section className="space-y-2">
+            <div className="text-[10.5px] uppercase tracking-[0.16em] text-ink-muted-48 font-medium">
+              Expected output
+            </div>
+            <div className="rounded-md border border-hairline bg-canvas px-3 py-2 text-[12.5px] text-ink-muted-80 leading-snug">
+              {hasPkg
+                ? `${files!.length} files generated. ${
+                    report
+                      ? `Quality ${report.totalScore} / 100 · ${fails} fails.`
+                      : ""
+                  }`
+                : "Press Generate Kit to compose the AXDD Standard Kit. Files appear here and in the workspace."}
+            </div>
+          </section>
+
+          <section className="space-y-2">
+            <div className="text-[10.5px] uppercase tracking-[0.16em] text-ink-muted-48 font-medium">
+              Actions
+            </div>
+            <div className="flex flex-col gap-2">
+              {onGenerate && (
+                <button
+                  type="button"
+                  onClick={onGenerate}
+                  disabled={!!isGenerating}
+                  className="w-full inline-flex items-center justify-center rounded-pill bg-cta text-body-on-dark px-[20px] py-[8px] text-[14px] font-medium shadow-sm hover:bg-cta-hover disabled:opacity-50 transition"
+                >
+                  {isGenerating ? "Generating…" : "Generate Kit"}
+                </button>
+              )}
+              {onDownload && (
+                <button
+                  type="button"
+                  onClick={onDownload}
+                  disabled={!hasPkg || !!isExporting}
+                  className="w-full inline-flex items-center justify-center rounded-pill border border-ink/30 bg-canvas text-ink px-[18px] py-[8px] text-[13.5px] font-medium hover:bg-divider-soft disabled:opacity-50 transition"
+                >
+                  {isExporting ? "Preparing ZIP…" : "Download ZIP"}
+                </button>
+              )}
+            </div>
+          </section>
+        </div>
+      </div>
+    );
+  }
+
+  // ── Skill Composition ────────────────────────────────────────────────────
+  if (target.type === "composition" && config && onConfigChange) {
+    return (
+      <div className="flex flex-col h-full min-h-0">
+        <div className="px-4 py-3 border-b border-hairline flex items-start gap-2 flex-shrink-0">
+          <div className="flex-1 min-w-0">
+            <div className="text-fine-print uppercase tracking-[0.16em] text-ink-muted-48">
+              Detail
+            </div>
+            <div className="text-body-strong text-ink mt-0.5">
+              Skill Composition
+            </div>
+            <div className="text-[12.5px] text-ink-muted-80 mt-1 leading-snug">
+              Which AXDD skill types this kit bundles. Preset auto-selects;
+              switch to Custom to edit manually.
+            </div>
+          </div>
+        </div>
+        <div className="flex-1 overflow-y-auto thin-scrollbar px-4 py-3 space-y-4">
+          {/* Build mode toggle reused from per-section settings */}
+          <div className="rounded-md border border-hairline bg-canvas">
+            <SettingsForm
+              config={config}
+              onChange={onConfigChange}
+              inspector={target}
+              onInspect={() => {}}
+              targetOnly="build-mode"
+            />
+          </div>
+          <div className="rounded-md border border-hairline bg-canvas">
+            <SettingsForm
+              config={config}
+              onChange={onConfigChange}
+              inspector={target}
+              onInspect={() => {}}
+              targetOnly="included-types"
+            />
+          </div>
+          <div className="rounded-md border border-hairline bg-canvas">
+            <SettingsForm
+              config={config}
+              onChange={onConfigChange}
+              inspector={target}
+              onInspect={() => {}}
+              targetOnly="primary-kit"
+            />
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // ── Generated Files (grouped matrix) ─────────────────────────────────────
+  if (target.type === "files-grouped") {
+    const groups: { label: string; match: (path: string) => boolean }[] = [
+      {
+        label: "Core",
+        match: (p) =>
+          /\/(SKILL\.md|CATALOG\.md|README\.md|KIT_MANIFEST\.json)$/.test(p),
+      },
+      {
+        label: "Workflow",
+        match: (p) =>
+          /\/(WORK_UNIT\.json|HOOKS\.json)$/.test(p) ||
+          p.includes("/references/stage-guides/"),
+      },
+      {
+        label: "Knowledge",
+        match: (p) =>
+          p.includes("/references/") && !p.includes("/references/stage-guides/"),
+      },
+      { label: "Templates", match: (p) => p.includes("/templates/") },
+      { label: "Checklists", match: (p) => p.includes("/checklists/") },
+      { label: "Tests", match: (p) => p.includes("/tests/") },
+      { label: "Examples", match: (p) => p.includes("/examples/") },
+      {
+        label: "Scripts & Metadata",
+        match: (p) =>
+          p.includes("/scripts/") ||
+          p.includes("/config/") ||
+          p.includes("/metadata/") ||
+          p.includes("/assets/"),
+      },
+    ];
+    const bucketed = groups.map((g) => ({
+      ...g,
+      items: (files ?? []).filter((f) => g.match(f.path)),
+    }));
+
+    return (
+      <div className="flex flex-col h-full min-h-0">
+        <div className="px-4 py-3 border-b border-hairline flex items-start gap-2 flex-shrink-0">
+          <div className="flex-1 min-w-0">
+            <div className="text-fine-print uppercase tracking-[0.16em] text-ink-muted-48">
+              Detail
+            </div>
+            <div className="text-body-strong text-ink mt-0.5">
+              Generated Files
+            </div>
+            <div className="text-[12.5px] text-ink-muted-80 mt-1 leading-snug">
+              {files
+                ? `${files.length} files grouped by purpose.`
+                : "No package yet. Press Generate Kit to populate this view."}
+            </div>
+          </div>
+        </div>
+        <div className="flex-1 overflow-y-auto thin-scrollbar px-4 py-3 space-y-3">
+          {bucketed.map((b) => (
+            <section key={b.label} className="space-y-1.5">
+              <div className="flex items-baseline gap-2">
+                <div className="text-[12px] font-semibold text-ink">
+                  {b.label}
+                </div>
+                <div className="text-[11px] text-ink-muted-80 font-mono">
+                  {b.items.length}
+                </div>
+              </div>
+              {b.items.length === 0 ? (
+                <div className="text-[11.5px] text-ink-muted-48 italic px-1">
+                  none in this kit
+                </div>
+              ) : (
+                <ul className="divide-y divide-divider-soft border border-hairline rounded-md bg-canvas overflow-hidden">
+                  {b.items.map((f) => (
+                    <li
+                      key={f.path}
+                      className="px-3 py-1.5 font-mono text-[12px] text-ink truncate"
+                      title={f.path}
+                    >
+                      {f.path}
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </section>
+          ))}
+        </div>
+      </div>
+    );
+  }
+
+  // ── Governance ───────────────────────────────────────────────────────────
+  if (target.type === "governance") {
+    const checks = report?.checks ?? [];
+    const fails = checks.filter((c) => c.status === "fail");
+    const warns = checks.filter((c) => c.status === "warning");
+    const passes = checks.filter((c) => c.status === "pass");
+    const findCheck = (idPart: string) =>
+      checks.find((c) => c.id.includes(idPart));
+    const probes: { label: string; key: string }[] = [
+      { label: "JSON validity (WORK_UNIT)", key: "work-unit-json" },
+      { label: "JSON validity (HOOKS)", key: "hooks-json" },
+      { label: "Stage count = 6", key: "work-unit-stages" },
+      { label: "Hook routes resolve", key: "hooks-stage-routes" },
+      { label: "Hook trigger collisions", key: "hooks-collisions" },
+      { label: "CATALOG cross-references", key: "catalog-refs" },
+      { label: "Required files (matrix)", key: "matrix-" },
+      { label: "Stage guides present", key: "stage-guides-set" },
+      { label: "Skill framework reference", key: "skill-framework-ref" },
+      { label: "Figma manual fallback", key: "figma-fallback" },
+      { label: "Script stubs", key: "script-stubs" },
+      { label: "Metadata stubs", key: "metadata-stubs" },
+      { label: "Asset stub", key: "asset-stubs" },
+    ];
+    const statusDot = (s: "pass" | "warning" | "fail" | undefined) =>
+      s === "fail"
+        ? "bg-primary"
+        : s === "warning"
+          ? "bg-ink-muted-48"
+          : s === "pass"
+            ? "bg-ink/40"
+            : "bg-hairline";
+    return (
+      <div className="flex flex-col h-full min-h-0">
+        <div className="px-4 py-3 border-b border-hairline flex items-start gap-2 flex-shrink-0">
+          <div className="flex-1 min-w-0">
+            <div className="text-fine-print uppercase tracking-[0.16em] text-ink-muted-48">
+              Detail
+            </div>
+            <div className="text-body-strong text-ink mt-0.5">Governance</div>
+            <div className="text-[12.5px] text-ink-muted-80 mt-1 leading-snug">
+              Quality score, JSON validity, required files, governance gates.
+            </div>
+          </div>
+        </div>
+        <div className="flex-1 overflow-y-auto thin-scrollbar px-4 py-3 space-y-4">
+          <section className="rounded-md border border-hairline bg-canvas p-3 space-y-1">
+            <div className="flex items-baseline justify-between">
+              <div className="text-[10.5px] uppercase tracking-[0.16em] text-ink-muted-48">
+                Score
+              </div>
+              <div className="text-[20px] font-semibold text-ink">
+                {report?.totalScore ?? "—"} <span className="text-[12px] text-ink-muted-80">/ 100</span>
+              </div>
+            </div>
+            <div className="flex items-center gap-3 text-[12px] text-ink-muted-80">
+              <span>pass {passes.length}</span>
+              <span>warn {warns.length}</span>
+              <span className={fails.length > 0 ? "text-primary" : ""}>
+                fail {fails.length}
+              </span>
+            </div>
+          </section>
+
+          <section className="space-y-1.5">
+            <div className="text-[10.5px] uppercase tracking-[0.16em] text-ink-muted-48 font-medium">
+              Gates
+            </div>
+            <ul className="divide-y divide-divider-soft border border-hairline rounded-md bg-canvas overflow-hidden">
+              {probes.map((p) => {
+                const c = findCheck(p.key);
+                return (
+                  <li
+                    key={p.key}
+                    className="px-3 py-2 flex items-center gap-2 text-[12.5px]"
+                    title={c?.message ?? "not evaluated"}
+                  >
+                    <span
+                      className={`inline-block w-1.5 h-1.5 rounded-full flex-shrink-0 ${statusDot(c?.status)}`}
+                    />
+                    <span className="text-ink flex-1 truncate">{p.label}</span>
+                    <span className="font-mono text-[11px] text-ink-muted-80">
+                      {c?.status ?? "—"}
+                    </span>
+                  </li>
+                );
+              })}
+            </ul>
+          </section>
+
+          {fails.length > 0 && (
+            <section className="space-y-1.5">
+              <div className="text-[10.5px] uppercase tracking-[0.16em] text-primary font-medium">
+                Failures
+              </div>
+              <ul className="space-y-1">
+                {fails.map((c) => (
+                  <li
+                    key={c.id}
+                    className="px-3 py-2 rounded-md border border-primary/30 bg-primary/5 text-[12px] text-ink"
+                  >
+                    <div className="font-medium">{c.label}</div>
+                    <div className="text-ink-muted-80 mt-0.5 leading-snug">
+                      {c.message}
+                    </div>
+                  </li>
+                ))}
+              </ul>
+            </section>
+          )}
+        </div>
+      </div>
+    );
+  }
+
+  // ── Advanced Settings (sub-nav of per-section editors) ───────────────────
+  if (target.type === "advanced") {
+    const advancedRows: {
+      section: SettingsTarget | "file-matrix";
+      label: string;
+      hint: string;
+    }[] = [
+      { section: "basic", label: "Basic Info", hint: "Name, package, description, target agent" },
+      { section: "role", label: "Role & Awareness", hint: "Role level, implementation / DS / business awareness" },
+      { section: "output", label: "Output Format", hint: "Markdown / JSON / tables / Cursor prompt / checklists / examples" },
+      { section: "workflow", label: "Workflow / Stages", hint: "Legacy workflow modules / stage display" },
+      { section: "packs", label: "Design Capability Add-ons", hint: "Optional UX/UI content packs" },
+      { section: "rules", label: "Quality Rules", hint: "Universal + category-specific rules" },
+      { section: "lang", label: "Language", hint: "Primary language (Korean translation is Phase 2)" },
+      { section: "pkg", label: "Raw Package Options", hint: "Per-folder include toggles (matrix-locked)" },
+      { section: "file-matrix", label: "File Matrix (raw view)", hint: "Folder counts of the current generation" },
+    ];
+
+    return (
+      <div className="flex flex-col h-full min-h-0">
+        <div className="px-4 py-3 border-b border-hairline flex items-start gap-2 flex-shrink-0">
+          <div className="flex-1 min-w-0">
+            <div className="text-fine-print uppercase tracking-[0.16em] text-ink-muted-48">
+              Detail
+            </div>
+            <div className="text-body-strong text-ink mt-0.5">
+              Advanced Settings
+            </div>
+            <div className="text-[12.5px] text-ink-muted-80 mt-1 leading-snug">
+              Detailed knobs. Most users won't need these; pick a preset
+              instead.
+            </div>
+          </div>
+        </div>
+        <div className="flex-1 overflow-y-auto thin-scrollbar px-4 py-3 space-y-1">
+          {advancedRows.map((r) => (
+            <button
+              key={r.section}
+              type="button"
+              onClick={() => {
+                if (!onInspect) return;
+                if (r.section === "file-matrix") {
+                  onInspect({ type: "file-matrix" });
+                } else {
+                  onInspect({
+                    type: "settings",
+                    section: r.section,
+                    title: r.label,
+                  });
+                }
+              }}
+              className="w-full text-left rounded-md border border-hairline bg-canvas px-3 py-2 hover:bg-divider-soft transition"
+            >
+              <div className="text-[13px] font-medium text-ink">{r.label}</div>
+              <div className="text-[11.5px] text-ink-muted-80 mt-0.5 leading-snug">
+                {r.hint}
+              </div>
+            </button>
+          ))}
+        </div>
+      </div>
+    );
+  }
 
   if (target.type === "summary") {
     return (

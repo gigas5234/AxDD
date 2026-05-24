@@ -5,51 +5,16 @@ import { useLocale, tr } from "@/lib/i18n/locale";
 import {
   PRESET_LABELS,
   SKILL_PACKAGE_TYPE_LABELS,
-  UI,
 } from "@/lib/i18n/strings";
-import {
-  type InspectorTarget,
-} from "./InspectorPanel";
-import { type SettingsTarget } from "./SettingsForm";
+import { type InspectorTarget } from "./InspectorPanel";
 import { PRESETS } from "@/lib/skill-builder/default-preset";
 
-type NavRow =
-  | { kind: "settings"; section: SettingsTarget; label: string; helper?: string }
-  | { kind: "file-matrix"; label: string }
-  | { kind: "preset"; label: string };
-
-const SECTION_GROUPS: { title: string; rows: NavRow[] }[] = [
-  {
-    title: "Quick Setup",
-    rows: [{ kind: "settings", section: "build-mode", label: "Build Mode" }],
-  },
-  {
-    title: "Kit Composition",
-    rows: [
-      { kind: "settings", section: "primary-kit", label: "Primary Kit Structure" },
-      { kind: "settings", section: "included-types", label: "Included Skill Types" },
-      { kind: "file-matrix", label: "Generated File Matrix" },
-    ],
-  },
-  {
-    title: "Customize",
-    rows: [
-      { kind: "settings", section: "role", label: "Role & Awareness" },
-      { kind: "settings", section: "output", label: "Output Format" },
-      { kind: "settings", section: "workflow", label: "Workflow / Validation" },
-      { kind: "settings", section: "packs", label: "Design Capability Add-ons" },
-      { kind: "settings", section: "rules", label: "Quality Rules" },
-      { kind: "settings", section: "lang", label: "Language" },
-    ],
-  },
-  {
-    title: "Advanced",
-    rows: [
-      { kind: "settings", section: "basic", label: "Basic Info" },
-      { kind: "settings", section: "pkg", label: "Raw Package Options" },
-    ],
-  },
-];
+type NavRow = {
+  id: NonNullable<InspectorTarget["type"]>;
+  label: string;
+  description: string;
+  target: InspectorTarget;
+};
 
 export function SettingsNav({
   config,
@@ -74,40 +39,65 @@ export function SettingsNav({
     : PRESETS.find((p) => p.id === selectedPresetId)?.name ?? selectedPresetId;
   const primaryMeta = SKILL_PACKAGE_TYPE_LABELS[config.packageType];
 
-  function isActive(row: NavRow): boolean {
-    if (row.kind === "settings") {
-      return (
-        inspector.type === "settings" && inspector.section === row.section
-      );
-    }
-    if (row.kind === "file-matrix") return inspector.type === "file-matrix";
-    return false; // preset is a one-shot action
-  }
+  const rows: NavRow[] = [
+    {
+      id: "overview",
+      label: "Kit Overview",
+      description: "Preset, mode, primary type, expected files, generate",
+      target: { type: "overview" },
+    },
+    {
+      id: "composition",
+      label: "Skill Composition",
+      description: "Included skill types + AXDD 8-type taxonomy",
+      target: { type: "composition" },
+    },
+    {
+      id: "files-grouped",
+      label: "Generated Files",
+      description: "Core, workflow, knowledge, templates, checklists, tests",
+      target: { type: "files-grouped" },
+    },
+    {
+      id: "governance",
+      label: "Governance",
+      description: "Quality score, JSON validity, required files, gates",
+      target: { type: "governance" },
+    },
+    {
+      id: "advanced",
+      label: "Advanced Settings",
+      description: "Role, output, add-ons, rules, language, raw options",
+      target: { type: "advanced" },
+    },
+  ];
 
-  function handleClick(row: NavRow) {
-    if (row.kind === "settings") {
-      onInspect({
-        type: "settings",
-        section: row.section,
-        title: row.label,
-      });
-      return;
+  function isActive(row: NavRow): boolean {
+    if (inspector.type === row.target.type) return true;
+    // Treat per-section "settings" / "file-matrix" / "capability-pack"
+    // targets as still belonging to the Advanced row so the nav doesn't
+    // lose its highlight when the user drills in.
+    if (
+      row.id === "advanced" &&
+      (inspector.type === "settings" ||
+        inspector.type === "capability-pack" ||
+        inspector.type === "file-matrix")
+    ) {
+      return true;
     }
-    if (row.kind === "file-matrix") {
-      onInspect({ type: "file-matrix" });
-    }
+    return false;
   }
 
   const rowCls = (active: boolean) =>
-    `w-full text-left text-[13px] px-3 py-1.5 rounded-md transition flex items-center gap-2 ${
+    `w-full text-left px-3 py-2.5 rounded-md transition border ${
       active
-        ? "bg-primary/10 text-ink border border-primary/30"
-        : "text-ink hover:bg-divider-soft border border-transparent"
+        ? "bg-primary/10 border-primary/30"
+        : "bg-canvas border-transparent hover:bg-divider-soft"
     }`;
 
   return (
     <nav className="space-y-4">
-      {/* Current Kit Summary */}
+      {/* Current Kit Summary card */}
       <section className="rounded-md border border-hairline bg-canvas overflow-hidden">
         <header className="px-3 py-2 border-b border-divider-soft">
           <div className="text-[10.5px] uppercase tracking-[0.16em] text-ink-muted-48 font-medium">
@@ -157,48 +147,37 @@ export function SettingsNav({
         </dl>
       </section>
 
-      {/* Grouped nav rows */}
-      {SECTION_GROUPS.map((group) => (
-        <section key={group.title} className="space-y-1">
-          <div className="text-[10.5px] uppercase tracking-[0.16em] text-ink-muted-48 font-medium px-1">
-            {group.title}
-          </div>
-          <ul className="space-y-0.5">
-            {group.rows.map((row) => {
-              const active = isActive(row);
-              return (
-                <li key={`${row.kind}-${"section" in row ? row.section : row.label}`}>
-                  <button
-                    type="button"
-                    onClick={() => handleClick(row)}
-                    className={rowCls(active)}
-                  >
-                    <span className="flex-1 truncate">{row.label}</span>
-                    {row.kind === "preset" && (
-                      <span className="text-[10.5px] text-ink-muted-48">
-                        change
-                      </span>
-                    )}
-                    {active && (
-                      <span
-                        className="text-[10.5px] text-primary"
-                        aria-hidden="true"
-                      >
-                        ●
-                      </span>
-                    )}
-                  </button>
-                </li>
-              );
-            })}
-          </ul>
-        </section>
-      ))}
-
-      <p className="text-fine-print text-ink-muted-48 leading-snug px-1 pt-2">
-        {tr(UI.panelDetailedSettings, locale)} · click any item to edit on the
-        right.
-      </p>
+      <ul className="space-y-1">
+        {rows.map((row) => {
+          const active = isActive(row);
+          return (
+            <li key={row.id}>
+              <button
+                type="button"
+                onClick={() => onInspect(row.target)}
+                className={rowCls(active)}
+              >
+                <div className="flex items-center gap-2">
+                  <span className="text-[13.5px] font-medium text-ink flex-1 truncate">
+                    {row.label}
+                  </span>
+                  {active && (
+                    <span
+                      className="text-[10.5px] text-primary"
+                      aria-hidden="true"
+                    >
+                      ●
+                    </span>
+                  )}
+                </div>
+                <div className="text-[11.5px] text-ink-muted-80 mt-0.5 leading-snug">
+                  {row.description}
+                </div>
+              </button>
+            </li>
+          );
+        })}
+      </ul>
     </nav>
   );
 }

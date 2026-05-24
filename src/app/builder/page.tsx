@@ -32,29 +32,8 @@ import {
 } from "@/components/builder/InspectorPanel";
 import { Dropdown, type DropdownItem } from "@/components/builder/Dropdown";
 import { LangToggle } from "@/components/builder/LangToggle";
-import { RecipeCard } from "@/components/builder/RecipeCard";
 import { useLocale, tr } from "@/lib/i18n/locale";
-import {
-  UI,
-  CATEGORY_LABELS,
-  PRESET_LABELS,
-} from "@/lib/i18n/strings";
-import {
-  RECIPES,
-  applyRecipeToConfig,
-  findMatchingRecipeId,
-} from "@/lib/skill-builder/recipes";
-import {
-  REFERENCE_SKILLS,
-  SKILLS_SH_URL,
-} from "@/lib/skill-builder/reference-skills";
-import {
-  recommend,
-  applyRecommendationToConfig,
-  type Recommendation,
-} from "@/lib/skill-builder/recommender";
-import { IntentInput } from "@/components/builder/IntentInput";
-import { RecommendationPanel } from "@/components/builder/RecommendationPanel";
+import { UI, CATEGORY_LABELS, PRESET_LABELS } from "@/lib/i18n/strings";
 import { SimulatorPanel } from "@/components/builder/SimulatorPanel";
 
 type PreviewTab = "preview" | "raw" | "korean" | "simulate";
@@ -105,27 +84,14 @@ export default function BuilderPage() {
   const [isGenerating, setIsGenerating] = useState(false);
   const [isExporting, setIsExporting] = useState(false);
   const [inspector, setInspector] = useState<InspectorTarget>({
-    type: "summary",
+    type: "overview",
   });
-  const [recommendation, setRecommendation] = useState<Recommendation | null>(
-    null,
-  );
 
-  function handleIntentSubmit(query: string) {
-    setRecommendation(recommend(query));
-  }
-
-  function handleApplyRecommendation() {
-    if (!recommendation) return;
-    setConfig((c) => applyRecommendationToConfig(recommendation, c));
-    setRecommendation(null);
-  }
-
-  // Esc → close inspector (back to Quality view)
+  // Esc → close inspector (back to Kit Overview)
   useEffect(() => {
     function onKey(e: KeyboardEvent) {
       if (e.key === "Escape" && inspector.type !== "summary") {
-        setInspector({ type: "summary" });
+        setInspector({ type: "overview" });
       }
     }
     document.addEventListener("keydown", onKey);
@@ -148,7 +114,6 @@ export default function BuilderPage() {
     return pkg.files.find((f) => f.id === selectedFileId) ?? null;
   }, [pkg, selectedFileId]);
 
-  const matchingRecipeId = useMemo(() => findMatchingRecipeId(config), [config]);
 
   function handleGenerate() {
     setIsGenerating(true);
@@ -305,14 +270,9 @@ export default function BuilderPage() {
         </div>
       </div>
 
-      {/* Body — left nav, optional detail panel, main workspace */}
-      <div
-        className={`flex-1 grid min-h-0 ${
-          inspector.type === "summary"
-            ? "grid-cols-[280px_minmax(0,1fr)]"
-            : "grid-cols-[280px_380px_minmax(0,1fr)]"
-        }`}
-      >
+      {/* Body — left nav, detail panel, main workspace. The detail panel
+          is always visible; "Kit Overview" is its default content. */}
+      <div className="flex-1 grid min-h-0 grid-cols-[260px_400px_minmax(0,1fr)]">
         {/* Left panel — settings nav (compact, no expansion) */}
         <aside className="border-r border-hairline bg-canvas-parchment overflow-y-auto thin-scrollbar min-h-0 h-full">
           <div className="p-4 space-y-3 pb-12">
@@ -337,23 +297,25 @@ export default function BuilderPage() {
           </div>
         </aside>
 
-        {/* Settings detail panel — appears next to the left nav when a
-            setting (or related target) is selected. Pushes the main
-            workspace to the right. */}
-        {inspector.type !== "summary" && (
-          <aside className="border-r border-hairline bg-canvas-parchment min-h-0 h-full overflow-hidden flex flex-col">
-            <InspectorPanel
-              target={inspector}
-              report={pkg?.qualityReport ?? null}
-              isEnabled={(id) => config.capabilityPacks.includes(id)}
-              onToggle={togglePack}
-              onClose={() => setInspector({ type: "summary" })}
-              config={config}
-              onConfigChange={setConfig}
-              files={pkg?.files}
-            />
-          </aside>
-        )}
+        {/* Detail panel — always visible. Kit Overview is the default
+            view; clicking a left-nav item swaps it. */}
+        <aside className="border-r border-hairline bg-canvas-parchment min-h-0 h-full overflow-hidden flex flex-col">
+          <InspectorPanel
+            target={inspector}
+            report={pkg?.qualityReport ?? null}
+            isEnabled={(id) => config.capabilityPacks.includes(id)}
+            onToggle={togglePack}
+            onClose={() => setInspector({ type: "overview" })}
+            onInspect={setInspector}
+            config={config}
+            onConfigChange={setConfig}
+            files={pkg?.files}
+            onGenerate={handleGenerate}
+            onDownload={handleDownloadZip}
+            isGenerating={isGenerating}
+            isExporting={isExporting}
+          />
+        </aside>
 
         {/* Main workspace — files + preview. The files column only
             appears after a package has been generated so the workspace
@@ -430,96 +392,20 @@ export default function BuilderPage() {
                 <SimulatorPanel config={config} pkg={pkg} />
               )}
               {activeTab !== "simulate" && !selectedFile && (
-                <div className="px-8 py-10 max-w-4xl mx-auto">
-                  {/* Intent input — primary hero */}
-                  <div className="mb-6">
-                    <IntentInput onSubmit={handleIntentSubmit} />
+                <div className="px-8 py-16 max-w-2xl mx-auto text-center space-y-3">
+                  <div className="text-[10.5px] uppercase tracking-[0.16em] text-ink-muted-48">
+                    Workspace
                   </div>
-
-                  {/* Recommendation result (only when present) */}
-                  {recommendation && (
-                    <div className="mb-8">
-                      <RecommendationPanel
-                        rec={recommendation}
-                        onApply={handleApplyRecommendation}
-                        onDismiss={() => setRecommendation(null)}
-                      />
-                    </div>
-                  )}
-
-                  {/* "Or pick a starting point" divider */}
-                  <div className="flex items-center gap-4 my-8">
-                    <div className="flex-1 h-px bg-hairline" />
-                    <div className="text-[12px] uppercase tracking-[0.16em] text-ink-muted-48">
-                      {tr(UI.orPickRecipe, locale)}
-                    </div>
-                    <div className="flex-1 h-px bg-hairline" />
-                  </div>
-
-                  {/* Recommended recipes */}
-                  <section className="mb-10">
-                    <div className="flex items-baseline justify-between mb-1">
-                      <h3 className="text-[18px] font-semibold text-ink">
-                        {tr(UI.recipesTitle, locale)}
-                      </h3>
-                    </div>
-                    <p className="text-[13px] text-ink-muted-80 leading-snug mb-4">
-                      {tr(UI.recipesIntro, locale)}
-                    </p>
-                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-                      {RECIPES.map((recipe) => (
-                        <RecipeCard
-                          key={recipe.id}
-                          recipe={recipe}
-                          active={matchingRecipeId === recipe.id}
-                          onApply={() =>
-                            setConfig((c) => applyRecipeToConfig(recipe, c))
-                          }
-                        />
-                      ))}
-                    </div>
-                  </section>
-
-                  {/* Reference skills */}
-                  <section>
-                    <div className="flex items-baseline justify-between mb-1">
-                      <h3 className="text-[18px] font-semibold text-ink">
-                        {tr(UI.refSkillsTitle, locale)}
-                      </h3>
-                      <a
-                        href={SKILLS_SH_URL}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="text-[12px] text-primary hover:underline"
-                      >
-                        {tr(UI.refSeeMore, locale)}
-                      </a>
-                    </div>
-                    <p className="text-[13px] text-ink-muted-80 leading-snug mb-4">
-                      {tr(UI.refSkillsIntro, locale)}
-                    </p>
-                    <ul className="divide-y divide-divider-soft border border-hairline rounded-lg bg-canvas overflow-hidden">
-                      {REFERENCE_SKILLS.map((rs) => (
-                        <li
-                          key={rs.name}
-                          className="flex items-baseline gap-3 px-4 py-2.5"
-                        >
-                          <span className="font-mono text-[13px] text-ink font-semibold truncate min-w-[180px]">
-                            {rs.name}
-                          </span>
-                          <span className="text-[12px] text-ink-muted-48 truncate hidden sm:inline">
-                            {rs.publisher}
-                          </span>
-                          <span className="flex-1 text-[12.5px] text-ink-muted-80 leading-snug truncate">
-                            {tr(rs.description, locale)}
-                          </span>
-                          <span className="text-[11px] text-ink-muted-48 whitespace-nowrap">
-                            {rs.installs} {tr(UI.refInstalls, locale)}
-                          </span>
-                        </li>
-                      ))}
-                    </ul>
-                  </section>
+                  <h2 className="text-[22px] font-semibold text-ink">
+                    {pkg
+                      ? "Select a file in the tree to preview"
+                      : "Press Generate Kit to compose your AXDD Standard Kit"}
+                  </h2>
+                  <p className="text-[13.5px] text-ink-muted-80 leading-snug">
+                    Use the left sidebar to review the kit overview, skill
+                    composition, generated files, governance, or advanced
+                    settings. Then press Generate Kit in the header.
+                  </p>
                 </div>
               )}
               {selectedFile && activeTab === "preview" && (
