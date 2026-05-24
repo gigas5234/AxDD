@@ -18,8 +18,8 @@ export type PresetBundle = {
 };
 
 export const PRESET_BUNDLES: Record<string, PresetBundle> = {
-  "ux-ui-axdd-default": {
-    id: "ux-ui-axdd-default",
+  "axdd-ux-ui-standard-kit": {
+    id: "axdd-ux-ui-standard-kit",
     focus: { en: "Full UX/UI workflow", ko: "전체 UX/UI 워크플로" },
     includedSkillTypes: [
       "full-step-skill",

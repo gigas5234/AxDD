@@ -295,7 +295,7 @@ export function InspectorPanel({
             config={config}
             onChange={onConfigChange}
             inspector={target}
-            onInspect={() => {}}
+            onInspect={onInspect ?? (() => {})}
             targetOnly="build-mode"
           />
           <hr className="border-divider-soft" />
@@ -303,7 +303,7 @@ export function InspectorPanel({
             config={config}
             onChange={onConfigChange}
             inspector={target}
-            onInspect={() => {}}
+            onInspect={onInspect ?? (() => {})}
             targetOnly="included-types"
           />
           <hr className="border-divider-soft" />
@@ -311,7 +311,7 @@ export function InspectorPanel({
             config={config}
             onChange={onConfigChange}
             inspector={target}
-            onInspect={() => {}}
+            onInspect={onInspect ?? (() => {})}
             targetOnly="primary-kit"
           />
         </div>
@@ -719,7 +719,7 @@ export function InspectorPanel({
             config={config}
             onChange={onConfigChange}
             inspector={target}
-            onInspect={() => {}}
+            onInspect={onInspect ?? (() => {})}
             targetOnly={target.section}
           />
         </div>

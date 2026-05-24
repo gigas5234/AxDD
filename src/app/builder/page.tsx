@@ -5,7 +5,7 @@ import Link from "next/link";
 import { CATEGORY_REGISTRY } from "@/lib/skill-builder/categories";
 import {
   buildDefaultConfigForCategory,
-  buildUxUiDefaultConfig,
+  buildUxUiStandardKitConfig,
   DEFAULT_PRESET_BY_CATEGORY,
   PRESETS,
 } from "@/lib/skill-builder/default-preset";
@@ -75,12 +75,12 @@ function DemoSummary({ pkg }: { pkg: GeneratedPackage }) {
 
 export default function BuilderPage() {
   const { locale } = useLocale();
-  const [config, setConfig] = useState<SkillConfig>(() => buildUxUiDefaultConfig());
+  const [config, setConfig] = useState<SkillConfig>(() => buildUxUiStandardKitConfig());
   const [pkg, setPkg] = useState<GeneratedPackage | null>(null);
   const [selectedFileId, setSelectedFileId] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<PreviewTab>("preview");
   const [selectedPresetId, setSelectedPresetId] = useState<string>(
-    "ux-ui-axdd-default",
+    "axdd-ux-ui-standard-kit",
   );
   const [lastPresetChange, setLastPresetChange] = useState<{
     fromId: string;

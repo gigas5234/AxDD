@@ -26,7 +26,7 @@ function nowIso(): string {
 // ─────────────────────────────────────────────────────────────────────────────
 // UX/UI Designer (existing default)
 // ─────────────────────────────────────────────────────────────────────────────
-export function buildUxUiDefaultConfig(): SkillConfig {
+export function buildUxUiStandardKitConfig(): SkillConfig {
   const ts = nowIso();
   return {
     id: "axdd-ux-ui-standard-kit",
@@ -110,7 +110,7 @@ export function buildUxUiDefaultConfig(): SkillConfig {
 // ─────────────────────────────────────────────────────────────────────────────
 // Reference-Based UX/UI Review (reference-skill primary, includes test-skill)
 // ─────────────────────────────────────────────────────────────────────────────
-export function buildUxUiReferenceSkillConfig(): SkillConfig {
+export function buildReferenceReviewKitConfig(): SkillConfig {
   const ts = nowIso();
   return {
     id: "axdd-ux-ui-reference-review",
@@ -176,7 +176,7 @@ export function buildUxUiReferenceSkillConfig(): SkillConfig {
 // ─────────────────────────────────────────────────────────────────────────────
 // Cursor Handoff Kit (template-skill primary, includes reference + test)
 // ─────────────────────────────────────────────────────────────────────────────
-export function buildUxUiTestSkillConfig(): SkillConfig {
+export function buildCursorHandoffKitConfig(): SkillConfig {
   const ts = nowIso();
   return {
     id: "axdd-cursor-handoff-kit",
@@ -379,7 +379,7 @@ export function buildUxValidationKitConfig(): SkillConfig {
 // Custom Mode default (user picks any combination of the 8 types)
 // ─────────────────────────────────────────────────────────────────────────────
 export function buildCustomDefaultConfig(): SkillConfig {
-  const base = buildUxUiDefaultConfig();
+  const base = buildUxUiStandardKitConfig();
   return {
     ...base,
     id: "axdd-ux-ui-custom",
@@ -590,7 +590,7 @@ export function buildHarnessDefaultConfig(): SkillConfig {
 // ─────────────────────────────────────────────────────────────────────────────
 export const PRESETS: PresetDescriptor[] = [
   {
-    id: "ux-ui-axdd-default",
+    id: "axdd-ux-ui-standard-kit",
     name: "AXDD UX/UI Standard Kit",
     category: "ux-ui",
     bestFor:
@@ -603,10 +603,10 @@ export const PRESETS: PresetDescriptor[] = [
       "Figma manual fallback template",
     ],
     status: "available",
-    buildConfig: buildUxUiDefaultConfig,
+    buildConfig: buildUxUiStandardKitConfig,
   },
   {
-    id: "frontend-axdd-default",
+    id: "axdd-frontend-default",
     name: "Frontend Implementation — AxDD Default",
     category: "frontend",
     bestFor:
@@ -621,7 +621,7 @@ export const PRESETS: PresetDescriptor[] = [
     buildConfig: buildFrontendDefaultConfig,
   },
   {
-    id: "design-system-axdd-default",
+    id: "axdd-design-system-default",
     name: "Design System Generator — AxDD Default",
     category: "design-system",
     bestFor:
@@ -653,7 +653,7 @@ export const PRESETS: PresetDescriptor[] = [
       "references/, checklists/, tests/, examples/",
     ],
     status: "available",
-    buildConfig: buildUxUiReferenceSkillConfig,
+    buildConfig: buildReferenceReviewKitConfig,
   },
   {
     id: "axdd-cursor-handoff-kit",
@@ -667,7 +667,7 @@ export const PRESETS: PresetDescriptor[] = [
       "templates/ (incl. cursor-prompt-template, figma-instruction-template), references/, checklists/, tests/, examples/",
     ],
     status: "available",
-    buildConfig: buildUxUiTestSkillConfig,
+    buildConfig: buildCursorHandoffKitConfig,
   },
   {
     id: "axdd-figma-manual-instruction-kit",
@@ -758,10 +758,10 @@ export const PRESETS: PresetDescriptor[] = [
 
 // Map category → default preset id (for category switching UX)
 export const DEFAULT_PRESET_BY_CATEGORY: Partial<Record<SkillCategory, string>> = {
-  "ux-ui": "ux-ui-axdd-default",
-  frontend: "frontend-axdd-default",
-  "design-system": "design-system-axdd-default",
-  harness: "harness-axdd-default",
+  "ux-ui": "axdd-ux-ui-standard-kit",
+  frontend: "axdd-frontend-default",
+  "design-system": "axdd-design-system-default",
+  harness: "axdd-harness-default",
 };
 
 export function buildDefaultConfigForCategory(
@@ -776,6 +776,6 @@ export function buildDefaultConfigForCategory(
       return buildHarnessDefaultConfig();
     case "ux-ui":
     default:
-      return buildUxUiDefaultConfig();
+      return buildUxUiStandardKitConfig();
   }
 }

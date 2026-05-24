@@ -86,7 +86,7 @@ const FULL_STEP_SCENARIOS: ScenarioManifestEntry[] = [
       "All four brief sections populated",
       "No design output yet",
     ],
-    appliesTo: ["ux-ui-axdd-default"],
+    appliesTo: ["axdd-ux-ui-standard-kit"],
   },
   {
     id: "S002",
@@ -112,7 +112,7 @@ const FULL_STEP_SCENARIOS: ScenarioManifestEntry[] = [
       "Accessibility reports contrast + keyboard",
       "Severity-sorted prioritization",
     ],
-    appliesTo: ["ux-ui-axdd-default"],
+    appliesTo: ["axdd-ux-ui-standard-kit"],
   },
   {
     id: "S003",
@@ -138,7 +138,7 @@ const FULL_STEP_SCENARIOS: ScenarioManifestEntry[] = [
       "Release checklist referenced",
       "Out-of-scope section present",
     ],
-    appliesTo: ["ux-ui-axdd-default"],
+    appliesTo: ["axdd-ux-ui-standard-kit"],
   },
   {
     id: "S004",
@@ -164,7 +164,7 @@ const FULL_STEP_SCENARIOS: ScenarioManifestEntry[] = [
       "All six build steps populated",
       "Parity checklist present",
     ],
-    appliesTo: ["ux-ui-axdd-default"],
+    appliesTo: ["axdd-ux-ui-standard-kit"],
   },
   {
     id: "S005",
@@ -186,7 +186,7 @@ const FULL_STEP_SCENARIOS: ScenarioManifestEntry[] = [
       "Missing inputs are explicitly named",
       "No premature design or review output",
     ],
-    appliesTo: ["ux-ui-axdd-default"],
+    appliesTo: ["axdd-ux-ui-standard-kit"],
   },
 ];
 

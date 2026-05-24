@@ -59,42 +59,18 @@ export const UI = {
   // Preview header
   previewTabPreview: { en: "Preview", ko: "미리보기" } as Bilingual,
   previewTabRaw: { en: "Raw", ko: "원본" } as Bilingual,
-  previewTabKorean: { en: "Korean", ko: "한국어" } as Bilingual,
   previewEmptyHint: {
     en: "Generate a package and select a file.",
     ko: "패키지를 생성하고 파일을 선택하세요.",
-  } as Bilingual,
-  emptyHeroTitle: {
-    en: "Choose a preset and generate your first kit.",
-    ko: "프리셋을 선택하고 첫 킷을 생성하세요.",
-  } as Bilingual,
-  emptyHeroBody: {
-    en: "The file tree, preview, and quality score appear here once the package is generated.",
-    ko: "패키지를 생성하면 파일 트리, 미리보기, 품질 점수가 여기에 표시됩니다.",
   } as Bilingual,
   edited: { en: "edited", ko: "편집됨" } as Bilingual,
   lastGenerated: { en: "Last generated", ko: "마지막 생성" } as Bilingual,
 
   // Footer buttons in preview area
-  btnKoreanPreview: { en: "Korean Preview", ko: "한국어 미리보기" } as Bilingual,
-  btnKoreanPreviewTitle: {
-    en: "Korean preview is available after AI integration (Phase 2).",
-    ko: "한국어 미리보기는 AI 연동(Phase 2) 이후 제공됩니다.",
-  } as Bilingual,
   btnRegenerateFile: { en: "Regenerate File", ko: "파일 재생성" } as Bilingual,
   btnRegenerateFileTitle: {
     en: "Regenerate this file deterministically from the current config.",
     ko: "현재 설정으로 이 파일을 결정론적으로 재생성합니다.",
-  } as Bilingual,
-
-  // Korean preview placeholder body
-  koPreviewLine1: {
-    en: "Korean preview will be available once AI translation is wired in. The MVP keeps it off to minimize token usage.",
-    ko: "한글 미리보기는 AI 번역 단계가 연결된 이후에 제공됩니다. MVP에서는 토큰 사용량을 줄이기 위해 비활성화되어 있습니다.",
-  } as Bilingual,
-  koPreviewLine2: {
-    en: "Korean preview is generated on demand to reduce token usage. Available in Phase 2 (AI Assist).",
-    ko: "토큰 사용량을 줄이기 위해 한글 미리보기는 필요할 때만 생성됩니다. Phase 2(AI Assist)에서 제공 예정.",
   } as Bilingual,
 
   // File tree empty
@@ -125,26 +101,14 @@ export const UI = {
   inspLabelSection: { en: "section", ko: "섹션" } as Bilingual,
   inspLabelRule: { en: "rule", ko: "규칙" } as Bilingual,
   inspPackNotFound: { en: "Pack not found.", ko: "팩을 찾을 수 없습니다." } as Bilingual,
-  inspClickPackHint: {
-    en: "Click a card to see its full effect on the right.",
-    ko: "카드를 클릭하면 오른쪽에 효과가 전부 표시됩니다.",
-  } as Bilingual,
   inspShowDetails: {
     en: "Show details on the right",
     ko: "오른쪽에 상세 표시",
   } as Bilingual,
 
   // Quality footer
-  qfWarnings: { en: "warnings", ko: "경고" } as Bilingual,
-  qfWarning: { en: "warning", ko: "경고" } as Bilingual,
-  qfShown: { en: "shown", ko: "표시 중" } as Bilingual,
-  qfDetails: { en: "details", ko: "상세" } as Bilingual,
   qfDownload: { en: "Download ZIP", ko: "ZIP 다운로드" } as Bilingual,
   qfDownloading: { en: "Preparing ZIP…", ko: "ZIP 준비 중…" } as Bilingual,
-  qfOpenDetails: {
-    en: "Open quality details",
-    ko: "품질 상세 열기",
-  } as Bilingual,
 
   // Quality panel
   qpEmpty: {
@@ -313,68 +277,6 @@ export const UI = {
   // Language value labels
   langEnglish: { en: "English", ko: "영어" } as Bilingual,
   langKorean: { en: "Korean", ko: "한국어" } as Bilingual,
-
-  // Recommendations on empty state
-  recipesTitle: {
-    en: "Recommended starting points",
-    ko: "추천 시작점",
-  } as Bilingual,
-  recipesIntro: {
-    en: "Click a recipe to apply its Capability Packs and workflow modules to your current settings. Fine-tune from the left panel, then press Generate.",
-    ko: "레시피를 클릭하면 현재 설정에 해당 Capability Pack과 워크플로가 적용됩니다. 좌측에서 세부 조정 후 생성을 눌러주세요.",
-  } as Bilingual,
-  recipeApply: { en: "Apply this recipe", ko: "이 레시피 적용" } as Bilingual,
-  recipeApplied: { en: "Applied ✓", ko: "적용됨 ✓" } as Bilingual,
-  recipePacksLabel: { en: "Packs", ko: "팩" } as Bilingual,
-  recipeWorkflowsLabel: { en: "Workflow", ko: "워크플로" } as Bilingual,
-  recipeStyleLabel: { en: "Style", ko: "스타일" } as Bilingual,
-  refSkillsTitle: { en: "Reference skills", ko: "참고 스킬" } as Bilingual,
-  refSkillsIntro: {
-    en: "Top installed skills on skills.sh that informed AxDD's Capability Packs.",
-    ko: "AxDD의 Capability Pack에 영감을 준 skills.sh의 인기 스킬들.",
-  } as Bilingual,
-  refInstalls: { en: "installs", ko: "설치" } as Bilingual,
-  refSeeMore: { en: "Browse more on skills.sh →", ko: "skills.sh에서 더 보기 →" } as Bilingual,
-
-  // Intent input / AI recommendation
-  intentHeroTitle: {
-    en: "What do you want to build?",
-    ko: "무엇을 만들고 싶으세요?",
-  } as Bilingual,
-  intentHeroSubtitle: {
-    en: "Type freely — we match the closest skills from the catalog and recommend a starting configuration.",
-    ko: "자유롭게 입력하면 카탈로그에서 가장 가까운 스킬을 찾아 추천해드립니다.",
-  } as Bilingual,
-  intentPlaceholder: {
-    en: "e.g., design a fintech onboarding screen / implement a React component",
-    ko: "예: 핀테크 온보딩 화면 설계 / React 컴포넌트 구현",
-  } as Bilingual,
-  intentSubmit: { en: "Recommend", ko: "추천 받기" } as Bilingual,
-  intentExamplesLabel: { en: "Try", ko: "예시" } as Bilingual,
-  intentNote: {
-    en: "Keyword matching today. AI semantic matching coming in Phase 2.",
-    ko: "현재는 키워드 매칭입니다. AI 의미 검색은 Phase 2에서 제공 예정.",
-  } as Bilingual,
-  orPickRecipe: {
-    en: "Or pick a starting point",
-    ko: "또는 시작점에서 선택",
-  } as Bilingual,
-
-  recHeader: {
-    en: "Recommendations for",
-    ko: "이 입력에 대한 추천",
-  } as Bilingual,
-  recCategory: { en: "Category", ko: "카테고리" } as Bilingual,
-  recRecipe: { en: "Recipe", ko: "레시피" } as Bilingual,
-  recPacks: { en: "Capability Packs", ko: "능력 팩" } as Bilingual,
-  recWorkflows: { en: "Workflow Modules", ko: "워크플로 모듈" } as Bilingual,
-  recMatched: { en: "matched", ko: "일치" } as Bilingual,
-  recApplyAll: { en: "Apply all suggestions", ko: "모두 적용" } as Bilingual,
-  recDismiss: { en: "Dismiss", ko: "닫기" } as Bilingual,
-  recNoMatch: {
-    en: "No matches found. Try different keywords or pick a recipe below.",
-    ko: "일치 항목이 없습니다. 다른 키워드를 시도하거나 아래 레시피에서 선택해 주세요.",
-  } as Bilingual,
 
   // Dependencies
   depsUnmet: { en: "Has unmet dependency", ko: "의존성 미충족" } as Bilingual,
@@ -849,7 +751,7 @@ export const PRESET_LABELS: Record<
   string,
   { name: Bilingual; bestFor: Bilingual }
 > = {
-  "ux-ui-axdd-default": {
+  "axdd-ux-ui-standard-kit": {
     name: {
       en: "AXDD UX/UI Standard Kit",
       ko: "AXDD UX/UI 표준 키트",
@@ -917,7 +819,7 @@ export const PRESET_LABELS: Record<
       ko: "기존 화면을 검토해 UX/UI 이슈를 찾아냅니다.",
     },
   },
-  "frontend-axdd-default": {
+  "axdd-frontend-default": {
     name: {
       en: "Frontend Implementation — AxDD Default",
       ko: "프론트엔드 구현 — AxDD 기본",
@@ -927,7 +829,7 @@ export const PRESET_LABELS: Record<
       ko: "명세·디자인 토큰을 TypeScript 규율을 갖춘 React + Tailwind 컴포넌트로 변환.",
     },
   },
-  "design-system-axdd-default": {
+  "axdd-design-system-default": {
     name: {
       en: "Design System Generator — AxDD Default",
       ko: "디자인 시스템 생성 — AxDD 기본",
